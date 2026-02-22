@@ -1,4 +1,6 @@
+import { ForgotPasswordPage } from '@/components/auth/ForgotPasswordPage'
 import { LoginPage } from '@/components/auth/LoginPage'
+import { ResetPasswordPage } from '@/components/auth/ResetPasswordPage'
 import { AppLayout } from '@/components/layout/AppLayout'
 import { MasterLayout } from '@/components/master/MasterLayout'
 import { Dashboard } from '@/pages/backoffice/Dashboard'
@@ -26,6 +28,14 @@ export const router = createBrowserRouter([
   {
     path: '/login',
     element: <LoginPage />,
+  },
+  {
+    path: '/forgot-password',
+    element: <ForgotPasswordPage />,
+  },
+  {
+    path: '/reset-password',
+    element: <ResetPasswordPage />,
   },
   {
     path: '/transparencia',
