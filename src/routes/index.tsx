@@ -4,7 +4,10 @@ import { MasterLayout } from '@/components/master/MasterLayout'
 import { LoginPage } from '@/components/auth/LoginPage'
 import { Dashboard } from '@/pages/backoffice/Dashboard'
 import { Legislativo } from '@/pages/backoffice/Legislativo'
+import { ProposicaoNova } from '@/pages/backoffice/ProposicaoNova'
+import { ProposicaoDetalhe } from '@/pages/backoffice/ProposicaoDetalhe'
 import { Plenario } from '@/pages/backoffice/Plenario'
+import { PlenarioAtivo } from '@/pages/backoffice/PlenarioAtivo'
 import { PortalPublico } from '@/pages/transparencia/PortalPublico'
 import { MasterDashboard } from '@/pages/master/MasterDashboard'
 import { ProvisionarCamara } from '@/pages/master/ProvisionarCamara'
@@ -50,9 +53,12 @@ export const router = createBrowserRouter([
       </AuthGuard>
     ),
     children: [
-      { index: true,         element: <Dashboard /> },
-      { path: 'legislativo', element: <Legislativo /> },
-      { path: 'plenario',    element: <Plenario /> },
+      { index: true,                    element: <Dashboard /> },
+      { path: 'legislativo',            element: <Legislativo /> },
+      { path: 'legislativo/nova',       element: <ProposicaoNova /> },
+      { path: 'legislativo/:id',        element: <ProposicaoDetalhe /> },
+      { path: 'plenario',               element: <Plenario /> },
+      { path: 'plenario/:id',           element: <PlenarioAtivo /> },
     ],
   },
 ])

@@ -1,66 +1,168 @@
-# CâmaraDigital - Plataforma SaaS de Gestão Legislativa e Administrativa
+# 🏛️ CâmaraDigital — Plataforma SaaS de Gestão Legislativa
 
-Plataforma SaaS (Software as a Service) 100% em nuvem, concebida para modernizar e automatizar a gestão de Câmaras Municipais. O foco principal é a desmaterialização (papel zero), a eficiência operacional e o cumprimento rigoroso das leis de transparência pública.
+Plataforma SaaS 100% em nuvem para modernizar e automatizar a gestão de **Câmaras Municipais brasileiras**. Foco em desmaterialização (papel zero), eficiência operacional e cumprimento rigoroso das leis de transparência pública (LAI, LGPD, LRF).
+
+---
 
 ## 🚀 Quick Start
 
 ### Pré-requisitos
-- Node.js (v18+)
+
+- Node.js v18+
 - Conta no [Supabase](https://supabase.com/)
 
 ### Instalação
 
-1. Clone o repositório:
 ```bash
+# 1. Clone o repositório
 git clone https://github.com/3aqtecnologia/C-maraDigital.git
 cd C-maraDigital
-```
 
-2. Instale as dependências:
-```bash
+# 2. Instale as dependências
 npm install
-```
 
-3. Instancie o banco de dados (Supabase):
-Rode as migrações SQL localizadas na pasta `supabase/migrations/` no seu projeto Supabase.
-
-4. Configure as variáveis de ambiente:
-```bash
+# 3. Configure as variáveis de ambiente
 cp .env.example .env.local
 ```
-Preencha `.env.local` com suas credenciais do Supabase:
+
+Preencha `.env.local` com suas credenciais Supabase:
+
 ```env
 VITE_SUPABASE_URL=https://<seu-projeto>.supabase.co
 VITE_SUPABASE_ANON_KEY=<sua-anon-key>
 ```
 
-5. Rode o projeto em ambiente de desenvolvimento:
 ```bash
+# 4. Aplique as migrações em supabase/migrations/ (ordem numérica)
+
+# 5. Inicie o servidor de desenvolvimento
 npm run dev
 ```
 
-## ✨ Features
+---
 
-- **Multi-tenant architecture:** Isolamento garantido via Row Level Security (RLS) no PostgreSQL.
-- **Protocolo Digital:** Cadastro, tramitação e histórico de proposições.
-- **Painel de Plenário & Votação Eletrônica:** Quórum, oradores, e painel em tempo real integrado a um app mobile (Votei.app style) para registro inalterável de votos.
-- **Administrativo & GED (Gestão Eletrônica de Documentos):** Preparação de documentos para Assinatura Web baseada em Gov.br/ICP-Brasil com verificador de autenticidade (QR Code + Carimbo).
-- **Portal da Transparência:** Sistema de Dados Abertos e ouvidoria atualizado automaticamente.
-- **PWA Ready:** Suporte para acessibilidade via Celular/Tablet como PWA offline-first (em construção).
+## ✨ Funcionalidades Implementadas
+
+### 👑 Administrador Master (SaaS)
+- Painel exclusivo em `/master` — isolado do backoffice das câmaras
+- **Provisionar nova Câmara:** formulário com nome, município, UF, CNPJ, slug, plano
+- **Audit Log:** histórico de ações administrativas com filtros
+- **Dashboard Master:** visão geral de todas as câmaras, planos e situações
+
+### 📋 Módulo Legislativo
+- **Lista de Proposições** com filtros por status e busca por número/ementa/tipo
+- **Nova Proposição:** seleção de tipo (PL, PLC, PR, REQ, IND, MOC, VP), ementa e texto integral
+  - Salvar como rascunho ou protocolar imediatamente (recebe número oficial)
+- **Detalhe da Proposição:** metadados, texto integral e **timeline de tramitação**
+  - Transições de status com histórico imutável
+
+### 🏛️ Módulo Plenário (Tempo Real)
+- **Lista de Sessões** com criação de nova sessão (tipo, data/hora, local, quórum mínimo)
+- **Painel ao Vivo** via Supabase Realtime:
+  - Indicador de quórum (verde/vermelho)
+  - Sidebar com a ordem do dia (pauta)
+  - Admin: inicia/encerra votação por item
+  - Vereador: voto eletrônico — **SIM / NÃO / ABSTENÇÃO** — imutável via trigger no banco
+
+### 🔐 Autenticação & Multi-tenant
+- Login único com redirecionamento automático (master → `/master`, tenant → `/backoffice`)
+- Row Level Security (RLS) no PostgreSQL — isolamento total entre câmaras
+- Funções auxiliares no schema `public`: `get_user_tenant_id()`, `get_user_role()`, `is_master_admin()`
+
+---
 
 ## 🛠️ Stack Tecnológico
 
-- **Frontend:** React 19, Vite, TypeScript, TailwindCSS, React Router, Phosphor Icons (Lucide)
-- **Backend (BaaS):** Supabase (PostgreSQL, Auth, Storage)
+| Camada | Tecnologia |
+|--------|-----------|
+| Frontend | React 19 + Vite + TypeScript |
+| Estilo | TailwindCSS v3 (tema customizado) |
+| Roteamento | React Router v7 |
+| Ícones | Lucide React |
+| Backend (BaaS) | Supabase (PostgreSQL, Auth, Realtime, Storage) |
+| PWA | vite-plugin-pwa (offline-first) |
+
+---
 
 ## 📁 Estrutura do Projeto
 
-- `/src/pages/` - As telas do sistema, divididas por contexto (`backoffice`, `plenario`, `transparencia`).
-- `/src/components/` - Componentes React reutilizáveis.
-- `/src/lib/` - Configurações utilitárias (Ex: Cliente do Supabase).
-- `/src/types/` - Tipagens e definições do schema de dados.
-- `/supabase/migrations/` - Os arquivos `.sql` de criação de esquema, políticas (RLS) e triggers.
+```
+src/
+├── components/
+│   ├── auth/           # LoginPage
+│   ├── layout/         # AppLayout, Sidebar, PageHeader
+│   └── master/         # MasterLayout
+├── hooks/
+│   ├── useAuth.ts            # Autenticação + resolução de tipo de usuário
+│   ├── useProposicoes.ts     # CRUD proposições + tramitações
+│   └── useSessoes.ts         # Sessões + votação em tempo real
+├── lib/
+│   └── supabase.ts           # Cliente Supabase tipado
+├── pages/
+│   ├── backoffice/
+│   │   ├── Dashboard.tsx
+│   │   ├── Legislativo.tsx         # Lista de proposições
+│   │   ├── ProposicaoNova.tsx      # Formulário de criação
+│   │   ├── ProposicaoDetalhe.tsx   # Detalhe + timeline de tramitação
+│   │   ├── Plenario.tsx            # Lista de sessões + criação
+│   │   └── PlenarioAtivo.tsx       # Painel ao vivo (Realtime)
+│   ├── master/
+│   │   ├── MasterDashboard.tsx
+│   │   ├── ProvisionarCamara.tsx
+│   │   └── AuditLog.tsx
+│   └── transparencia/
+│       └── PortalPublico.tsx
+├── routes/
+│   ├── index.tsx         # Definição de todas as rotas
+│   ├── AuthGuard.tsx     # Proteção de rotas tenant
+│   └── MasterGuard.tsx
+└── types/
+    └── database.ts       # Tipagem completa do schema Supabase
+supabase/
+└── migrations/
+    ├── 001_initial_schema.sql    # Tabelas, enums, RLS, triggers
+    └── 002_master_admin.sql      # Master admin, planos, provisioning
+```
+
+---
+
+## 🗂️ Perfis de Usuário
+
+| Role | Acesso |
+|------|--------|
+| `master` | Painel `/master` — gestão global da plataforma |
+| `admin` | Backoffice completo — gestão da câmara |
+| `servidor` | Backoffice — operação legislativa |
+| `vereador` | Backoffice — votação eletrônica no plenário |
+| `executivo` | Visualização + proposições do executivo |
+| `cidadao` | Portal da Transparência |
+
+---
+
+## 🗺️ Roadmap
+
+- [x] Fase 1 — Scaffold: Vite + React + TailwindCSS + Supabase + PWA
+- [x] Fase 2 — Master Admin: provisionamento de câmaras, audit log, planos
+- [x] Fase 3 — Módulo Legislativo: CRUD, tramitação, timeline
+- [x] Fase 4 — Plenário: sessões, votação eletrônica em tempo real
+- [ ] Fase 5 — Administrativo & GED: assinatura digital, QR Code, teletrabalho
+- [ ] Fase 6 — Portal da Transparência: dados abertos, ouvidoria (e-SIC), CSV/JSON
+
+---
+
+## 📝 Convenção de Commits
+
+Desenvolvimento documentado em **Português do Brasil (pt-BR)** seguindo Conventional Commits:
+
+```
+feat: adicionar módulo de votação eletrônica
+fix: corrigir cálculo de quórum
+docs: atualizar README com roadmap
+refactor: reorganizar hooks de sessão
+```
+
+---
 
 ## 📄 Licença
 
-Uso proprietário - 3AQ Tecnologia.
+Uso proprietário — © 3AQ Tecnologia. Todos os direitos reservados.

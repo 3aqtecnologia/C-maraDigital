@@ -35,7 +35,7 @@ export function useProposicoes(filtroStatus?: ProposicaoStatus | 'todos') {
     if (err) {
       setError(err.message)
     } else {
-      setProposicoes((data ?? []) as ProposicaoComAutor[])
+      setProposicoes((data ?? []) as unknown as ProposicaoComAutor[])
     }
     setLoading(false)
   }, [profile, filtroStatus])
@@ -51,13 +51,13 @@ export function useProposicoes(filtroStatus?: ProposicaoStatus | 'todos') {
 
     // Gera número automático via função do banco
     const { data: numData } = await supabase
-      .rpc('next_proposicao_numero' as never, {
+      .rpc('next_proposicao_numero', {
         p_tenant_id: profile.tenant_id,
         p_tipo: dados.tipo,
         p_ano: new Date().getFullYear(),
-      } as never)
+      })
 
-    const numero = (numData as string) ?? '001'
+    const numero = (numData as string | null) ?? '001'
 
     const insert: ProposicaoInsert = {
       tenant_id:      profile.tenant_id,
@@ -163,8 +163,8 @@ export function useProposicaoDetalhe(id: string) {
         .eq('proposicao_id', id)
         .order('created_at', { ascending: true }),
     ])
-    setProposicao((propResp.data as ProposicaoComAutor) ?? null)
-    setTramitacoes((tramResp.data ?? []) as typeof tramitacoes)
+    setProposicao(propResp.data ? (propResp.data as unknown as ProposicaoComAutor) : null)
+    setTramitacoes((tramResp.data ?? []) as unknown as typeof tramitacoes)
     setLoading(false)
   }, [id])
 

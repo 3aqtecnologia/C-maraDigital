@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from 'react'
 import { supabase } from '@/lib/supabase'
-import type { Database, SessaoStatus, SessaoTipo } from '@/types/database'
+import type { Database, SessaoTipo } from '@/types/database'
 import { useAuth } from './useAuth'
 
 type Sessao = Database['public']['Tables']['sessoes']['Row']
@@ -124,11 +124,12 @@ export function useSessaoAtiva(id: string) {
       .single()
 
     if (data) {
-      const sorted = {
-        ...data,
-        pauta_itens: [...(data.pauta_itens ?? [])].sort((a, b) => a.ordem - b.ordem),
+      const raw = data as unknown as SessaoComPauta
+      const sorted: SessaoComPauta = {
+        ...raw,
+        pauta_itens: [...(raw.pauta_itens ?? [])].sort((a, b) => a.ordem - b.ordem),
       }
-      setSessao(sorted as SessaoComPauta)
+      setSessao(sorted)
     }
     setLoading(false)
   }, [id])

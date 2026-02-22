@@ -1,5 +1,5 @@
-// Tipos gerados para o banco de dados Supabase
-// Execute: npx supabase gen types typescript --project-id YOUR_PROJECT_ID > src/types/database.ts
+// Tipos para o banco de dados Supabase
+// Para regenerar: npx supabase gen types typescript --project-id joecchvnzxcnsgzyugdh
 
 export type Json =
   | string
@@ -59,8 +59,27 @@ export interface Database {
           created_at: string
           updated_at: string
         }
-        Insert: Omit<Database['public']['Tables']['tenants']['Row'], 'id' | 'created_at' | 'updated_at'>
-        Update: Partial<Database['public']['Tables']['tenants']['Insert']>
+        Insert: {
+          nome: string
+          municipio: string
+          uf: string
+          cnpj?: string | null
+          slug: string
+          logo_url?: string | null
+          cor_primaria?: string
+          ativo?: boolean
+        }
+        Update: {
+          nome?: string
+          municipio?: string
+          uf?: string
+          cnpj?: string | null
+          slug?: string
+          logo_url?: string | null
+          cor_primaria?: string
+          ativo?: boolean
+        }
+        Relationships: []
       }
       master_admins: {
         Row: {
@@ -72,8 +91,18 @@ export interface Database {
           created_at: string
           updated_at: string
         }
-        Insert: Omit<Database['public']['Tables']['master_admins']['Row'], 'id' | 'created_at' | 'updated_at'>
-        Update: Partial<Database['public']['Tables']['master_admins']['Insert']>
+        Insert: {
+          user_id: string
+          nome: string
+          email: string
+          ativo?: boolean
+        }
+        Update: {
+          nome?: string
+          email?: string
+          ativo?: boolean
+        }
+        Relationships: []
       }
       tenant_planos_config: {
         Row: {
@@ -89,8 +118,26 @@ export interface Database {
           created_at: string
           updated_at: string
         }
-        Insert: Omit<Database['public']['Tables']['tenant_planos_config']['Row'], 'id' | 'created_at' | 'updated_at'>
-        Update: Partial<Database['public']['Tables']['tenant_planos_config']['Insert']>
+        Insert: {
+          tenant_id: string
+          plano: TenantPlano
+          situacao?: TenantSituacao
+          max_usuarios?: number
+          max_storage_gb?: number
+          trial_ate?: string | null
+          proxima_cobranca?: string | null
+          valor_mensalidade?: number | null
+        }
+        Update: {
+          plano?: TenantPlano
+          situacao?: TenantSituacao
+          max_usuarios?: number
+          max_storage_gb?: number
+          trial_ate?: string | null
+          proxima_cobranca?: string | null
+          valor_mensalidade?: number | null
+        }
+        Relationships: []
       }
       tenant_audit_log: {
         Row: {
@@ -102,8 +149,15 @@ export interface Database {
           ip_address: string | null
           created_at: string
         }
-        Insert: Omit<Database['public']['Tables']['tenant_audit_log']['Row'], 'id' | 'created_at'>
-        Update: never // log é imutável
+        Insert: {
+          master_admin_id: string
+          tenant_id?: string | null
+          acao: string
+          detalhes?: Json | null
+          ip_address?: string | null
+        }
+        Update: never
+        Relationships: []
       }
       profiles: {
         Row: {
@@ -120,8 +174,27 @@ export interface Database {
           created_at: string
           updated_at: string
         }
-        Insert: Omit<Database['public']['Tables']['profiles']['Row'], 'id' | 'created_at' | 'updated_at'>
-        Update: Partial<Database['public']['Tables']['profiles']['Insert']>
+        Insert: {
+          tenant_id: string
+          user_id: string
+          nome: string
+          email: string
+          role: UserRole
+          avatar_url?: string | null
+          partido?: string | null
+          matricula?: string | null
+          ativo?: boolean
+        }
+        Update: {
+          nome?: string
+          email?: string
+          role?: UserRole
+          avatar_url?: string | null
+          partido?: string | null
+          matricula?: string | null
+          ativo?: boolean
+        }
+        Relationships: []
       }
       proposicoes: {
         Row: {
@@ -139,8 +212,50 @@ export interface Database {
           created_at: string
           updated_at: string
         }
-        Insert: Omit<Database['public']['Tables']['proposicoes']['Row'], 'id' | 'created_at' | 'updated_at'>
-        Update: Partial<Database['public']['Tables']['proposicoes']['Insert']>
+        Insert: {
+          tenant_id: string
+          numero: string
+          ano: number
+          tipo: ProposicaoTipo
+          ementa: string
+          texto_integral?: string | null
+          autor_id: string
+          status?: ProposicaoStatus
+          data_protocolo?: string
+          data_publicacao?: string | null
+        }
+        Update: {
+          numero?: string
+          tipo?: ProposicaoTipo
+          ementa?: string
+          texto_integral?: string | null
+          status?: ProposicaoStatus
+          data_protocolo?: string
+          data_publicacao?: string | null
+        }
+        Relationships: []
+      }
+      tramitacoes: {
+        Row: {
+          id: string
+          tenant_id: string
+          proposicao_id: string
+          status_anterior: ProposicaoStatus
+          status_novo: ProposicaoStatus
+          descricao: string | null
+          responsavel_id: string
+          created_at: string
+        }
+        Insert: {
+          tenant_id: string
+          proposicao_id: string
+          status_anterior: ProposicaoStatus
+          status_novo: ProposicaoStatus
+          descricao?: string | null
+          responsavel_id: string
+        }
+        Update: never
+        Relationships: []
       }
       sessoes: {
         Row: {
@@ -159,8 +274,50 @@ export interface Database {
           created_at: string
           updated_at: string
         }
-        Insert: Omit<Database['public']['Tables']['sessoes']['Row'], 'id' | 'created_at' | 'updated_at'>
-        Update: Partial<Database['public']['Tables']['sessoes']['Insert']>
+        Insert: {
+          tenant_id: string
+          numero: number
+          ano: number
+          tipo: SessaoTipo
+          status?: SessaoStatus
+          data_inicio: string
+          data_fim?: string | null
+          local: string
+          quorum_minimo: number
+          presentes?: string[]
+          transmissao_url?: string | null
+        }
+        Update: {
+          status?: SessaoStatus
+          data_inicio?: string
+          data_fim?: string | null
+          local?: string
+          quorum_minimo?: number
+          presentes?: string[]
+          transmissao_url?: string | null
+        }
+        Relationships: []
+      }
+      pauta_itens: {
+        Row: {
+          id: string
+          sessao_id: string
+          proposicao_id: string
+          ordem: number
+          em_votacao: boolean
+          created_at: string
+        }
+        Insert: {
+          sessao_id: string
+          proposicao_id: string
+          ordem: number
+          em_votacao?: boolean
+        }
+        Update: {
+          ordem?: number
+          em_votacao?: boolean
+        }
+        Relationships: []
       }
       votos: {
         Row: {
@@ -172,8 +329,15 @@ export interface Database {
           opcao: VotoOpcao
           created_at: string
         }
-        Insert: Omit<Database['public']['Tables']['votos']['Row'], 'id' | 'created_at'>
+        Insert: {
+          tenant_id: string
+          sessao_id: string
+          proposicao_id: string
+          vereador_id: string
+          opcao: VotoOpcao
+        }
         Update: never
+        Relationships: []
       }
     }
     Views: {
@@ -195,6 +359,7 @@ export interface Database {
           total_proposicoes: number
           total_sessoes: number
         }
+        Relationships: []
       }
     }
     Functions: {
@@ -210,6 +375,14 @@ export interface Database {
         }
         Returns: string
       }
+      next_proposicao_numero: {
+        Args: {
+          p_tenant_id: string
+          p_tipo: string
+          p_ano: number
+        }
+        Returns: string
+      }
     }
     Enums: {
       user_role: UserRole
@@ -221,5 +394,6 @@ export interface Database {
       tenant_plano: TenantPlano
       tenant_situacao: TenantSituacao
     }
+    CompositeTypes: Record<string, unknown>
   }
 }
