@@ -1,9 +1,11 @@
+import { useAuth } from '@/hooks/useAuth'
 import { supabase } from '@/lib/supabase'
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 
 export function ResetPasswordPage() {
   const navigate = useNavigate()
+  const { mustChangePassword } = useAuth()
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
@@ -31,6 +33,7 @@ export function ResetPasswordPage() {
 
     const { error: updateError } = await supabase.auth.updateUser({
       password: password,
+      data: { force_password_change: false } // Limpa o flag de troca obrigatória
     })
 
     if (updateError) {
@@ -51,23 +54,32 @@ export function ResetPasswordPage() {
             </svg>
           </div>
           <h1 className="text-2xl font-bold text-white">CâmaraDigital</h1>
-          <p className="text-primary-200 text-sm mt-1">Redefinição de Senha</p>
+          <p className="text-primary-200 text-sm mt-1">
+            {mustChangePassword ? 'Atualização de Senha Obrigatória' : 'Redefinição de Senha'}
+          </p>
         </div>
 
         <div className="bg-white rounded-2xl shadow-2xl p-8">
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">Criar nova senha</h2>
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">
+            {mustChangePassword ? 'Defina sua senha definitiva' : 'Criar nova senha'}
+          </h2>
+          {mustChangePassword && (
+            <p className="text-sm text-gray-500 mb-6">
+              Por segurança, você precisa alterar sua senha provisória antes de continuar.
+            </p>
+          )}
 
           {success ? (
             <div className="space-y-6">
               <div className="bg-green-50 border border-green-200 rounded-lg p-4 text-sm text-green-800">
                 <p className="font-semibold text-green-900 mb-1">Senha atualizada com sucesso!</p>
-                <p>Sua senha foi redefinida. Agora você já pode fazer login.</p>
+                <p>Sua senha foi redefinida. Agora você já pode acessar todos os recursos da plataforma.</p>
               </div>
               <button
-                onClick={() => navigate('/login', { replace: true })}
+                onClick={() => navigate(mustChangePassword ? '/backoffice' : '/login', { replace: true })}
                 className="btn-primary w-full justify-center flex py-2.5"
               >
-                Acessar a Plataforma
+                {mustChangePassword ? 'Ir para o Painel' : 'Acessar a Plataforma'}
               </button>
             </div>
           ) : (
@@ -114,11 +126,13 @@ export function ResetPasswordPage() {
                 {loading ? 'Salvando...' : 'Redefinir senha'}
               </button>
 
-              <div className="text-center pt-2">
-                <Link to="/login" className="text-sm font-medium text-primary-600 hover:text-primary-700 transition-colors">
-                  Cancelar e voltar
-                </Link>
-              </div>
+              {!mustChangePassword && (
+                <div className="text-center pt-2">
+                  <Link to="/login" className="text-sm font-medium text-primary-600 hover:text-primary-700 transition-colors">
+                    Cancelar e voltar
+                  </Link>
+                </div>
+              )}
             </form>
           )}
 

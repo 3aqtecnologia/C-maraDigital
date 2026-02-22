@@ -51,8 +51,9 @@ npm run dev
 - **Reset de Senha Mestre (Hard Reset):** funcionalidade para resetar remotamente a senha do administrador da câmara em caso de perda total de acesso, com geração de nova credencial provisória e log de auditoria.
 - **Configurações Globais:** edição dinâmica de limites e recursos dos planos de assinatura (Básico, Profissional, Enterprise), segurança com MFA e whitelist IP, e outras permissões.
 - **Representação Autenticada (Impersonation):** função de acessar áreas restritas do tenant via painel Mestre com faixa de alerta para suporte técnico rápido.
-- **Audit Log:** histórico de ações administrativas com filtros
+- **Audit Log:** histórico de ações administrativas com filtros.
 - **Dashboard Master:** visão geral de todas as câmaras com hiperlinks espertos para filtragem automática e isolamento na visualização.
+- **Forçar Troca de Senha:** garantia de segurança que obriga o administrador a definir uma senha definitiva no primeiro acesso ou após um reset mestre.
 
 ### 📋 Módulo Legislativo
 - **Lista de Proposições** com filtros por status e busca por número/ementa/tipo
@@ -76,8 +77,10 @@ npm run dev
 
 ### 🔐 Autenticação & Multi-tenant
 - Login único com redirecionamento automático (master → `/master`, tenant → `/backoffice`)
-- Row Level Security (RLS) no PostgreSQL — isolamento total entre câmaras
-- Funções auxiliares no schema `public`: `get_user_tenant_id()`, `get_user_role()`, `is_master_admin()`
+- Row Level Security (RLS) no PostgreSQL — isolamento total entre câmaras.
+- **Recuperação de Senha (Self-service):** fluxo completo via e-mail para usuários redefinirem suas senhas com segurança.
+- **Sanitização de Dados Auth:** normalização do banco de dados para evitar erros de processamento em instâncias legadas de tokens nulos no Supabase.
+- Funções auxiliares no schema `public`: `get_user_tenant_id()`, `get_user_role()`, `is_master_admin()`.
 
 ---
 

@@ -14,6 +14,7 @@ interface AuthState {
   profile: Profile | null
   masterAdmin: MasterAdmin | null
   userType: AuthUserType
+  mustChangePassword: boolean
   loading: boolean
 }
 
@@ -24,22 +25,19 @@ export function useAuth() {
     profile: null,
     masterAdmin: null,
     userType: null,
+    mustChangePassword: false,
     loading: true,
   })
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) {
-        setState(prev => ({ ...prev, session, user: session.user }))
-        resolveUserType(session.user.id)
-      } else {
-        setState(prev => ({ ...prev, session: null, user: null, loading: false }))
-      }
-    })
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (session?.user) {
-        setState(prev => ({ ...prev, session, user: session.user }))
+        setState(prev => ({
+          ...prev,
+          session,
+          user: session.user,
+          mustChangePassword: !!session.user.user_metadata?.force_password_change
+        }))
         resolveUserType(session.user.id)
       } else {
         setState({
@@ -48,6 +46,29 @@ export function useAuth() {
           profile: null,
           masterAdmin: null,
           userType: null,
+          mustChangePassword: false,
+          loading: false,
+        })
+      }
+    })
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session?.user) {
+        setState(prev => ({
+          ...prev,
+          session,
+          user: session.user,
+          mustChangePassword: !!session.user.user_metadata?.force_password_change
+        }))
+        resolveUserType(session.user.id)
+      } else {
+        setState({
+          session: null,
+          user: null,
+          profile: null,
+          masterAdmin: null,
+          userType: null,
+          mustChangePassword: false,
           loading: false,
         })
       }
