@@ -1,11 +1,13 @@
 # Projeto: Plataforma SaaS de Gestão Legislativa e Administrativa
 
-## Fase 1: Setup e Infraestrutura
+## Fase 1: Setup, Infraestrutura e Repositório
 - [x] Inicializar projeto Frontend (Vite + React + TS)
 - [x] Configurar roteamento (React Router)
 - [x] Configurar integração com Supabase (Auth, Database, Storage) via ambiente oficial usando MCP
 - [x] Configurar layout responsivo com TailwindCSS
 - [x] Configurar PWA (vite-plugin-pwa)
+- [x] Versionar projeto local e no GitHub (Commit inicial feito)
+- [x] Criar README documentando o projeto e os padrões (Idiomas e Commits - PT-BR)
 
 ## Fase 2: Banco de Dados e Segurança (Supabase)
 - [x] Criar schema multi-tenant para Câmaras (organizations/tenants)
@@ -15,25 +17,65 @@
 - [x] Criar tabelas do Módulo Plenário (Pautas, Sessões, Votos)
 - [x] Criar repositórios do Módulo Administrativo (Documentos, Assinatura)
 
-## Fase 3: Módulo Legislativo (Processo Eletrônico)
-- [ ] Desenvolver Protocolo Digital (CRUD de proposições com numeração automática)
-- [ ] Desenvolver Fluxo de Tramitação (Linha do tempo)
-- [ ] Integrar Editor de Texto rico para Redação e Revisão
+## Fase 2.5: Módulo Master Admin (Adicional — SaaS Plataforma)
+> Módulo desenvolvido para gestão centralizada de todas as Câmaras pelo administrador da plataforma.
+- [x] Criar tabelas master_admins e tenant_audit_log (migration 002)
+- [x] Criar tabela tenant_planos_config com limites por plano (basico/profissional/enterprise)
+- [x] Criar função provisionar_tenant() e view master_tenant_overview
+- [x] Desenvolver MasterDashboard (visão geral de todas as câmaras, planos, situação)
+- [x] Desenvolver tela ProvisionarCamara (cadastro de novas câmaras)
+- [x] Desenvolver AuditLog (histórico de ações do master admin)
+- [x] Desenvolver MasterConfiguracoes (edição de planos dinâmicos, IP whitelist e MFA UI)
+- [x] Desenvolver Impersonation System (Representação autenticada master -> tenant bypass)
+- [x] Criar MasterGuard e MasterLayout com tema escuro separado
+- [x] Implementar função auth.is_master_admin() e políticas RLS de bypass para master
+
+## Fase 3: Autenticação (Frontend)
+- [x] Desenvolver tela de Login (Administrador e Servidor) → `src/components/auth/LoginPage.tsx`
+- [x] Conectar tela de Login com Supabase Auth
+- [x] Criar Context/Hook React para gerenciamento da sessão do Usuário logado → `src/hooks/useAuth.ts`
+- [ ] Implementar rota de recuperação de senha (Forgot Password)
+
+## Fase 4: Módulo Legislativo (Processo Eletrônico)
+- [x] Desenvolver Protocolo Digital (CRUD de proposições com numeração automática) → `src/pages/backoffice/ProposicaoNova.tsx` + `src/hooks/useProposicoes.ts`
+- [x] Desenvolver Fluxo de Tramitação (Linha do tempo) → `src/pages/backoffice/ProposicaoDetalhe.tsx`
+- [ ] Integrar Editor de Texto rico para Redação e Revisão (atualmente usa `<textarea>` simples)
 - [ ] Desenvolver funcionalidade de Compilação de Leis (LeisGov)
 
-## Fase 4: Módulo de Plenário e Votação
-- [ ] Desenvolver Gestão de Pautas (Geração da Ordem do Dia)
-- [ ] Desenvolver Painel Eletrônico (Quórum, oradores, resultados em tempo real)
-- [ ] Desenvolver Interface Mobile para Votação (Votei.app style)
-- [ ] Implementar visualização/links de Transmissão Audiovisual
+## Fase 5: Módulo de Plenário e Votação
+- [x] Desenvolver Gestão de Pautas (Geração da Ordem do Dia) → `src/pages/backoffice/Plenario.tsx` + tabela `pauta_itens`
+- [x] Desenvolver Painel Eletrônico (Quórum, oradores, resultados em tempo real) → `src/pages/backoffice/PlenarioAtivo.tsx` com Realtime subscriptions
+- [x] Desenvolver Interface de Votação Eletrônica (SIM/NÃO/ABSTENÇÃO com votos imutáveis via trigger) → `src/pages/backoffice/PlenarioAtivo.tsx`
+- [ ] Implementar visualização/links de Transmissão Audiovisual (campo `transmissao_url` existe no schema, falta UI dedicada)
 
-## Fase 5: Módulo Administrativo e GED
+## Fase 6: Módulo Administrativo e GED
 - [ ] Implementar API/Integração para Assinatura Digital (ICP-Brasil via API de terceiros ou Gov.br)
 - [ ] Implementar Verificador de Autenticidade (QR Code em PDFs)
 - [ ] Desenvolver registro de Teletrabalho e produtividade
 - [ ] Desenvolver módulo de Protocolo Externo
 
-## Fase 6: Portal da Transparência
-- [ ] Desenvolver visualização pública sincronizada
+## Fase 7: Portal da Transparência
+- [ ] Desenvolver visualização pública sincronizada (componente `PortalPublico.tsx` criado mas apenas scaffolded)
 - [ ] Desenvolver Ouvidoria e e-SIC (Sistema de tickets)
 - [ ] Desenvolver Exportação em Dados Abertos (CSV, JSON)
+
+---
+
+## Resumo do Progresso
+
+| Fase | Status | Concluído |
+|------|--------|-----------|
+| Fase 1 — Setup e Infraestrutura | ✅ Completa | 7/7 |
+| Fase 2 — Banco de Dados e Segurança | ✅ Completa | 6/6 |
+| Fase 2.5 — Master Admin (extra) | ✅ Completa | 10/10 |
+| Fase 3 — Autenticação | 🟡 Quase completa | 3/4 |
+| Fase 4 — Módulo Legislativo | 🟡 Em andamento | 2/4 |
+| Fase 5 — Plenário e Votação | 🟡 Em andamento | 3/4 |
+| Fase 6 — Administrativo e GED | ⬜ Não iniciada | 0/4 |
+| Fase 7 — Portal da Transparência | ⬜ Não iniciada | 0/3 |
+
+**Próximos passos prioritários:**
+1. Fase 3 — Implementar rota Forgot Password
+2. Fase 4 — Integrar editor de texto rico (ex: TipTap ou Quill)
+3. Fase 5 — Adicionar UI de link de transmissão ao vivo no PlenarioAtivo
+4. Fase 7 — Expandir PortalPublico com dados reais (proposições, sessões)

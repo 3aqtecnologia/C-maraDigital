@@ -1,29 +1,29 @@
+import { PageHeader } from '@/components/layout/PageHeader'
+import { useAuth } from '@/hooks/useAuth'
+import { useSessoes } from '@/hooks/useSessoes'
+import type { SessaoStatus, SessaoTipo } from '@/types/database'
+import { AlertCircle, Clock, Gavel, Play, Plus, Radio, RefreshCw, Users, X } from 'lucide-react'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Gavel, Play, Users, Clock, Plus, AlertCircle, RefreshCw, Radio, X } from 'lucide-react'
-import { PageHeader } from '@/components/layout/PageHeader'
-import { useSessoes } from '@/hooks/useSessoes'
-import { useAuth } from '@/hooks/useAuth'
-import type { SessaoStatus, SessaoTipo } from '@/types/database'
 
 const STATUS_CONFIG: Record<SessaoStatus, { label: string; color: string; dot: string }> = {
-  agendada:     { label: 'Agendada',     color: 'bg-blue-100 text-blue-700',   dot: 'bg-blue-500' },
+  agendada: { label: 'Agendada', color: 'bg-blue-100 text-blue-700', dot: 'bg-blue-500' },
   em_andamento: { label: 'Em andamento', color: 'bg-green-100 text-green-700', dot: 'bg-green-500 animate-pulse' },
-  encerrada:    { label: 'Encerrada',    color: 'bg-gray-100 text-gray-600',   dot: 'bg-gray-400' },
-  cancelada:    { label: 'Cancelada',    color: 'bg-red-100 text-red-600',     dot: 'bg-red-400' },
+  encerrada: { label: 'Encerrada', color: 'bg-gray-100 text-gray-600', dot: 'bg-gray-400' },
+  cancelada: { label: 'Cancelada', color: 'bg-red-100 text-red-600', dot: 'bg-red-400' },
 }
 
 const TIPO_LABELS: Record<SessaoTipo, string> = {
-  ordinaria:     'Sessão Ordinária',
-  extraordinaria:'Sessão Extraordinária',
-  especial:      'Sessão Especial',
-  solene:        'Sessão Solene',
+  ordinaria: 'Sessão Ordinária',
+  extraordinaria: 'Sessão Extraordinária',
+  especial: 'Sessão Especial',
+  solene: 'Sessão Solene',
 }
 
 export function Plenario() {
   const navigate = useNavigate()
   const { profile } = useAuth()
-  const { sessoes, loading, error, fetch, criar, iniciar } = useSessoes()
+  const { sessoes, loading, error, fetch, criar } = useSessoes()
 
   const isAdmin = profile?.role === 'admin' || profile?.role === 'servidor'
 
@@ -50,10 +50,6 @@ export function Plenario() {
     }
   }
 
-  async function handleIniciar(id: string) {
-    await iniciar(id)
-    navigate(`/backoffice/plenario/${id}`)
-  }
 
   return (
     <div className="flex flex-col h-full">

@@ -46,6 +46,8 @@ npm run dev
 ### 👑 Administrador Master (SaaS)
 - Painel exclusivo em `/master` — isolado do backoffice das câmaras
 - **Provisionar nova Câmara:** formulário com nome, município, UF, CNPJ, slug, plano
+- **Configurações Globais:** edição dinâmica de limites e recursos dos planos de assinatura (Básico, Profissional, Enterprise), segurança com MFA e whitelist IP, e outras permissões.
+- **Representação Autenticada (Impersonation):** função de acessar áreas restritas do tenant via painel Mestre com faixa de alerta para suporte técnico rápido.
 - **Audit Log:** histórico de ações administrativas com filtros
 - **Dashboard Master:** visão geral de todas as câmaras, planos e situações
 

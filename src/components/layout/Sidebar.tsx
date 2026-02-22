@@ -1,16 +1,17 @@
-import { NavLink } from 'react-router-dom'
-import {
-  LayoutDashboard,
-  FileText,
-  Gavel,
-  FolderOpen,
-  Globe,
-  Users,
-  Settings,
-  LogOut,
-  ChevronRight,
-} from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
+import {
+  ChevronRight,
+  FileText,
+  FolderOpen,
+  Gavel,
+  Globe,
+  LayoutDashboard,
+  LogOut,
+  Settings,
+  ShieldAlert,
+  Users,
+} from 'lucide-react'
+import { NavLink } from 'react-router-dom'
 
 interface NavItem {
   label: string
@@ -30,7 +31,7 @@ const NAV_ITEMS: NavItem[] = [
 ]
 
 export function Sidebar() {
-  const { profile, signOut } = useAuth()
+  const { profile, masterAdmin, signOut, stopImpersonating } = useAuth()
 
   const visibleItems = NAV_ITEMS.filter(item =>
     !item.roles || (profile && item.roles.includes(profile.role))
@@ -58,6 +59,26 @@ export function Sidebar() {
         </div>
       )}
 
+      {/* Impersonation Banner */}
+      {masterAdmin && profile && (
+        <div className="mx-3 mt-4 mb-1 p-3 bg-orange-500/10 border border-orange-500/50 rounded-lg animate-pulse">
+          <div className="flex items-start gap-2 text-orange-400">
+            <ShieldAlert size={16} className="mt-0.5 flex-shrink-0" />
+            <div>
+              <p className="text-xs font-bold">Acesso Mestre</p>
+              <p className="text-[10px] opacity-80 mt-1 leading-tight">Você está governando a câmara em modo de suporte.</p>
+              <button
+                onClick={stopImpersonating}
+                className="mt-2 text-xs font-semibold bg-orange-500 hover:bg-orange-600 text-white px-2 py-1 rounded w-full transition-colors"
+                title="Voltar ao Painel SaaS"
+              >
+                Voltar ao Master
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Navigation */}
       <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
         {visibleItems.map(item => (
@@ -66,10 +87,9 @@ export function Sidebar() {
             to={item.to}
             end={item.to === '/backoffice'}
             className={({ isActive }) =>
-              `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors group ${
-                isActive
-                  ? 'bg-white text-primary-600'
-                  : 'text-primary-100 hover:bg-primary-500 hover:text-white'
+              `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors group ${isActive
+                ? 'bg-white text-primary-600'
+                : 'text-primary-100 hover:bg-primary-500 hover:text-white'
               }`
             }
           >

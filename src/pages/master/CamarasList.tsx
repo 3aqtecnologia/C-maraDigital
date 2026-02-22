@@ -1,3 +1,4 @@
+import { useAuth } from '@/hooks/useAuth'
 import { supabase } from '@/lib/supabase'
 import type { Database, TenantSituacao } from '@/types/database'
 import { Building2, MoreVertical, Search, Settings, ShieldCheck } from 'lucide-react'
@@ -13,6 +14,7 @@ const SITUACAO_LABELS: Record<TenantSituacao, string> = {
 }
 
 export function CamarasList() {
+  const { impersonateTenant } = useAuth()
   const [camaras, setCamaras] = useState<TenantOverview[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
@@ -104,7 +106,7 @@ export function CamarasList() {
 
                 <div className="pt-4 mt-2 border-t border-gray-700/50 flex gap-2">
                   <button
-                    onClick={() => alert(`Funcionalidade de acesso administrativo direto para a câmara '${camara.nome}' estará disponível na próxima atualização de segurança.`)}
+                    onClick={() => impersonateTenant?.(camara.id)}
                     className="flex-1 flex items-center justify-center gap-2 bg-gray-700 hover:bg-gray-600 text-white py-2 rounded-lg text-xs font-semibold transition-colors"
                   >
                     <ShieldCheck size={14} />

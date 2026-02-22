@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react'
-import type { Session, User } from '@supabase/supabase-js'
 import { supabase } from '@/lib/supabase'
 import type { Database } from '@/types/database'
+import type { Session, User } from '@supabase/supabase-js'
+import { useEffect, useState } from 'react'
 
 type Profile = Database['public']['Tables']['profiles']['Row']
 type MasterAdmin = Database['public']['Tables']['master_admins']['Row']
@@ -61,6 +61,8 @@ export function useAuth() {
    * Prioridade: master_admins → profiles
    */
   async function resolveUserType(userId: string) {
+    const impersonatedTenantId = sessionStorage.getItem('@camara:impersonate_tenant')
+
     // 1. Verifica se é master admin
     const { data: masterData } = await supabase
       .from('master_admins')
@@ -70,6 +72,31 @@ export function useAuth() {
       .maybeSingle()
 
     if (masterData) {
+      if (impersonatedTenantId) {
+        // Master Admin atuando como um Admin do Tenant (Impersonation)
+        setState(prev => ({
+          ...prev,
+          masterAdmin: masterData,
+          profile: {
+            id: masterData.id,
+            tenant_id: impersonatedTenantId,
+            user_id: masterData.user_id,
+            nome: `${masterData.nome} (Admin Mestre)`,
+            email: masterData.email,
+            role: 'admin',
+            ativo: true,
+            avatar_url: null,
+            partido: null,
+            matricula: null,
+            created_at: masterData.created_at,
+            updated_at: masterData.updated_at
+          } as Profile,
+          userType: 'tenant', // O sistema entende como tenant
+          loading: false,
+        }))
+        return
+      }
+
       setState(prev => ({
         ...prev,
         masterAdmin: masterData,
@@ -103,8 +130,20 @@ export function useAuth() {
   }
 
   async function signOut() {
+    sessionStorage.removeItem('@camara:impersonate_tenant')
     await supabase.auth.signOut()
   }
 
-  return { ...state, signIn, signOut }
+  function impersonateTenant(tenantId: string) {
+    sessionStorage.setItem('@camara:impersonate_tenant', tenantId)
+    // Forçamos o reload da página para todos os hooks recompilarem os contextos isolados
+    window.location.href = '/backoffice'
+  }
+
+  function stopImpersonating() {
+    sessionStorage.removeItem('@camara:impersonate_tenant')
+    window.location.href = '/master'
+  }
+
+  return { ...state, signIn, signOut, impersonateTenant, stopImpersonating }
 }
