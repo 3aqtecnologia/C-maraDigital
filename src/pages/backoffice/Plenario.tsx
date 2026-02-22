@@ -33,6 +33,7 @@ export function Plenario() {
     data_inicio: '',
     local: 'Câmara Municipal',
     quorum_minimo: 6,
+    transmissao_url: '',
   })
   const [saving, setSaving] = useState(false)
 
@@ -46,7 +47,7 @@ export function Plenario() {
     setSaving(false)
     if (result) {
       setShowForm(false)
-      setFormData({ tipo: 'ordinaria', data_inicio: '', local: 'Câmara Municipal', quorum_minimo: 6 })
+      setFormData({ tipo: 'ordinaria', data_inicio: '', local: 'Câmara Municipal', quorum_minimo: 6, transmissao_url: '' })
     }
   }
 
@@ -113,7 +114,6 @@ export function Plenario() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1.5">Quórum Mínimo</label>
                   <input
                     type="number"
                     min={1}
@@ -122,6 +122,17 @@ export function Plenario() {
                     value={formData.quorum_minimo}
                     onChange={e => setFormData(f => ({ ...f, quorum_minimo: Number(e.target.value) }))}
                   />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5">Link de Transmissão (Opcional)</label>
+                  <input
+                    type="url"
+                    className="input"
+                    placeholder="Ex: https://youtube.com/live/..."
+                    value={formData.transmissao_url}
+                    onChange={e => setFormData(f => ({ ...f, transmissao_url: e.target.value }))}
+                  />
+                  <p className="text-[10px] text-gray-500 mt-1">YouTube, Vimeo ou outros vídeos embutíveis.</p>
                 </div>
               </div>
               <div className="flex gap-3 px-6 pb-5">

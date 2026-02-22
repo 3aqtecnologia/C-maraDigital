@@ -1,6 +1,6 @@
-import { useEffect, useState, useCallback } from 'react'
 import { supabase } from '@/lib/supabase'
 import type { Database, SessaoTipo } from '@/types/database'
+import { useCallback, useEffect, useState } from 'react'
 import { useAuth } from './useAuth'
 
 type Sessao = Database['public']['Tables']['sessoes']['Row']
@@ -48,6 +48,7 @@ export function useSessoes() {
     data_inicio: string
     local: string
     quorum_minimo: number
+    transmissao_url?: string
   }): Promise<{ id: string } | null> {
     if (!profile) return null
 
@@ -59,15 +60,16 @@ export function useSessoes() {
       .eq('ano', ano)
 
     const insert: SessaoInsert = {
-      tenant_id:     profile.tenant_id,
-      numero:        (count ?? 0) + 1,
+      tenant_id: profile.tenant_id,
+      numero: (count ?? 0) + 1,
       ano,
-      tipo:          dados.tipo,
-      status:        'agendada',
-      data_inicio:   dados.data_inicio,
-      local:         dados.local,
+      tipo: dados.tipo,
+      status: 'agendada',
+      data_inicio: dados.data_inicio,
+      local: dados.local,
       quorum_minimo: dados.quorum_minimo,
-      presentes:     [],
+      transmissao_url: dados.transmissao_url,
+      presentes: [],
     }
 
     const { data, error: err } = await supabase
@@ -114,12 +116,12 @@ export function useSessaoAtiva(id: string) {
     const { data } = await supabase
       .from('sessoes')
       .select(`
-        *,
-        pauta_itens (
-          id, ordem, em_votacao,
-          proposicao:proposicoes!proposicao_id(id, numero, tipo, ementa, status)
-        )
-      `)
+  *,
+  pauta_itens(
+    id, ordem, em_votacao,
+    proposicao: proposicoes!proposicao_id(id, numero, tipo, ementa, status)
+  )
+    `)
       .eq('id', id)
       .single()
 
@@ -160,10 +162,10 @@ export function useSessaoAtiva(id: string) {
   async function votar(proposicao_id: string, opcao: 'sim' | 'nao' | 'abstencao'): Promise<boolean> {
     if (!profile) return false
     const { error } = await supabase.from('votos').insert({
-      tenant_id:     profile.tenant_id,
-      sessao_id:     id,
+      tenant_id: profile.tenant_id,
+      sessao_id: id,
       proposicao_id,
-      vereador_id:   profile.id,
+      vereador_id: profile.id,
       opcao,
     })
     return !error

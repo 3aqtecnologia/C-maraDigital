@@ -1,7 +1,7 @@
-import { useParams, useNavigate } from 'react-router-dom'
-import { ArrowLeft, Users, Gavel, Radio, ThumbsUp, ThumbsDown, Minus, CheckCircle2 } from 'lucide-react'
-import { useSessaoAtiva } from '@/hooks/useSessoes'
 import { useAuth } from '@/hooks/useAuth'
+import { useSessaoAtiva } from '@/hooks/useSessoes'
+import { ArrowLeft, CheckCircle2, Gavel, Minus, Radio, ThumbsDown, ThumbsUp, Users } from 'lucide-react'
+import { useNavigate, useParams } from 'react-router-dom'
 
 const TIPO_SIGLAS: Record<string, string> = {
   projeto_lei: 'PL', projeto_lei_complementar: 'PLC', projeto_resolucao: 'PR',
@@ -17,6 +17,17 @@ export function PlenarioAtivo() {
   const isAdmin = profile?.role === 'admin' || profile?.role === 'servidor'
   const isVereador = profile?.role === 'vereador'
   const itemEmVotacao = sessao?.pauta_itens.find(i => i.em_votacao)
+
+  // Função para converter links em Embed (YouTube/Vimeo)
+  function getEmbedUrl(url?: string | null) {
+    if (!url) return null
+    if (url.includes('youtube.com/watch?v=')) return url.replace('watch?v=', 'embed/')
+    if (url.includes('youtu.be/')) return url.replace('youtu.be/', 'youtube.com/embed/')
+    if (url.includes('vimeo.com/')) return url.replace('vimeo.com/', 'player.vimeo.com/video/')
+    return url
+  }
+
+  const embedUrl = getEmbedUrl(sessao?.transmissao_url)
 
   if (loading) {
     return (
@@ -67,8 +78,8 @@ export function PlenarioAtivo() {
                 </span>
                 <h1 className="font-bold text-lg">
                   {sessao.tipo === 'ordinaria' ? 'Sessão Ordinária' :
-                   sessao.tipo === 'extraordinaria' ? 'Sessão Extraordinária' :
-                   sessao.tipo === 'especial' ? 'Sessão Especial' : 'Sessão Solene'} nº {sessao.numero}/{sessao.ano}
+                    sessao.tipo === 'extraordinaria' ? 'Sessão Extraordinária' :
+                      sessao.tipo === 'especial' ? 'Sessão Especial' : 'Sessão Solene'} nº {sessao.numero}/{sessao.ano}
                 </h1>
               </div>
               <p className="text-gray-400 text-xs mt-0.5">{sessao.local}</p>
@@ -84,7 +95,7 @@ export function PlenarioAtivo() {
         </div>
       </header>
 
-      <div className="flex-1 flex gap-0">
+      <div className="flex-1 flex gap-0 overflow-hidden">
         {/* Pauta — Coluna esquerda */}
         <aside className="w-80 bg-gray-800 border-r border-gray-700 flex flex-col">
           <div className="px-5 py-4 border-b border-gray-700">
@@ -96,11 +107,10 @@ export function PlenarioAtivo() {
             ) : sessao.pauta_itens.map(item => (
               <div
                 key={item.id}
-                className={`rounded-xl p-3 transition-all ${
-                  item.em_votacao
+                className={`rounded-xl p-3 transition-all ${item.em_votacao
                     ? 'bg-purple-600/20 border border-purple-500'
                     : 'bg-gray-750 border border-gray-700 hover:border-gray-600'
-                }`}
+                  }`}
               >
                 <div className="flex items-start gap-2">
                   <span className="text-xs text-gray-500 font-mono w-5 flex-shrink-0">{item.ordem}.</span>
@@ -146,71 +156,88 @@ export function PlenarioAtivo() {
         </aside>
 
         {/* Painel central */}
-        <main className="flex-1 flex flex-col items-center justify-center p-8">
-          {itemEmVotacao ? (
-            <div className="w-full max-w-2xl text-center space-y-8">
-              {/* Proposição em votação */}
-              <div>
-                <div className="inline-flex items-center gap-2 text-purple-400 text-sm font-medium mb-3">
-                  <Radio size={14} className="animate-pulse" />
-                  VOTAÇÃO EM ANDAMENTO
-                </div>
-                <div className="bg-gray-800 rounded-2xl border border-purple-500/30 p-8">
-                  <p className="text-xs font-mono text-gray-400 mb-2">
-                    {TIPO_SIGLAS[itemEmVotacao.proposicao?.tipo ?? ''] ?? ''} {itemEmVotacao.proposicao?.numero}/{new Date().getFullYear()}
-                  </p>
-                  <p className="text-xl font-semibold text-white leading-relaxed">
-                    {itemEmVotacao.proposicao?.ementa}
-                  </p>
-                </div>
+        <main className="flex-1 flex flex-col overflow-y-auto bg-gray-900">
+          {/* Vídeo Transmissão */}
+          {embedUrl && (
+            <div className="w-full bg-black border-b border-gray-700">
+              <div className="max-w-4xl mx-auto aspect-video">
+                <iframe
+                  className="w-full h-full"
+                  src={embedUrl}
+                  title="Transmissão ao Vivo"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                />
               </div>
-
-              {/* Botões de voto — apenas vereadores */}
-              {isVereador && (
-                <div>
-                  <p className="text-gray-400 text-sm mb-4">Registre seu voto:</p>
-                  <div className="flex gap-4 justify-center">
-                    <button
-                      onClick={() => votar(itemEmVotacao.proposicao!.id, 'sim')}
-                      className="flex flex-col items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-10 py-6 rounded-2xl text-lg font-bold transition-colors shadow-lg shadow-green-900/30"
-                    >
-                      <ThumbsUp size={28} />
-                      SIM
-                    </button>
-                    <button
-                      onClick={() => votar(itemEmVotacao.proposicao!.id, 'nao')}
-                      className="flex flex-col items-center gap-2 bg-red-600 hover:bg-red-700 text-white px-10 py-6 rounded-2xl text-lg font-bold transition-colors shadow-lg shadow-red-900/30"
-                    >
-                      <ThumbsDown size={28} />
-                      NÃO
-                    </button>
-                    <button
-                      onClick={() => votar(itemEmVotacao.proposicao!.id, 'abstencao')}
-                      className="flex flex-col items-center gap-2 bg-gray-600 hover:bg-gray-500 text-white px-8 py-6 rounded-2xl text-lg font-bold transition-colors"
-                    >
-                      <Minus size={28} />
-                      ABST.
-                    </button>
-                  </div>
-                </div>
-              )}
-
-              {/* Mensagem para não-vereadores */}
-              {!isVereador && (
-                <div className="text-gray-500 text-sm">
-                  Aguardando votos dos vereadores...
-                </div>
-              )}
-            </div>
-          ) : (
-            <div className="text-center text-gray-500">
-              <CheckCircle2 size={48} className="mx-auto mb-4 opacity-20" />
-              <p className="text-lg font-medium text-gray-400">Nenhuma votação em andamento</p>
-              <p className="text-sm mt-1">
-                {isAdmin ? 'Selecione um item da pauta para iniciar a votação.' : 'Aguarde o presidente iniciar a votação.'}
-              </p>
             </div>
           )}
+
+          <div className="flex-1 flex flex-col items-center justify-center p-8">
+            {itemEmVotacao ? (
+              <div className="w-full max-w-2xl text-center space-y-8">
+                {/* Proposição em votação */}
+                <div>
+                  <div className="inline-flex items-center gap-2 text-purple-400 text-sm font-medium mb-3">
+                    <Radio size={14} className="animate-pulse" />
+                    VOTAÇÃO EM ANDAMENTO
+                  </div>
+                  <div className="bg-gray-800 rounded-2xl border border-purple-500/30 p-8">
+                    <p className="text-xs font-mono text-gray-400 mb-2">
+                      {TIPO_SIGLAS[itemEmVotacao.proposicao?.tipo ?? ''] ?? ''} {itemEmVotacao.proposicao?.numero}/{new Date().getFullYear()}
+                    </p>
+                    <p className="text-xl font-semibold text-white leading-relaxed">
+                      {itemEmVotacao.proposicao?.ementa}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Botões de voto — apenas vereadores */}
+                {isVereador && (
+                  <div>
+                    <p className="text-gray-400 text-sm mb-4">Registre seu voto:</p>
+                    <div className="flex gap-4 justify-center">
+                      <button
+                        onClick={() => votar(itemEmVotacao.proposicao!.id, 'sim')}
+                        className="flex flex-col items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-10 py-6 rounded-2xl text-lg font-bold transition-colors shadow-lg shadow-green-900/30"
+                      >
+                        <ThumbsUp size={28} />
+                        SIM
+                      </button>
+                      <button
+                        onClick={() => votar(itemEmVotacao.proposicao!.id, 'nao')}
+                        className="flex flex-col items-center gap-2 bg-red-600 hover:bg-red-700 text-white px-10 py-6 rounded-2xl text-lg font-bold transition-colors shadow-lg shadow-red-900/30"
+                      >
+                        <ThumbsDown size={28} />
+                        NÃO
+                      </button>
+                      <button
+                        onClick={() => votar(itemEmVotacao.proposicao!.id, 'abstencao')}
+                        className="flex flex-col items-center gap-2 bg-gray-600 hover:bg-gray-500 text-white px-8 py-6 rounded-2xl text-lg font-bold transition-colors"
+                      >
+                        <Minus size={28} />
+                        ABST.
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Mensagem para não-vereadores */}
+                {!isVereador && (
+                  <div className="text-gray-500 text-sm">
+                    Aguardando votos dos vereadores...
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="text-center text-gray-500">
+                <CheckCircle2 size={48} className="mx-auto mb-4 opacity-20" />
+                <p className="text-lg font-medium text-gray-400">Nenhuma votação em andamento</p>
+                <p className="text-sm mt-1">
+                  {isAdmin ? 'Selecione um item da pauta para iniciar a votação.' : 'Aguarde o presidente iniciar a votação.'}
+                </p>
+              </div>
+            )}
+          </div>
         </main>
       </div>
     </div>
