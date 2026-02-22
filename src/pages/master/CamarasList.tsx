@@ -1,7 +1,7 @@
 import { useAuth } from '@/hooks/useAuth'
 import { supabase } from '@/lib/supabase'
 import type { Database, TenantSituacao } from '@/types/database'
-import { Building2, ExternalLink, MoreVertical, Save, Search, Settings, ShieldCheck, X } from 'lucide-react'
+import { Building2, ExternalLink, KeyRound, MoreVertical, Save, Search, Settings, ShieldCheck, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 
@@ -25,10 +25,36 @@ export function CamarasList() {
   const [editingCamara, setEditingCamara] = useState<TenantOverview | null>(null)
   const [editForm, setEditForm] = useState<Partial<TenantOverview>>({})
   const [saving, setSaving] = useState(false)
+  const [resettingPassword, setResettingPassword] = useState(false)
+  const [newCredentials, setNewCredentials] = useState<{ admin_email: string, admin_password: string } | null>(null)
 
   function openEdit(c: TenantOverview) {
     setEditingCamara(c)
     setEditForm({ ...c })
+    setNewCredentials(null)
+  }
+
+  async function handleResetPassword() {
+    if (!editingCamara) return
+    if (!window.confirm("Essa ação anulará a senha atual do Administrador base desta Câmara e providenciará uma nova provisória. Tem certeza?")) {
+      return
+    }
+
+    setResettingPassword(true)
+    setNewCredentials(null)
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data, error } = await (supabase.rpc as any)('admin_resetar_senha_tenant', {
+      p_tenant_id: editingCamara.id
+    })
+
+    setResettingPassword(false)
+
+    if (error) {
+      alert("Erro ao resetar: " + error.message)
+    } else {
+      setNewCredentials(data as { admin_email: string, admin_password: string })
+    }
   }
 
   async function handleSave() {
@@ -273,6 +299,61 @@ export function CamarasList() {
                       </select>
                     </div>
                   </div>
+                </div>
+              </div>
+
+              {/* Botão Reset de Senha */}
+              <div className="space-y-4">
+                <h4 className="text-sm font-semibold text-red-400 uppercase tracking-wide border-b border-gray-800 pb-2 flex items-center gap-2">
+                  <KeyRound size={16} />
+                  Acesso e Segurança
+                </h4>
+
+                <div className="bg-red-900/10 border border-red-500/20 rounded-lg p-5">
+                  <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
+                    <div className="text-sm text-gray-300">
+                      <p className="font-semibold text-white mb-1">Perda de Acesso do Administrador?</p>
+                      <p className="text-xs">Se a câmara perdeu total acesso ao sistema, você pode forçar um reset da senha do perfil Administrador e lhe entregar uma provisória.</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleResetPassword}
+                      disabled={resettingPassword}
+                      className="flex-shrink-0 bg-red-600 hover:bg-red-700 text-white font-medium text-xs px-4 py-2 rounded-lg transition-colors flex items-center justify-center gap-2"
+                    >
+                      {resettingPassword ? (
+                        <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                        </svg>
+                      ) : (
+                        <>Efetuar Hard Reset</>
+                      )}
+                    </button>
+                  </div>
+
+                  {/* Resultados do Reset */}
+                  {newCredentials && (
+                    <div className="mt-4 bg-gray-900 border border-gray-700 rounded-xl p-4 text-left">
+                      <p className="text-xs font-semibold uppercase text-green-400 mb-3">
+                        Novas Credenciais Geradas
+                      </p>
+                      <div className="space-y-3">
+                        <div>
+                          <span className="text-[11px] text-gray-500 block mb-1 uppercase tracking-wider">Conta Principal de Admin</span>
+                          <div className="bg-black/50 border border-gray-800 py-2 px-3 rounded text-sm text-gray-200 font-mono select-all">
+                            {newCredentials.admin_email}
+                          </div>
+                        </div>
+                        <div>
+                          <span className="text-[11px] text-gray-500 block mb-1 uppercase tracking-wider">Nova Senha Provisória</span>
+                          <div className="bg-black/50 border border-gray-800 py-2 px-3 rounded text-sm text-gray-200 font-mono select-all">
+                            {newCredentials.admin_password}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
 

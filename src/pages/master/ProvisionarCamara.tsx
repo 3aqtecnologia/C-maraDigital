@@ -1,16 +1,16 @@
-import { useState, type FormEvent } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { Building2, CheckCircle2, AlertCircle } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import type { TenantPlano } from '@/types/database'
+import { AlertCircle, Building2, CheckCircle2 } from 'lucide-react'
+import { useState, type FormEvent } from 'react'
+import { useNavigate } from 'react-router-dom'
 
 const PLANOS: { value: TenantPlano; label: string; desc: string; max: number; preco: string }[] = [
-  { value: 'basico',       label: 'Básico',       desc: 'Até 15 usuários, 5 GB storage',  max: 15,  preco: 'R$ 490/mês' },
-  { value: 'profissional', label: 'Profissional', desc: 'Até 30 usuários, 20 GB storage', max: 30,  preco: 'R$ 890/mês' },
-  { value: 'enterprise',   label: 'Enterprise',   desc: 'Usuários ilimitados, 100 GB',    max: 999, preco: 'Sob consulta' },
+  { value: 'basico', label: 'Básico', desc: 'Até 15 usuários, 5 GB storage', max: 15, preco: 'R$ 490/mês' },
+  { value: 'profissional', label: 'Profissional', desc: 'Até 30 usuários, 20 GB storage', max: 30, preco: 'R$ 890/mês' },
+  { value: 'enterprise', label: 'Enterprise', desc: 'Usuários ilimitados, 100 GB', max: 999, preco: 'Sob consulta' },
 ]
 
-const UFS = ['AC','AL','AM','AP','BA','CE','DF','ES','GO','MA','MG','MS','MT','PA','PB','PE','PI','PR','RJ','RN','RO','RR','RS','SC','SE','SP','TO']
+const UFS = ['AC', 'AL', 'AM', 'AP', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA', 'MG', 'MS', 'MT', 'PA', 'PB', 'PE', 'PI', 'PR', 'RJ', 'RN', 'RO', 'RR', 'RS', 'SC', 'SE', 'SP', 'TO']
 
 type FormState = {
   nome: string
@@ -19,16 +19,17 @@ type FormState = {
   cnpj: string
   slug: string
   plano: TenantPlano
+  adminEmail: string
 }
 
 export function ProvisionarCamara() {
   const navigate = useNavigate()
   const [form, setForm] = useState<FormState>({
-    nome: '', municipio: '', uf: 'SP', cnpj: '', slug: '', plano: 'basico',
+    nome: '', municipio: '', uf: 'SP', cnpj: '', slug: '', plano: 'basico', adminEmail: ''
   })
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
   const [errorMsg, setErrorMsg] = useState('')
-  const [newTenantId, setNewTenantId] = useState<string | null>(null)
+  const [resultData, setResultData] = useState<{ tenant_id: string, admin_email: string, admin_password: string } | null>(null)
 
   function set(field: keyof FormState, value: string) {
     setForm(prev => ({ ...prev, [field]: value }))
@@ -64,13 +65,14 @@ export function ProvisionarCamara() {
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data, error } = await (supabase.rpc as any)('provisionar_tenant', {
-      p_nome:         form.nome,
-      p_municipio:    form.municipio,
-      p_uf:           form.uf,
-      p_cnpj:         form.cnpj.replace(/\D/g, ''),
-      p_slug:         form.slug,
-      p_plano:        form.plano,
+      p_nome: form.nome,
+      p_municipio: form.municipio,
+      p_uf: form.uf,
+      p_cnpj: form.cnpj.replace(/\D/g, ''),
+      p_slug: form.slug,
+      p_plano: form.plano,
       p_max_usuarios: PLANOS.find(p => p.value === form.plano)?.max ?? 15,
+      p_admin_email: form.adminEmail ? form.adminEmail : undefined,
     })
 
     if (error) {
@@ -79,7 +81,7 @@ export function ProvisionarCamara() {
       return
     }
 
-    setNewTenantId(data as string)
+    setResultData(data as { tenant_id: string, admin_email: string, admin_password: string })
     setStatus('success')
   }
 
@@ -90,16 +92,36 @@ export function ProvisionarCamara() {
           <h1 className="text-2xl font-bold text-white">Câmara Provisionada</h1>
         </div>
         <div className="flex-1 flex items-center justify-center p-8">
-          <div className="text-center max-w-sm">
+          <div className="text-center w-full max-w-md">
             <div className="w-16 h-16 rounded-full bg-green-900/40 flex items-center justify-center mx-auto mb-4">
               <CheckCircle2 size={36} className="text-green-400" />
             </div>
             <h2 className="text-xl font-bold text-white mb-2">{form.nome}</h2>
-            <p className="text-gray-400 text-sm mb-1">{form.municipio}/{form.uf}</p>
-            <p className="text-gray-500 text-xs font-mono mb-6">{newTenantId}</p>
-            <p className="text-gray-300 text-sm mb-8">
-              A câmara foi provisionada com sucesso. O próximo passo é criar o usuário administrador desta câmara.
-            </p>
+            <p className="text-gray-400 text-sm mb-6 pb-6 border-b border-gray-800">{form.municipio}/{form.uf}</p>
+
+            <div className="bg-gray-900 border border-gray-700 rounded-xl p-5 mb-8 text-left">
+              <p className="text-xs font-semibold uppercase text-indigo-400 mb-4 flex items-center gap-2">
+                Credenciais de Acesso Inicial
+              </p>
+
+              <div className="space-y-3">
+                <div>
+                  <span className="text-xs text-gray-500 block mb-1">E-mail do Administrador</span>
+                  <div className="bg-black/50 border border-gray-800 py-2 px-3 rounded text-sm text-gray-200 font-mono select-all">
+                    {resultData?.admin_email}
+                  </div>
+                </div>
+                <div>
+                  <span className="text-xs text-gray-500 block mb-1">Senha Provisória</span>
+                  <div className="bg-black/50 border border-gray-800 py-2 px-3 rounded text-sm text-gray-200 font-mono select-all">
+                    {resultData?.admin_password}
+                  </div>
+                </div>
+                <p className="text-[11px] text-gray-500 mt-2 leading-tight">
+                  Copie e envie essas credenciais (de forma segura) à Câmara. Elas dão acesso irrestrito ao sistema para preenchimentos iniciais.
+                </p>
+              </div>
+            </div>
             <div className="flex gap-3 justify-center">
               <button
                 onClick={() => navigate('/master/camaras')}
@@ -108,7 +130,7 @@ export function ProvisionarCamara() {
                 Ver todas as câmaras
               </button>
               <button
-                onClick={() => { setStatus('idle'); setForm({ nome:'', municipio:'', uf:'SP', cnpj:'', slug:'', plano:'basico' }) }}
+                onClick={() => { setStatus('idle'); setForm({ nome: '', municipio: '', uf: 'SP', cnpj: '', slug: '', plano: 'basico', adminEmail: '' }) }}
                 className="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-lg text-sm font-medium transition-colors"
               >
                 Provisionar outra
@@ -145,6 +167,17 @@ export function ProvisionarCamara() {
                 placeholder="Ex: Câmara Municipal de Campinas"
                 value={form.nome}
                 onChange={e => handleNomeChange(e.target.value)}
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm text-gray-400 mb-1.5">E-mail do Administrador (Opcional)</label>
+              <input
+                type="email"
+                className="w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-2.5 text-gray-100 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent placeholder-gray-600"
+                placeholder="Ex: secretaria@camara.leg.br (Deixe em branco para auto-gerar)"
+                value={form.adminEmail}
+                onChange={e => set('adminEmail', e.target.value)}
               />
             </div>
 
@@ -204,11 +237,10 @@ export function ProvisionarCamara() {
                   key={plano.value}
                   type="button"
                   onClick={() => set('plano', plano.value)}
-                  className={`text-left p-4 rounded-xl border transition-all ${
-                    form.plano === plano.value
-                      ? 'border-indigo-500 bg-indigo-600/10 ring-1 ring-indigo-500'
-                      : 'border-gray-700 bg-gray-800 hover:border-gray-600'
-                  }`}
+                  className={`text-left p-4 rounded-xl border transition-all ${form.plano === plano.value
+                    ? 'border-indigo-500 bg-indigo-600/10 ring-1 ring-indigo-500'
+                    : 'border-gray-700 bg-gray-800 hover:border-gray-600'
+                    }`}
                 >
                   <p className="text-white font-semibold text-sm">{plano.label}</p>
                   <p className="text-gray-400 text-xs mt-1">{plano.desc}</p>
@@ -239,8 +271,8 @@ export function ProvisionarCamara() {
               {status === 'loading' ? (
                 <>
                   <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
                   </svg>
                   Provisionando...
                 </>

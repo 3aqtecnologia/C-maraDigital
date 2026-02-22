@@ -45,8 +45,10 @@ npm run dev
 
 ### 👑 Administrador Master (SaaS)
 - Painel exclusivo em `/master` — isolado do backoffice das câmaras
-- **Provisionar nova Câmara:** formulário com nome, município, UF, CNPJ, slug, plano
+- **Provisionar nova Câmara:** formulário com nome, município, UF, CNPJ, slug, plano e e-mail administrativo customizado.
+- **Geração Automática de Credenciais:** o sistema gera automaticamente e-mail padrão e senha forte aleatória no provisionamento, facilitando o primeiro acesso do cliente.
 - **Gestão de Câmaras:** modal administrativo com edição de dados em tempo real, controle dinâmico do Slug Base (subdomínio dinâmico via URL linkável) e controle de Lifecycle do cliente (Status: Ativo, Trial, Suspenso e Cancelado).
+- **Reset de Senha Mestre (Hard Reset):** funcionalidade para resetar remotamente a senha do administrador da câmara em caso de perda total de acesso, com geração de nova credencial provisória e log de auditoria.
 - **Configurações Globais:** edição dinâmica de limites e recursos dos planos de assinatura (Básico, Profissional, Enterprise), segurança com MFA e whitelist IP, e outras permissões.
 - **Representação Autenticada (Impersonation):** função de acessar áreas restritas do tenant via painel Mestre com faixa de alerta para suporte técnico rápido.
 - **Audit Log:** histórico de ações administrativas com filtros
@@ -59,6 +61,10 @@ npm run dev
   - Salvar como rascunho ou protocolar imediatamente (recebe número oficial)
 - **Detalhe da Proposição:** metadados, texto integral e **timeline de tramitação**
   - Transições de status com histórico imutável
+- **Compilação de Leis (LeisGov):** gestão de leis municipais/estaduais vigentes
+  - Cadastro com ementas e texto compilado via TipTap
+  - Listagem com filtros de busca e visualização estilizada tipo "Diário Oficial"
+  - Controle de status (Em Vigor, Revogada Parcial/Total)
 
 ### 🏛️ Módulo Plenário (Tempo Real)
 - **Lista de Sessões** com criação de nova sessão (tipo, data/hora, local, quórum mínimo)
@@ -108,6 +114,9 @@ src/
 │   │   ├── Legislativo.tsx         # Lista de proposições
 │   │   ├── ProposicaoNova.tsx      # Formulário de criação
 │   │   ├── ProposicaoDetalhe.tsx   # Detalhe + timeline de tramitação
+│   │   ├── LeisList.tsx            # Lista de leis compiladas (LeisGov)
+│   │   ├── LeiNova.tsx             # Cadastro de nova lei
+│   │   ├── LeiDetalhe.tsx          # Detalhe estilizado da lei
 │   │   ├── Plenario.tsx            # Lista de sessões + criação
 │   │   └── PlenarioAtivo.tsx       # Painel ao vivo (Realtime)
 │   ├── master/

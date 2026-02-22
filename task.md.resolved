@@ -23,8 +23,10 @@
 - [x] Criar tabela tenant_planos_config com limites por plano (basico/profissional/enterprise)
 - [x] Criar função provisionar_tenant() e view master_tenant_overview
 - [x] Desenvolver MasterDashboard (visão geral de todas as câmaras, planos, situação) com filtro inteligente
-- [x] Desenvolver tela ProvisionarCamara (cadastro de novas câmaras)
+- [x] Desenvolver ProvisionarCamara com Geração Automática de Credenciais (E-mail padrão e senha randômica)
+- [x] Implementar suporte a E-mail Administrativo customizado no provisionamento
 - [x] Desenvolver Gestão de Câmara (Modal para alterar nome, status, URL base dinâmico e plano via banco direto)
+- [x] Desenvolver Sistema de Reset de Senha Mestre (Hard Reset de admin local via painel Master)
 - [x] Desenvolver AuditLog (histórico de ações do master admin)
 - [x] Desenvolver MasterConfiguracoes (edição de planos dinâmicos, IP whitelist e MFA UI)
 - [x] Desenvolver Impersonation System (Representação autenticada master -> tenant bypass)
@@ -41,7 +43,12 @@
 - [x] Desenvolver Protocolo Digital (CRUD de proposições com numeração automática) → `src/pages/backoffice/ProposicaoNova.tsx` + `src/hooks/useProposicoes.ts`
 - [x] Desenvolver Fluxo de Tramitação (Linha do tempo) → `src/pages/backoffice/ProposicaoDetalhe.tsx`
 - [x] Integrar Editor de Texto rico para Redação e Revisão (Tiptap + Tailwind Typography inseridos para Projetos de Leis)
-- [ ] Desenvolver funcionalidade de Compilação de Leis (LeisGov)
+- [x] Desenvolver funcionalidade de Compilação de Leis (LeisGov):
+  - [x] Schema SQL (Enum lei_status, Tabela leis, RLS, Triggers) → `supabase/migrations/004_leis_compiladas.sql`
+  - [x] Hooks React (`useLeis`, `useLeiDetalhe`) → `src/hooks/useLeis.ts`
+  - [x] Interface de Listagem e Busca → `src/pages/backoffice/LeisList.tsx`
+  - [x] Formulário de Cadastro com TipTap → `src/pages/backoffice/LeiNova.tsx`
+  - [x] Visualização de Detalhe tipo Diário Oficial → `src/pages/backoffice/LeiDetalhe.tsx`
 
 ## Fase 5: Módulo de Plenário e Votação
 - [x] Desenvolver Gestão de Pautas (Geração da Ordem do Dia) → `src/pages/backoffice/Plenario.tsx` + tabela `pauta_itens`
@@ -70,7 +77,7 @@
 | Fase 2 — Banco de Dados e Segurança | ✅ Completa | 6/6 |
 | Fase 2.5 — Master Admin (extra) | ✅ Completa | 11/11 |
 | Fase 3 — Autenticação | ✅ Completa | 4/4 |
-| Fase 4 — Módulo Legislativo | 🟡 Em andamento | 3/4 |
+| Fase 4 — Módulo Legislativo | ✅ Completa | 4/4 |
 | Fase 5 — Plenário e Votação | 🟡 Em andamento | 3/4 |
 | Fase 6 — Administrativo e GED | ⬜ Não iniciada | 0/4 |
 | Fase 7 — Portal da Transparência | ⬜ Não iniciada | 0/3 |

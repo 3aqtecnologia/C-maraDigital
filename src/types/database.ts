@@ -42,6 +42,8 @@ export type TenantPlano = 'basico' | 'profissional' | 'enterprise'
 
 export type TenantSituacao = 'ativo' | 'suspenso' | 'trial' | 'cancelado'
 
+export type LeiStatus = 'em_vigor' | 'revogada_parcialmente' | 'revogada_totalmente'
+
 export interface Database {
   public: {
     Tables: {
@@ -235,6 +237,47 @@ export interface Database {
         }
         Relationships: []
       }
+      leis: {
+        Row: {
+          id: string
+          tenant_id: string
+          proposicao_id: string | null
+          numero: string
+          ano: number
+          esfera: string
+          ementa: string
+          texto_compilado: string
+          status: LeiStatus
+          data_publicacao: string
+          tags: string[]
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          tenant_id: string
+          proposicao_id?: string | null
+          numero: string
+          ano: number
+          esfera?: string
+          ementa: string
+          texto_compilado: string
+          status?: LeiStatus
+          data_publicacao: string
+          tags?: string[]
+        }
+        Update: {
+          proposicao_id?: string | null
+          numero?: string
+          ano?: number
+          esfera?: string
+          ementa?: string
+          texto_compilado?: string
+          status?: LeiStatus
+          data_publicacao?: string
+          tags?: string[]
+        }
+        Relationships: []
+      }
       tramitacoes: {
         Row: {
           id: string
@@ -372,8 +415,16 @@ export interface Database {
           p_slug: string
           p_plano?: TenantPlano
           p_max_usuarios?: number
+          p_admin_nome?: string
+          p_admin_email?: string
         }
-        Returns: string
+        Returns: Json
+      }
+      admin_resetar_senha_tenant: {
+        Args: {
+          p_tenant_id: string
+        }
+        Returns: Json
       }
       next_proposicao_numero: {
         Args: {

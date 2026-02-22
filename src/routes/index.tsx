@@ -5,6 +5,9 @@ import { AppLayout } from '@/components/layout/AppLayout'
 import { MasterLayout } from '@/components/master/MasterLayout'
 import { Dashboard } from '@/pages/backoffice/Dashboard'
 import { Legislativo } from '@/pages/backoffice/Legislativo'
+import { LeiDetalhe } from '@/pages/backoffice/LeiDetalhe'
+import { LeiNova } from '@/pages/backoffice/LeiNova'
+import { LeisList } from '@/pages/backoffice/LeisList'
 import { Plenario } from '@/pages/backoffice/Plenario'
 import { PlenarioAtivo } from '@/pages/backoffice/PlenarioAtivo'
 import { PlenarioGerenciar } from '@/pages/backoffice/PlenarioGerenciar'
@@ -72,6 +75,9 @@ export const router = createBrowserRouter([
       { path: 'legislativo', element: <Legislativo /> },
       { path: 'legislativo/nova', element: <ProposicaoNova /> },
       { path: 'legislativo/:id', element: <ProposicaoDetalhe /> },
+      { path: 'leis', element: <LeisList /> },
+      { path: 'leis/nova', element: <LeiNova /> },
+      { path: 'leis/:id', element: <LeiDetalhe /> },
       { path: 'plenario', element: <Plenario /> },
       { path: 'plenario/:id/gerenciar', element: <PlenarioGerenciar /> },
       { path: 'plenario/:id', element: <PlenarioAtivo /> },
