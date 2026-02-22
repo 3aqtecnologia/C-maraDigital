@@ -55,6 +55,7 @@ npm run dev
 ### 📋 Módulo Legislativo
 - **Lista de Proposições** com filtros por status e busca por número/ementa/tipo
 - **Nova Proposição:** seleção de tipo (PL, PLC, PR, REQ, IND, MOC, VP), ementa e texto integral
+  - Editor Rico (TipTap) embutido nativamente para formatação profissional de Diário Oficial
   - Salvar como rascunho ou protocolar imediatamente (recebe número oficial)
 - **Detalhe da Proposição:** metadados, texto integral e **timeline de tramitação**
   - Transições de status com histórico imutável
@@ -79,7 +80,7 @@ npm run dev
 | Camada | Tecnologia |
 |--------|-----------|
 | Frontend | React 19 + Vite + TypeScript |
-| Estilo | TailwindCSS v3 (tema customizado) |
+| UI e Texto Rico | TailwindCSS, Tailwind Typography, TipTap |
 | Roteamento | React Router v7 |
 | Ícones | Lucide React |
 | Backend (BaaS) | Supabase (PostgreSQL, Auth, Realtime, Storage) |
