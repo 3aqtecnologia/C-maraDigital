@@ -156,7 +156,10 @@ export function LeiDetalhe() {
                   <Globe size={14} className="text-gray-400" /> Abertura Pública
                 </h3>
 
-                <button className="btn-secondary w-full text-xs justify-center flex items-center gap-2 py-2">
+                <button
+                  onClick={() => window.open(`/transparencia/lei/${lei.id}`, '_blank')}
+                  className="btn-secondary w-full text-xs justify-center flex items-center gap-2 py-2"
+                >
                   <FileText size={14} /> Link do Cidadão
                 </button>
               </div>

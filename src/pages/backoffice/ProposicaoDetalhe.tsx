@@ -11,6 +11,7 @@ import {
   Download,
   Edit3,
   FileText,
+  Globe,
   Send,
   XCircle
 } from 'lucide-react'
@@ -310,6 +311,20 @@ export function ProposicaoDetalhe() {
                 <p className="text-xs text-gray-500 mt-1">Processo encerrado</p>
               </div>
             )}
+
+            {/* Ações Visão Público */}
+            <div className="card space-y-3 bg-white">
+              <h3 className="text-sm font-semibold text-gray-900 border-b border-gray-100 pb-2 mb-3 flex items-center gap-2">
+                <Globe size={14} className="text-gray-400" /> Transparência
+              </h3>
+
+              <button
+                onClick={() => window.open(`/transparencia/proposicao/${proposicao.id}`, '_blank')}
+                className="btn-secondary w-full text-xs justify-center flex items-center gap-2 py-2"
+              >
+                <FileText size={14} /> Visualizar como Cidadão
+              </button>
+            </div>
 
             {/* Info */}
             <div className="card text-xs text-gray-400 space-y-1">

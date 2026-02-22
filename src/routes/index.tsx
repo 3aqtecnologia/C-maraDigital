@@ -13,12 +13,17 @@ import { PlenarioAtivo } from '@/pages/backoffice/PlenarioAtivo'
 import { PlenarioGerenciar } from '@/pages/backoffice/PlenarioGerenciar'
 import { ProposicaoDetalhe } from '@/pages/backoffice/ProposicaoDetalhe'
 import { ProposicaoNova } from '@/pages/backoffice/ProposicaoNova'
+import { Usuarios } from '@/pages/backoffice/Usuarios'
+import { Configuracoes } from '@/pages/backoffice/Configuracoes'
+import { Documentos } from '@/pages/backoffice/Documentos'
 import { AuditLog } from '@/pages/master/AuditLog'
 import { CamarasList } from '@/pages/master/CamarasList'
 import { MasterConfiguracoes } from '@/pages/master/MasterConfiguracoes'
 import { MasterDashboard } from '@/pages/master/MasterDashboard'
 import { ProvisionarCamara } from '@/pages/master/ProvisionarCamara'
+import { LeiPublicaDetalhe } from '@/pages/transparencia/LeiPublicaDetalhe'
 import { PortalPublico } from '@/pages/transparencia/PortalPublico'
+import { ProposicaoPublicaDetalhe } from '@/pages/transparencia/ProposicaoPublicaDetalhe'
 import { createBrowserRouter, Navigate } from 'react-router-dom'
 import { AuthGuard } from './AuthGuard'
 import { MasterGuard } from './MasterGuard'
@@ -43,6 +48,14 @@ export const router = createBrowserRouter([
   {
     path: '/transparencia',
     element: <PortalPublico />,
+  },
+  {
+    path: '/transparencia/proposicao/:id',
+    element: <ProposicaoPublicaDetalhe />,
+  },
+  {
+    path: '/transparencia/lei/:id',
+    element: <LeiPublicaDetalhe />,
   },
 
   // ── Master Admin ────────────────────────────────────────────
@@ -81,6 +94,9 @@ export const router = createBrowserRouter([
       { path: 'plenario', element: <Plenario /> },
       { path: 'plenario/:id/gerenciar', element: <PlenarioGerenciar /> },
       { path: 'plenario/:id', element: <PlenarioAtivo /> },
+      { path: 'documentos',   element: <Documentos /> },
+      { path: 'usuarios',     element: <Usuarios /> },
+      { path: 'configuracoes', element: <Configuracoes /> },
     ],
   },
 ])
