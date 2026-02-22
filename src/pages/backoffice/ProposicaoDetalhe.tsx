@@ -1,25 +1,33 @@
-import { useState } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
-import {
-  ArrowLeft, FileText, Clock, CheckCircle2, XCircle,
-  ChevronRight, Send, AlertCircle, Edit3, Download
-} from 'lucide-react'
 import { PageHeader } from '@/components/layout/PageHeader'
-import { useProposicaoDetalhe, useProposicoes } from '@/hooks/useProposicoes'
 import { useAuth } from '@/hooks/useAuth'
+import { useProposicaoDetalhe, useProposicoes } from '@/hooks/useProposicoes'
 import type { ProposicaoStatus } from '@/types/database'
+import {
+  AlertCircle,
+  ArrowLeft,
+  CheckCircle2,
+  ChevronRight,
+  Clock,
+  Download,
+  Edit3,
+  FileText,
+  Send,
+  XCircle
+} from 'lucide-react'
+import { useState } from 'react'
+import { useNavigate, useParams } from 'react-router-dom'
 
 const STATUS_CONFIG: Record<ProposicaoStatus, { label: string; color: string; bg: string }> = {
-  rascunho:      { label: 'Rascunho',       color: 'text-gray-600',   bg: 'bg-gray-100' },
-  protocolado:   { label: 'Protocolado',    color: 'text-blue-700',   bg: 'bg-blue-100' },
-  em_tramitacao: { label: 'Em Tramitação',  color: 'text-yellow-700', bg: 'bg-yellow-100' },
-  em_comissao:   { label: 'Em Comissão',    color: 'text-orange-700', bg: 'bg-orange-100' },
-  em_votacao:    { label: 'Em Votação',     color: 'text-purple-700', bg: 'bg-purple-100' },
-  aprovado:      { label: 'Aprovado',       color: 'text-green-700',  bg: 'bg-green-100' },
-  rejeitado:     { label: 'Rejeitado',      color: 'text-red-700',    bg: 'bg-red-100' },
-  arquivado:     { label: 'Arquivado',      color: 'text-gray-500',   bg: 'bg-gray-100' },
-  sancionado:    { label: 'Sancionado',     color: 'text-emerald-700',bg: 'bg-emerald-100' },
-  vetado:        { label: 'Vetado',         color: 'text-red-600',    bg: 'bg-red-100' },
+  rascunho: { label: 'Rascunho', color: 'text-gray-600', bg: 'bg-gray-100' },
+  protocolado: { label: 'Protocolado', color: 'text-blue-700', bg: 'bg-blue-100' },
+  em_tramitacao: { label: 'Em Tramitação', color: 'text-yellow-700', bg: 'bg-yellow-100' },
+  em_comissao: { label: 'Em Comissão', color: 'text-orange-700', bg: 'bg-orange-100' },
+  em_votacao: { label: 'Em Votação', color: 'text-purple-700', bg: 'bg-purple-100' },
+  aprovado: { label: 'Aprovado', color: 'text-green-700', bg: 'bg-green-100' },
+  rejeitado: { label: 'Rejeitado', color: 'text-red-700', bg: 'bg-red-100' },
+  arquivado: { label: 'Arquivado', color: 'text-gray-500', bg: 'bg-gray-100' },
+  sancionado: { label: 'Sancionado', color: 'text-emerald-700', bg: 'bg-emerald-100' },
+  vetado: { label: 'Vetado', color: 'text-red-600', bg: 'bg-red-100' },
 }
 
 const TIPO_SIGLAS: Record<string, string> = {
@@ -28,23 +36,23 @@ const TIPO_SIGLAS: Record<string, string> = {
 }
 
 const TRANSICOES: Partial<Record<ProposicaoStatus, { status: ProposicaoStatus; label: string; color: string }[]>> = {
-  rascunho:      [{ status: 'protocolado',   label: 'Protocolar',        color: 'bg-blue-600 hover:bg-blue-700 text-white' }],
-  protocolado:   [{ status: 'em_tramitacao', label: 'Iniciar Tramitação', color: 'bg-yellow-500 hover:bg-yellow-600 text-white' }],
+  rascunho: [{ status: 'protocolado', label: 'Protocolar', color: 'bg-blue-600 hover:bg-blue-700 text-white' }],
+  protocolado: [{ status: 'em_tramitacao', label: 'Iniciar Tramitação', color: 'bg-yellow-500 hover:bg-yellow-600 text-white' }],
   em_tramitacao: [
-    { status: 'em_comissao',  label: 'Enviar à Comissão',  color: 'bg-orange-500 hover:bg-orange-600 text-white' },
-    { status: 'em_votacao',   label: 'Colocar em Votação', color: 'bg-purple-600 hover:bg-purple-700 text-white' },
-    { status: 'arquivado',    label: 'Arquivar',            color: 'bg-gray-500 hover:bg-gray-600 text-white' },
+    { status: 'em_comissao', label: 'Enviar à Comissão', color: 'bg-orange-500 hover:bg-orange-600 text-white' },
+    { status: 'em_votacao', label: 'Colocar em Votação', color: 'bg-purple-600 hover:bg-purple-700 text-white' },
+    { status: 'arquivado', label: 'Arquivar', color: 'bg-gray-500 hover:bg-gray-600 text-white' },
   ],
-  em_comissao:   [
-    { status: 'em_votacao',   label: 'Colocar em Votação', color: 'bg-purple-600 hover:bg-purple-700 text-white' },
-    { status: 'arquivado',    label: 'Arquivar',            color: 'bg-gray-500 hover:bg-gray-600 text-white' },
+  em_comissao: [
+    { status: 'em_votacao', label: 'Colocar em Votação', color: 'bg-purple-600 hover:bg-purple-700 text-white' },
+    { status: 'arquivado', label: 'Arquivar', color: 'bg-gray-500 hover:bg-gray-600 text-white' },
   ],
-  em_votacao:    [
-    { status: 'aprovado',     label: 'Aprovar',             color: 'bg-green-600 hover:bg-green-700 text-white' },
-    { status: 'rejeitado',    label: 'Rejeitar',            color: 'bg-red-600 hover:bg-red-700 text-white' },
+  em_votacao: [
+    { status: 'aprovado', label: 'Aprovar', color: 'bg-green-600 hover:bg-green-700 text-white' },
+    { status: 'rejeitado', label: 'Rejeitar', color: 'bg-red-600 hover:bg-red-700 text-white' },
   ],
-  aprovado:      [{ status: 'sancionado', label: 'Sancionar', color: 'bg-emerald-600 hover:bg-emerald-700 text-white' },
-                  { status: 'vetado',     label: 'Vetar',     color: 'bg-red-500 hover:bg-red-600 text-white' }],
+  aprovado: [{ status: 'sancionado', label: 'Sancionar', color: 'bg-emerald-600 hover:bg-emerald-700 text-white' },
+  { status: 'vetado', label: 'Vetar', color: 'bg-red-500 hover:bg-red-600 text-white' }],
 }
 
 export function ProposicaoDetalhe() {
@@ -186,9 +194,10 @@ export function ProposicaoDetalhe() {
             {proposicao.texto_integral && (
               <div className="card">
                 <h2 className="font-semibold text-gray-900 mb-4">Texto Integral</h2>
-                <pre className="whitespace-pre-wrap text-sm text-gray-700 font-sans leading-relaxed bg-gray-50 rounded-lg p-4 max-h-80 overflow-auto">
-                  {proposicao.texto_integral}
-                </pre>
+                <div
+                  className="prose prose-sm xl:prose-base max-w-none text-gray-800 bg-white rounded-lg p-8 max-h-[600px] overflow-auto shadow-inner border border-gray-200"
+                  dangerouslySetInnerHTML={{ __html: proposicao.texto_integral }}
+                />
               </div>
             )}
 
@@ -277,12 +286,12 @@ export function ProposicaoDetalhe() {
                     >
                       {transitioning ? (
                         <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
                         </svg>
                       ) : acao.status === 'aprovado' ? <CheckCircle2 size={14} />
                         : acao.status === 'rejeitado' ? <XCircle size={14} />
-                        : <ChevronRight size={14} />}
+                          : <ChevronRight size={14} />}
                       {acao.label}
                     </button>
                   ))}
@@ -291,11 +300,11 @@ export function ProposicaoDetalhe() {
             )}
 
             {/* Status final */}
-            {['aprovado','rejeitado','arquivado','sancionado','vetado'].includes(proposicao.status) && (
+            {['aprovado', 'rejeitado', 'arquivado', 'sancionado', 'vetado'].includes(proposicao.status) && (
               <div className={`card text-center py-6 ${cfg.bg}`}>
                 <div className={`text-4xl mb-2 ${cfg.color}`}>
-                  {['aprovado','sancionado'].includes(proposicao.status) ? '✓'
-                    : ['rejeitado','vetado'].includes(proposicao.status) ? '✗' : '○'}
+                  {['aprovado', 'sancionado'].includes(proposicao.status) ? '✓'
+                    : ['rejeitado', 'vetado'].includes(proposicao.status) ? '✗' : '○'}
                 </div>
                 <p className={`font-bold ${cfg.color}`}>{cfg.label}</p>
                 <p className="text-xs text-gray-500 mt-1">Processo encerrado</p>

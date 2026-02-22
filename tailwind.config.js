@@ -8,7 +8,7 @@ export default {
     extend: {
       colors: {
         primary: {
-          50:  '#eef3fa',
+          50: '#eef3fa',
           100: '#d5e4f5',
           200: '#adc8eb',
           300: '#80aada',
@@ -30,5 +30,7 @@ export default {
       },
     },
   },
-  plugins: [],
+  plugins: [
+    require('@tailwindcss/typography'),
+  ],
 }

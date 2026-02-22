@@ -1,18 +1,19 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { ArrowLeft, Save, Send, AlertCircle } from 'lucide-react'
 import { PageHeader } from '@/components/layout/PageHeader'
+import { RichTextEditor } from '@/components/ui/RichTextEditor'
 import { useProposicoes } from '@/hooks/useProposicoes'
 import type { ProposicaoTipo } from '@/types/database'
+import { AlertCircle, ArrowLeft, Save, Send } from 'lucide-react'
+import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 
 const TIPOS: { value: ProposicaoTipo; label: string; desc: string }[] = [
-  { value: 'projeto_lei',             label: 'Projeto de Lei (PL)',           desc: 'Proposta de criação, alteração ou revogação de lei municipal' },
-  { value: 'projeto_lei_complementar',label: 'Proj. Lei Complementar (PLC)', desc: 'Complementa a Lei Orgânica ou outras leis fundamentais' },
-  { value: 'projeto_resolucao',       label: 'Projeto de Resolução (PR)',     desc: 'Disciplina assuntos internos da Câmara' },
-  { value: 'requerimento',            label: 'Requerimento (REQ)',            desc: 'Solicita informações, providências ou manifestações' },
-  { value: 'indicacao',               label: 'Indicação (IND)',               desc: 'Sugere ao Executivo adoção de providências' },
-  { value: 'moca_aplausos',           label: 'Moção de Aplausos (MOC)',       desc: 'Homenagem ou reconhecimento público' },
-  { value: 'voto_pesar',              label: 'Voto de Pesar (VP)',            desc: 'Manifestação de condolências' },
+  { value: 'projeto_lei', label: 'Projeto de Lei (PL)', desc: 'Proposta de criação, alteração ou revogação de lei municipal' },
+  { value: 'projeto_lei_complementar', label: 'Proj. Lei Complementar (PLC)', desc: 'Complementa a Lei Orgânica ou outras leis fundamentais' },
+  { value: 'projeto_resolucao', label: 'Projeto de Resolução (PR)', desc: 'Disciplina assuntos internos da Câmara' },
+  { value: 'requerimento', label: 'Requerimento (REQ)', desc: 'Solicita informações, providências ou manifestações' },
+  { value: 'indicacao', label: 'Indicação (IND)', desc: 'Sugere ao Executivo adoção de providências' },
+  { value: 'moca_aplausos', label: 'Moção de Aplausos (MOC)', desc: 'Homenagem ou reconhecimento público' },
+  { value: 'voto_pesar', label: 'Voto de Pesar (VP)', desc: 'Manifestação de condolências' },
 ]
 
 export function ProposicaoNova() {
@@ -75,11 +76,10 @@ export function ProposicaoNova() {
                   key={t.value}
                   type="button"
                   onClick={() => setTipo(t.value)}
-                  className={`text-left p-3 rounded-lg border transition-all ${
-                    tipo === t.value
+                  className={`text-left p-3 rounded-lg border transition-all ${tipo === t.value
                       ? 'border-primary-500 bg-primary-50 ring-1 ring-primary-400'
                       : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
-                  }`}
+                    }`}
                 >
                   <p className={`font-semibold text-sm ${tipo === t.value ? 'text-primary-700' : 'text-gray-800'}`}>
                     {t.label}
@@ -112,16 +112,13 @@ export function ProposicaoNova() {
                 Texto Integral
                 <span className="text-gray-400 font-normal ml-1">(opcional)</span>
               </label>
-              <textarea
-                rows={12}
-                className="input resize-y font-mono text-xs leading-relaxed"
-                placeholder={`CÂMARA MUNICIPAL DE ___________\n\n${tipoSelecionado?.label?.toUpperCase() ?? 'PROJETO'} Nº ___/2025\n\nAutor: ___________\n\nDispõe sobre...\n\nA Câmara Municipal de ___________,\n\nAprova:\n\nArt. 1º ...\n\nArt. 2º Esta lei entra em vigor na data de sua publicação.\n\n_______________, ___ de _______ de 2025.\n\n___________________________`}
-                value={texto}
-                onChange={e => setTexto(e.target.value)}
-              />
-              <p className="text-xs text-gray-400 mt-1">
-                Utilize formatação simples. Suporte a editor rico será adicionado em breve.
-              </p>
+              <div className="border border-gray-200 rounded-lg shadow-sm focus-within:ring-2 focus-within:ring-primary-500 focus-within:border-primary-500 transition-all">
+                <RichTextEditor
+                  content={texto}
+                  onChange={setTexto}
+                  placeholder={`CÂMARA MUNICIPAL DE ___________\n\n${tipoSelecionado?.label?.toUpperCase() ?? 'PROJETO'} Nº ___/2025\n\nAutor: ___________\n\nDispõe sobre...\n\nA Câmara Municipal de ___________,\n\nAprova:\n\nArt. 1º ...\n\nArt. 2º Esta lei entra em vigor na data de sua publicação.\n\n_______________, ___ de _______ de 2025.\n\n___________________________`}
+                />
+              </div>
             </div>
           </section>
 
@@ -152,8 +149,8 @@ export function ProposicaoNova() {
             >
               {saving ? (
                 <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
                 </svg>
               ) : <Send size={15} />}
               Protocolar

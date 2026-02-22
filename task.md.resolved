@@ -40,7 +40,7 @@
 ## Fase 4: Módulo Legislativo (Processo Eletrônico)
 - [x] Desenvolver Protocolo Digital (CRUD de proposições com numeração automática) → `src/pages/backoffice/ProposicaoNova.tsx` + `src/hooks/useProposicoes.ts`
 - [x] Desenvolver Fluxo de Tramitação (Linha do tempo) → `src/pages/backoffice/ProposicaoDetalhe.tsx`
-- [ ] Integrar Editor de Texto rico para Redação e Revisão (atualmente usa `<textarea>` simples)
+- [x] Integrar Editor de Texto rico para Redação e Revisão (Tiptap + Tailwind Typography inseridos para Projetos de Leis)
 - [ ] Desenvolver funcionalidade de Compilação de Leis (LeisGov)
 
 ## Fase 5: Módulo de Plenário e Votação
@@ -70,12 +70,11 @@
 | Fase 2 — Banco de Dados e Segurança | ✅ Completa | 6/6 |
 | Fase 2.5 — Master Admin (extra) | ✅ Completa | 11/11 |
 | Fase 3 — Autenticação | ✅ Completa | 4/4 |
-| Fase 4 — Módulo Legislativo | 🟡 Em andamento | 2/4 |
+| Fase 4 — Módulo Legislativo | 🟡 Em andamento | 3/4 |
 | Fase 5 — Plenário e Votação | 🟡 Em andamento | 3/4 |
 | Fase 6 — Administrativo e GED | ⬜ Não iniciada | 0/4 |
 | Fase 7 — Portal da Transparência | ⬜ Não iniciada | 0/3 |
 
 **Próximos passos prioritários:**
-1. Fase 4 — Integrar editor de texto rico (ex: TipTap ou Quill)
-2. Fase 5 — Adicionar UI de link de transmissão ao vivo no PlenarioAtivo
-3. Fase 7 — Expandir PortalPublico com dados reais (proposições, sessões)
+1. Fase 5 — Adicionar UI de link de transmissão ao vivo no PlenarioAtivo
+2. Fase 7 — Expandir PortalPublico com dados reais (proposições, sessões)
