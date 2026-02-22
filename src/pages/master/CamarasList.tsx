@@ -1,7 +1,7 @@
 import { useAuth } from '@/hooks/useAuth'
 import { supabase } from '@/lib/supabase'
 import type { Database, TenantSituacao } from '@/types/database'
-import { Building2, ExternalLink, KeyRound, MoreVertical, Save, Search, Settings, ShieldCheck, X } from 'lucide-react'
+import { AlertTriangle, Building2, ExternalLink, KeyRound, MoreVertical, Save, Search, Settings, ShieldCheck, Trash2, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 
@@ -28,10 +28,36 @@ export function CamarasList() {
   const [resettingPassword, setResettingPassword] = useState(false)
   const [newCredentials, setNewCredentials] = useState<{ admin_email: string, admin_password: string } | null>(null)
 
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [deleteConfirmText, setDeleteConfirmText] = useState('')
+  const [deleting, setDeleting] = useState(false)
+
   function openEdit(c: TenantOverview) {
     setEditingCamara(c)
     setEditForm({ ...c })
     setNewCredentials(null)
+    setShowDeleteConfirm(false)
+    setDeleteConfirmText('')
+  }
+
+  async function handleDeleteTenant() {
+    if (!editingCamara) return
+    setDeleting(true)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data, error } = await (supabase.rpc as any)('admin_deletar_tenant', {
+      p_tenant_id: editingCamara.id,
+    })
+    setDeleting(false)
+    if (error) {
+      alert('Erro ao deletar: ' + error.message)
+    } else {
+      const resultado = data as { nome_tenant: string; usuarios_removidos: number }
+      setCamaras(prev => prev.filter(c => c.id !== editingCamara.id))
+      setEditingCamara(null)
+      setShowDeleteConfirm(false)
+      setDeleteConfirmText('')
+      alert(`Câmara "${resultado.nome_tenant}" deletada permanentemente. ${resultado.usuarios_removidos} usuário(s) removido(s).`)
+    }
   }
 
   async function handleResetPassword() {
@@ -302,7 +328,7 @@ export function CamarasList() {
                 </div>
               </div>
 
-              {/* Botão Reset de Senha */}
+              {/* Reset de Senha */}
               <div className="space-y-4">
                 <h4 className="text-sm font-semibold text-red-400 uppercase tracking-wide border-b border-gray-800 pb-2 flex items-center gap-2">
                   <KeyRound size={16} />
@@ -355,6 +381,82 @@ export function CamarasList() {
                     </div>
                   )}
                 </div>
+              </div>
+
+              {/* Zona de Perigo — Deletar Tenant */}
+              <div className="space-y-4">
+                <h4 className="text-sm font-semibold text-red-500 uppercase tracking-wide border-b border-red-900/40 pb-2 flex items-center gap-2">
+                  <Trash2 size={16} />
+                  Zona de Perigo
+                </h4>
+
+                {!showDeleteConfirm ? (
+                  <div className="bg-red-950/30 border border-red-800/40 rounded-lg p-5 flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+                    <div>
+                      <p className="font-semibold text-red-300 text-sm mb-1">Deletar esta câmara permanentemente</p>
+                      <p className="text-xs text-gray-400 leading-relaxed">
+                        Remove o tenant, todos os usuários, proposições, sessões, leis e demais
+                        registros. Esta ação é <span className="text-red-400 font-semibold">irreversível</span> e
+                        não pode ser desfeita.
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setShowDeleteConfirm(true)}
+                      className="flex-shrink-0 flex items-center gap-2 bg-red-900/50 hover:bg-red-800/60 border border-red-700/50 text-red-300 hover:text-red-200 font-medium text-xs px-4 py-2 rounded-lg transition-colors"
+                    >
+                      <Trash2 size={14} />
+                      Deletar Câmara
+                    </button>
+                  </div>
+                ) : (
+                  <div className="bg-red-950/50 border border-red-700/60 rounded-lg p-5 space-y-4">
+                    <div className="flex items-start gap-3">
+                      <AlertTriangle size={18} className="text-red-400 flex-shrink-0 mt-0.5" />
+                      <div>
+                        <p className="text-red-300 font-semibold text-sm">Confirme a exclusão permanente</p>
+                        <p className="text-xs text-gray-400 mt-1 leading-relaxed">
+                          Todos os dados desta câmara serão destruídos imediatamente. Para confirmar,
+                          digite o nome exato da câmara abaixo:
+                        </p>
+                        <p className="text-xs text-red-300 font-mono mt-2 select-all bg-black/30 px-2 py-1 rounded inline-block">
+                          {editingCamara.nome}
+                        </p>
+                      </div>
+                    </div>
+
+                    <input
+                      type="text"
+                      autoFocus
+                      placeholder={`Digite: ${editingCamara.nome}`}
+                      value={deleteConfirmText}
+                      onChange={e => setDeleteConfirmText(e.target.value)}
+                      className="w-full bg-black/40 border border-red-700/50 rounded-lg px-3 py-2 text-sm text-red-200 placeholder-red-900 focus:outline-none focus:ring-1 focus:ring-red-600"
+                    />
+
+                    <div className="flex gap-3">
+                      <button
+                        type="button"
+                        onClick={() => { setShowDeleteConfirm(false); setDeleteConfirmText('') }}
+                        className="flex-1 px-4 py-2 text-sm text-gray-400 hover:text-gray-200 border border-gray-700 rounded-lg transition-colors"
+                      >
+                        Cancelar
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleDeleteTenant}
+                        disabled={deleteConfirmText !== editingCamara.nome || deleting}
+                        className="flex-1 flex items-center justify-center gap-2 bg-red-700 hover:bg-red-600 disabled:opacity-40 disabled:cursor-not-allowed text-white font-semibold text-xs px-4 py-2 rounded-lg transition-colors"
+                      >
+                        {deleting ? (
+                          <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                        ) : (
+                          <><Trash2 size={14} /> Confirmar Exclusão</>
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
 
             </div>

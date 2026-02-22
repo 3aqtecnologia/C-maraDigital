@@ -1,5 +1,5 @@
 import { supabase } from '@/lib/supabase'
-import { useState, type FormEvent } from 'react'
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 
 export function ForgotPasswordPage() {
@@ -8,18 +8,16 @@ export function ForgotPasswordPage() {
   const [success, setSuccess] = useState(false)
   const [loading, setLoading] = useState(false)
 
-  async function handleSubmit(e: FormEvent) {
+  async function handleSubmit(e: React.SyntheticEvent) {
     e.preventDefault()
     setError(null)
     setSuccess(false)
     setLoading(true)
 
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.protocol}//${window.location.host}/reset-password`,
-    })
+    const { error } = await supabase.auth.resetPasswordForEmail(email)
 
     if (error) {
-      setError('Ocorreu um erro ao tentar recuperar sua senha. ' + error.message)
+      setError('Erro ao enviar e-mail: ' + error.message)
     } else {
       setSuccess(true)
     }

@@ -37,7 +37,7 @@
 - [x] Desenvolver tela de Login (Administrador e Servidor) → `src/components/auth/LoginPage.tsx`
 - [x] Conectar tela de Login com Supabase Auth
 - [x] Criar Context/Hook React para gerenciamento da sessão do Usuário logado → `src/hooks/useAuth.ts`
-- [x] Implementar rota de recuperação de senha (Forgot Password)
+- [x] Implementar rota de recuperação de senha (Forgot Password) + redefinição (ResetPassword)
 
 ## Fase 4: Módulo Legislativo (Processo Eletrônico)
 - [x] Desenvolver Protocolo Digital (CRUD de proposições com numeração automática) → `src/pages/backoffice/ProposicaoNova.tsx` + `src/hooks/useProposicoes.ts`
@@ -52,18 +52,32 @@
 
 ## Fase 5: Módulo de Plenário e Votação
 - [x] Desenvolver Gestão de Pautas (Geração da Ordem do Dia) → `src/pages/backoffice/Plenario.tsx` + tabela `pauta_itens`
+- [x] Desenvolver página dedicada de Gestão de Pauta pré-sessão (adicionar/remover/reordenar itens) → `src/pages/backoffice/PlenarioGerenciar.tsx` + `src/hooks/usePautaItens.ts`
 - [x] Desenvolver Painel Eletrônico (Quórum, oradores, resultados em tempo real) → `src/pages/backoffice/PlenarioAtivo.tsx` com Realtime subscriptions
 - [x] Desenvolver Interface de Votação Eletrônica (SIM/NÃO/ABSTENÇÃO com votos imutáveis via trigger) → `src/pages/backoffice/PlenarioAtivo.tsx`
-- [ ] Implementar visualização/links de Transmissão Audiovisual (campo `transmissao_url` existe no schema, falta UI dedicada)
+- [x] Implementar Transmissão Audiovisual (campo `transmissao_url`, link clicável e player embutido no PlenarioAtivo)
+
+## Fase 5.5: Módulos de Suporte ao Backoffice (Adicional)
+> Módulos transversais adicionados para completar o backoffice do tenant.
+- [x] Dashboard com dados reais (queries paralelas via `Promise.all`) → `src/hooks/useDashboard.ts` + `src/pages/backoffice/Dashboard.tsx`
+  - Estatísticas: proposições em tramitação, sessões no mês, vereadores ativos, leis aprovadas
+  - Proposições recentes clicáveis e card do plenário com badge "Ao Vivo"
+- [x] Gestão de Usuários (lista com busca/filtro, toggle ativo/inativo, alterar perfil, convidar usuário) → `src/pages/backoffice/Usuarios.tsx`
+- [x] Configurações do Tenant (nome, município, UF, CNPJ, cor primária com preview ao vivo) → `src/pages/backoffice/Configuracoes.tsx`
 
 ## Fase 6: Módulo Administrativo e GED
+- [x] Criar fundação do módulo GED com scaffold visual e prévia das funcionalidades → `src/pages/backoffice/Documentos.tsx`
 - [ ] Implementar API/Integração para Assinatura Digital (ICP-Brasil via API de terceiros ou Gov.br)
 - [ ] Implementar Verificador de Autenticidade (QR Code em PDFs)
 - [ ] Desenvolver registro de Teletrabalho e produtividade
 - [ ] Desenvolver módulo de Protocolo Externo
 
 ## Fase 7: Portal da Transparência
-- [ ] Desenvolver visualização pública sincronizada (componente `PortalPublico.tsx` criado mas apenas scaffolded)
+- [x] Desenvolver visualização pública sincronizada com dados reais (proposições, leis, sessões) → `src/pages/transparencia/PortalPublico.tsx` + `src/hooks/useTransparencia.ts`
+- [x] Desenvolver páginas de detalhe público:
+  - [x] Proposição pública → `src/pages/transparencia/ProposicaoPublicaDetalhe.tsx`
+  - [x] Lei pública → `src/pages/transparencia/LeiPublicaDetalhe.tsx`
+- [x] Criar migration de views e políticas para dados públicos → `supabase/migrations/008_public_transparency.sql`
 - [ ] Desenvolver Ouvidoria e e-SIC (Sistema de tickets)
 - [ ] Desenvolver Exportação em Dados Abertos (CSV, JSON)
 
@@ -75,13 +89,16 @@
 |------|--------|-----------|
 | Fase 1 — Setup e Infraestrutura | ✅ Completa | 7/7 |
 | Fase 2 — Banco de Dados e Segurança | ✅ Completa | 6/6 |
-| Fase 2.5 — Master Admin (extra) | ✅ Completa | 11/11 |
+| Fase 2.5 — Master Admin (extra) | ✅ Completa | 13/13 |
 | Fase 3 — Autenticação | ✅ Completa | 4/4 |
-| Fase 4 — Módulo Legislativo | ✅ Completa | 4/4 |
-| Fase 5 — Plenário e Votação | 🟡 Em andamento | 3/4 |
-| Fase 6 — Administrativo e GED | ⬜ Não iniciada | 0/4 |
-| Fase 7 — Portal da Transparência | ⬜ Não iniciada | 0/3 |
+| Fase 4 — Módulo Legislativo | ✅ Completa | 9/9 |
+| Fase 5 — Plenário e Votação | ✅ Completa | 5/5 |
+| Fase 5.5 — Módulos de Suporte (extra) | ✅ Completa | 3/3 |
+| Fase 6 — Administrativo e GED | 🟡 Em andamento | 1/5 |
+| Fase 7 — Portal da Transparência | 🟡 Em andamento | 4/6 |
 
 **Próximos passos prioritários:**
-1. Fase 5 — Adicionar UI de link de transmissão ao vivo no PlenarioAtivo
-2. Fase 7 — Expandir PortalPublico com dados reais (proposições, sessões)
+1. Fase 7 — Desenvolver Ouvidoria / e-SIC (sistema de tickets para cidadãos)
+2. Fase 7 — Exportação em Dados Abertos (CSV, JSON) no portal público
+3. Fase 6 — Integração de Assinatura Digital ICP-Brasil (GED completo)
+4. Técnico — Implementar code-splitting (`manualChunks`) para reduzir bundle (~1 MB atualmente)

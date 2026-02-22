@@ -1,5 +1,5 @@
 import { supabase } from '@/lib/supabase'
-import { useState, type FormEvent } from 'react'
+import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 
 export function ResetPasswordPage() {
@@ -13,7 +13,7 @@ export function ResetPasswordPage() {
   // O Supabase Auth vai automaticamente pegar o token da URL e setar a sessão.
   // Assim a gente consegue chamar o ".updateUser" logo em seguida.
 
-  async function handleSubmit(e: FormEvent) {
+  async function handleSubmit(e: React.SyntheticEvent) {
     e.preventDefault()
     setError(null)
 
