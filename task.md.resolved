@@ -38,6 +38,8 @@
 - [x] Conectar tela de Login com Supabase Auth
 - [x] Criar Context/Hook React para gerenciamento da sessão do Usuário logado → `src/hooks/useAuth.ts`
 - [x] Implementar rota de recuperação de senha (Forgot Password) + redefinição (ResetPassword)
+- [x] Implementar Fluxo de Troca de Senha Obrigatória no primeiro acesso ou após reset → `src/hooks/useAuth.ts` + `src/routes/AuthGuard.tsx`
+- [x] Corrigir erros de banco (PostgREST cache) e polices no Supabase Storage para bucket `documentos`
 
 ## Fase 4: Módulo Legislativo (Processo Eletrônico)
 - [x] Desenvolver Protocolo Digital (CRUD de proposições com numeração automática) → `src/pages/backoffice/ProposicaoNova.tsx` + `src/hooks/useProposicoes.ts`
@@ -67,10 +69,12 @@
 
 ## Fase 6: Módulo Administrativo e GED
 - [x] Criar fundação do módulo GED com scaffold visual e prévia das funcionalidades → `src/pages/backoffice/Documentos.tsx`
+- [x] Implementar GED real com upload (Supabase Storage), listagem, busca por tipo e download → `src/hooks/useDocumentos.ts` + `Documentos.tsx` reescrito
+- [x] Desenvolver registro de Teletrabalho (jornada, aprovação de gestor) → `src/hooks/useTeletrabalho.ts` + `src/pages/backoffice/Teletrabalho.tsx`
+- [x] Desenvolver módulo de Protocolo Externo (entrada/saída, rastreamento de status) → `src/hooks/useProtocolos.ts` + `src/pages/backoffice/Protocolos.tsx`
+- [x] Criar migration SQL com Storage bucket, RLS, tabelas e função `next_protocolo_numero` → `supabase/migrations/012_fase6_ged_teletrabalho_protocolo.sql`
 - [ ] Implementar API/Integração para Assinatura Digital (ICP-Brasil via API de terceiros ou Gov.br)
 - [ ] Implementar Verificador de Autenticidade (QR Code em PDFs)
-- [ ] Desenvolver registro de Teletrabalho e produtividade
-- [ ] Desenvolver módulo de Protocolo Externo
 
 ## Fase 7: Portal da Transparência
 - [x] Desenvolver visualização pública sincronizada com dados reais (proposições, leis, sessões) → `src/pages/transparencia/PortalPublico.tsx` + `src/hooks/useTransparencia.ts`
@@ -90,11 +94,11 @@
 | Fase 1 — Setup e Infraestrutura | ✅ Completa | 7/7 |
 | Fase 2 — Banco de Dados e Segurança | ✅ Completa | 6/6 |
 | Fase 2.5 — Master Admin (extra) | ✅ Completa | 13/13 |
-| Fase 3 — Autenticação | ✅ Completa | 4/4 |
+| Fase 3 — Autenticação | ✅ Completa | 5/5 |
 | Fase 4 — Módulo Legislativo | ✅ Completa | 9/9 |
 | Fase 5 — Plenário e Votação | ✅ Completa | 5/5 |
 | Fase 5.5 — Módulos de Suporte (extra) | ✅ Completa | 3/3 |
-| Fase 6 — Administrativo e GED | 🟡 Em andamento | 1/5 |
+| Fase 6 — Administrativo e GED | 🟡 Em andamento | 5/7 |
 | Fase 7 — Portal da Transparência | 🟡 Em andamento | 4/6 |
 
 **Próximos passos prioritários:**
@@ -102,3 +106,4 @@
 2. Fase 7 — Exportação em Dados Abertos (CSV, JSON) no portal público
 3. Fase 6 — Integração de Assinatura Digital ICP-Brasil (GED completo)
 4. Técnico — Implementar code-splitting (`manualChunks`) para reduzir bundle (~1 MB atualmente)
+5. Técnico — Configurar SMTP customizado no Supabase (Gmail App Password) para recuperação de senha

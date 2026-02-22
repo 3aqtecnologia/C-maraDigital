@@ -68,12 +68,13 @@ npm run dev
   - Controle de status (Em Vigor, Revogada Parcial/Total)
 
 ### 🏛️ Módulo Plenário (Tempo Real)
-- **Lista de Sessões** com criação de nova sessão (tipo, data/hora, local, quórum mínimo)
-- **Painel ao Vivo** via Supabase Realtime:
-  - Indicador de quórum (verde/vermelho)
-  - Sidebar com a ordem do dia (pauta)
-  - Admin: inicia/encerra votação por item
-  - Vereador: voto eletrônico — **SIM / NÃO / ABSTENÇÃO** — imutável via trigger no banco
+- Vereador: voto eletrônico — **SIM / NÃO / ABSTENÇÃO** — imutável via trigger no banco
+- **Transmissão:** suporte a URL de vídeo com player integrado no painel.
+
+### 📁 Módulo Administrativo (GED & Processos)
+- **GED (Gestão Eletrônica de Documentos):** sistema de arquivos com upload via Supabase Storage, categorização por tipo (Ata, Ofício, Portaria, etc.) e isolamento total por Câmara.
+- **Protocolo Externo:** registro e rastreamento de entrada e saída de documentos com numeração seqüencial anual e controle de status.
+- **Teletrabalho:** registro de atividades diárias, controle de jornada remota e fluxo de aprovação por gestores.
 
 ### 🔐 Autenticação & Multi-tenant
 - Login único com redirecionamento automático (master → `/master`, tenant → `/backoffice`)
@@ -161,8 +162,9 @@ supabase/
 - [x] Fase 2 — Master Admin: provisionamento de câmaras, audit log, planos
 - [x] Fase 3 — Módulo Legislativo: CRUD, tramitação, timeline
 - [x] Fase 4 — Plenário: sessões, votação eletrônica em tempo real
-- [ ] Fase 5 — Administrativo & GED: assinatura digital, QR Code, teletrabalho
-- [ ] Fase 6 — Portal da Transparência: dados abertos, ouvidoria (e-SIC), CSV/JSON
+- [x] Fase 5 — Administrativo & GED: upload de arquivos, teletrabalho e protocolo
+- [ ] Fase 6 — Segurança Avançada: assinatura digital (ICP-Brasil) e verificação de QR Code
+- [ ] Fase 7 — Portal da Transparência: ouvidoria (e-SIC) e exportação de dados abertos
 
 ---
 
