@@ -46,10 +46,11 @@ npm run dev
 ### 👑 Administrador Master (SaaS)
 - Painel exclusivo em `/master` — isolado do backoffice das câmaras
 - **Provisionar nova Câmara:** formulário com nome, município, UF, CNPJ, slug, plano
+- **Gestão de Câmaras:** modal administrativo com edição de dados em tempo real, controle dinâmico do Slug Base (subdomínio dinâmico via URL linkável) e controle de Lifecycle do cliente (Status: Ativo, Trial, Suspenso e Cancelado).
 - **Configurações Globais:** edição dinâmica de limites e recursos dos planos de assinatura (Básico, Profissional, Enterprise), segurança com MFA e whitelist IP, e outras permissões.
 - **Representação Autenticada (Impersonation):** função de acessar áreas restritas do tenant via painel Mestre com faixa de alerta para suporte técnico rápido.
 - **Audit Log:** histórico de ações administrativas com filtros
-- **Dashboard Master:** visão geral de todas as câmaras, planos e situações
+- **Dashboard Master:** visão geral de todas as câmaras com hiperlinks espertos para filtragem automática e isolamento na visualização.
 
 ### 📋 Módulo Legislativo
 - **Lista de Proposições** com filtros por status e busca por número/ementa/tipo

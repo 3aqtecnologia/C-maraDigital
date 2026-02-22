@@ -1,8 +1,9 @@
 import { useAuth } from '@/hooks/useAuth'
 import { supabase } from '@/lib/supabase'
 import type { Database, TenantSituacao } from '@/types/database'
-import { Building2, MoreVertical, Search, Settings, ShieldCheck } from 'lucide-react'
+import { Building2, ExternalLink, MoreVertical, Save, Search, Settings, ShieldCheck, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
+import { useLocation } from 'react-router-dom'
 
 type TenantOverview = Database['public']['Views']['master_tenant_overview']['Row']
 
@@ -15,9 +16,42 @@ const SITUACAO_LABELS: Record<TenantSituacao, string> = {
 
 export function CamarasList() {
   const { impersonateTenant } = useAuth()
+  const location = useLocation()
+
   const [camaras, setCamaras] = useState<TenantOverview[]>([])
   const [loading, setLoading] = useState(true)
-  const [search, setSearch] = useState('')
+  const [search, setSearch] = useState((location.state as any)?.preSearch || '')
+
+  const [editingCamara, setEditingCamara] = useState<TenantOverview | null>(null)
+  const [editForm, setEditForm] = useState<Partial<TenantOverview>>({})
+  const [saving, setSaving] = useState(false)
+
+  function openEdit(c: TenantOverview) {
+    setEditingCamara(c)
+    setEditForm({ ...c })
+  }
+
+  async function handleSave() {
+    if (!editingCamara) return
+    setSaving(true)
+    const { error } = await (supabase.rpc as any)('admin_update_tenant', {
+      p_tenant_id: editingCamara.id,
+      p_nome: editForm.nome,
+      p_municipio: editForm.municipio,
+      p_uf: editForm.uf,
+      p_slug: editForm.slug,
+      p_plano: editForm.plano,
+      p_situacao: editForm.situacao,
+    })
+
+    setSaving(false)
+    if (error) {
+      alert('Erro ao atualizar: ' + error.message)
+    } else {
+      setCamaras(prev => prev.map(c => c.id === editingCamara.id ? { ...c, ...editForm } as TenantOverview : c))
+      setEditingCamara(null)
+    }
+  }
 
   useEffect(() => {
     supabase
@@ -86,8 +120,17 @@ export function CamarasList() {
 
               <div className="p-5 space-y-4">
                 <div className="flex justify-between items-center text-sm">
-                  <span className="text-gray-500">Slug Base</span>
-                  <span className="text-gray-300 font-mono text-xs">{camara.slug}</span>
+                  <span className="text-gray-500">Link de Acesso</span>
+                  <a
+                    href={`${window.location.protocol}//${camara.slug}.${window.location.host.replace('master.', '').replace('app.', '')}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-indigo-400 font-mono text-xs hover:underline flex items-center gap-1 text-right"
+                    title="Acessar portal do cliente em nova aba"
+                  >
+                    {camara.slug}.{window.location.hostname.replace('master.', '').replace('app.', '')}
+                    <ExternalLink size={12} />
+                  </a>
                 </div>
                 <div className="flex justify-between items-center text-sm">
                   <span className="text-gray-500">Plano</span>
@@ -113,11 +156,11 @@ export function CamarasList() {
                     Acessar Admin
                   </button>
                   <button
-                    onClick={() => alert(`O painel de configuração individual da câmara '${camara.nome}' está em desenvolvimento.`)}
+                    onClick={() => openEdit(camara)}
                     className="flex-1 flex items-center justify-center gap-2 border border-gray-600 hover:border-gray-500 text-gray-300 py-2 rounded-lg text-xs font-semibold transition-colors"
                   >
                     <Settings size={14} />
-                    Configurar
+                    Gerir Câmara
                   </button>
                 </div>
               </div>
@@ -125,6 +168,141 @@ export function CamarasList() {
           ))}
         </div>
       </div>
+
+      {/* Modal de Gestão da Câmara */}
+      {editingCamara && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="bg-gray-900 border border-gray-700 rounded-xl w-full max-w-2xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
+            <div className="px-6 py-4 border-b border-gray-800 flex justify-between items-center bg-gray-800/50">
+              <div>
+                <h3 className="text-lg font-bold text-white">Gestão Mestre: {editingCamara.nome}</h3>
+                <p className="text-xs text-gray-400 font-mono mt-0.5">ID: {editingCamara.id}</p>
+              </div>
+              <button onClick={() => setEditingCamara(null)} className="text-gray-400 hover:text-white transition-colors">
+                <X size={20} />
+              </button>
+            </div>
+
+            <div className="p-6 overflow-y-auto space-y-6 flex-1 text-gray-100">
+
+              <div className="space-y-4">
+                <h4 className="text-sm font-semibold text-indigo-400 uppercase tracking-wide border-b border-gray-800 pb-2">Identificação Base</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs text-gray-400 mb-1">Nome da Câmara</label>
+                    <input
+                      type="text"
+                      value={editForm.nome || ''}
+                      onChange={e => setEditForm({ ...editForm, nome: e.target.value })}
+                      className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-indigo-500"
+                    />
+                  </div>
+                  <div className="flex gap-4">
+                    <div className="flex-1">
+                      <label className="block text-xs text-gray-400 mb-1">Município</label>
+                      <input
+                        type="text"
+                        value={editForm.municipio || ''}
+                        onChange={e => setEditForm({ ...editForm, municipio: e.target.value })}
+                        className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-indigo-500"
+                      />
+                    </div>
+                    <div className="w-20">
+                      <label className="block text-xs text-gray-400 mb-1">UF</label>
+                      <input
+                        type="text"
+                        maxLength={2}
+                        value={editForm.uf || ''}
+                        onChange={e => setEditForm({ ...editForm, uf: e.target.value.toUpperCase() })}
+                        className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-indigo-500 text-center uppercase"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-4">
+                  <label className="block text-xs text-gray-400 mb-1">Slug Base (URL de Acesso)</label>
+                  <div className="flex border border-gray-700 rounded-lg overflow-hidden focus-within:ring-1 focus-within:ring-indigo-500">
+                    <input
+                      type="text"
+                      value={editForm.slug || ''}
+                      onChange={e => setEditForm({ ...editForm, slug: e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '') })}
+                      className="w-1/3 min-w-[120px] max-w-[200px] bg-gray-900 border-none px-3 py-2 text-sm text-indigo-400 font-mono text-right focus:ring-0"
+                      placeholder="minhacamara"
+                    />
+                    <div className="flex-1 bg-gray-800 px-3 py-2 text-sm text-gray-500 font-mono border-l border-gray-700 select-none">
+                      .{(window.location.hostname).replace('master.', '').replace('app.', '') || 'camaradigital.com.br'}
+                    </div>
+                  </div>
+                  <p className="text-[10px] text-gray-500 mt-1">Isso alterará fisicamente o endereço de todos os usuários desta câmara.</p>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <h4 className="text-sm font-semibold text-indigo-400 uppercase tracking-wide border-b border-gray-800 pb-2">Plano e Situação (Lifecycle)</h4>
+
+                <div className="bg-indigo-900/10 border border-indigo-500/20 rounded-lg p-4">
+                  <p className="text-xs text-indigo-300 mb-3">ATENÇÃO: Alterar a situação do tenant reconfigura permissões e pode bloquear o acesso de centenas de usuários instantaneamente (Ex: Suspenso ou Cancelado corta logins).</p>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs text-gray-400 mb-1 font-medium">Plano de Assinatura</label>
+                      <select
+                        value={editForm.plano || 'basico'}
+                        onChange={e => setEditForm({ ...editForm, plano: e.target.value as any })}
+                        className="w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-200 focus:ring-1 focus:ring-indigo-500 capitalize"
+                      >
+                        <option value="basico">Básico</option>
+                        <option value="profissional">Profissional</option>
+                        <option value="enterprise">Enterprise</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-xs text-gray-400 mb-1 font-medium">Status Operacional</label>
+                      <select
+                        value={editForm.situacao || 'ativo'}
+                        onChange={e => setEditForm({ ...editForm, situacao: e.target.value as any })}
+                        className={`w-full bg-gray-900 border rounded-lg px-3 py-2 text-sm text-gray-200 focus:ring-1 focus:outline-none capitalize font-semibold ${editForm.situacao === 'cancelado' ? 'border-red-500/50 text-red-400' :
+                          editForm.situacao === 'suspenso' ? 'border-orange-500/50 text-orange-400' : 'border-gray-700 focus:ring-indigo-500'
+                          }`}
+                      >
+                        <option value="ativo" className="text-green-400">Ativa (Normal)</option>
+                        <option value="trial" className="text-yellow-400">Em Trial</option>
+                        <option value="suspenso" className="text-orange-400">Suspensa (Inadimplência, etc)</option>
+                        <option value="cancelado" className="text-red-400">Cancelada (Inativa/Desligada)</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+            <div className="px-6 py-4 bg-gray-800 border-t border-gray-700 flex justify-end gap-3">
+              <button
+                onClick={() => setEditingCamara(null)}
+                className="px-4 py-2 text-sm font-medium text-gray-300 hover:text-white transition-colors"
+              >
+                Cancelar Edição
+              </button>
+              <button
+                onClick={handleSave}
+                disabled={saving}
+                className="flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white px-6 py-2 rounded-lg text-sm font-semibold transition-colors shadow-sm"
+              >
+                {saving ? (
+                  <span className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin"></span>
+                ) : (
+                  <>
+                    <Save size={16} />
+                    Aplicar Configurações
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

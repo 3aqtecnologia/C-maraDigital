@@ -89,7 +89,7 @@ CREATE POLICY "audit_log_master_only" ON public.tenant_audit_log
 -- ============================================================
 
 -- Verifica se o usuário logado é um master admin ativo
-CREATE OR REPLACE FUNCTION auth.is_master_admin()
+CREATE OR REPLACE FUNCTION public.is_master_admin()
 RETURNS BOOLEAN AS $$
   SELECT EXISTS (
     SELECT 1 FROM public.master_admins
@@ -105,22 +105,22 @@ $$ LANGUAGE SQL SECURITY DEFINER STABLE;
 -- tenants: master admin vê todos
 DROP POLICY IF EXISTS "tenants_isolation" ON public.tenants;
 CREATE POLICY "tenants_master_all" ON public.tenants
-  USING (auth.is_master_admin() OR id = auth.user_tenant_id());
+  USING (public.is_master_admin() OR id = auth.user_tenant_id());
 
 -- profiles: master admin vê todos
 DROP POLICY IF EXISTS "profiles_tenant_isolation" ON public.profiles;
 CREATE POLICY "profiles_master_or_tenant" ON public.profiles
-  USING (auth.is_master_admin() OR tenant_id = auth.user_tenant_id());
+  USING (public.is_master_admin() OR tenant_id = auth.user_tenant_id());
 
 -- proposicoes: master admin vê todas (somente leitura auditoria)
 DROP POLICY IF EXISTS "proposicoes_tenant_isolation" ON public.proposicoes;
 CREATE POLICY "proposicoes_master_or_tenant" ON public.proposicoes
-  USING (auth.is_master_admin() OR tenant_id = auth.user_tenant_id());
+  USING (public.is_master_admin() OR tenant_id = auth.user_tenant_id());
 
 -- sessoes: master admin vê todas
 DROP POLICY IF EXISTS "sessoes_tenant_isolation" ON public.sessoes;
 CREATE POLICY "sessoes_master_or_tenant" ON public.sessoes
-  USING (auth.is_master_admin() OR tenant_id = auth.user_tenant_id());
+  USING (public.is_master_admin() OR tenant_id = auth.user_tenant_id());
 
 -- ============================================================
 -- FUNÇÃO: provisionar_tenant
@@ -142,7 +142,7 @@ DECLARE
   v_master_id UUID;
 BEGIN
   -- Verificar se quem chama é master admin
-  IF NOT auth.is_master_admin() THEN
+  IF NOT public.is_master_admin() THEN
     RAISE EXCEPTION 'Acesso negado: apenas Master Admins podem provisionar tenants.';
   END IF;
 

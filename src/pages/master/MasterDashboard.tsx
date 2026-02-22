@@ -2,7 +2,7 @@ import { supabase } from '@/lib/supabase'
 import type { Database, TenantSituacao } from '@/types/database'
 import { AlertTriangle, Building2, CheckCircle2, FileText, TrendingUp, Users } from 'lucide-react'
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 
 type TenantOverview = Database['public']['Views']['master_tenant_overview']['Row']
 
@@ -28,6 +28,7 @@ function StatCard({ label, value, icon: Icon, color }: { label: string; value: s
 }
 
 export function MasterDashboard() {
+  const navigate = useNavigate()
   const [tenants, setTenants] = useState<TenantOverview[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -105,7 +106,12 @@ export function MasterDashboard() {
                     const situacao = t.situacao ?? 'ativo'
                     const cfg = SITUACAO_CONFIG[situacao as TenantSituacao]
                     return (
-                      <tr key={t.id} className="hover:bg-gray-750 transition-colors group">
+                      <tr
+                        key={t.id}
+                        onClick={() => navigate('/master/camaras', { state: { preSearch: t.nome } })}
+                        className="hover:bg-gray-750 transition-colors group cursor-pointer"
+                        title={`Ir para a Gestão de ${t.nome}`}
+                      >
                         <td className="px-5 py-4">
                           <div className="flex items-center gap-3">
                             <div className="w-8 h-8 rounded-lg bg-indigo-600/20 flex items-center justify-center flex-shrink-0">

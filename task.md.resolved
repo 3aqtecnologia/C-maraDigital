@@ -22,8 +22,9 @@
 - [x] Criar tabelas master_admins e tenant_audit_log (migration 002)
 - [x] Criar tabela tenant_planos_config com limites por plano (basico/profissional/enterprise)
 - [x] Criar função provisionar_tenant() e view master_tenant_overview
-- [x] Desenvolver MasterDashboard (visão geral de todas as câmaras, planos, situação)
+- [x] Desenvolver MasterDashboard (visão geral de todas as câmaras, planos, situação) com filtro inteligente
 - [x] Desenvolver tela ProvisionarCamara (cadastro de novas câmaras)
+- [x] Desenvolver Gestão de Câmara (Modal para alterar nome, status, URL base dinâmico e plano via banco direto)
 - [x] Desenvolver AuditLog (histórico de ações do master admin)
 - [x] Desenvolver MasterConfiguracoes (edição de planos dinâmicos, IP whitelist e MFA UI)
 - [x] Desenvolver Impersonation System (Representação autenticada master -> tenant bypass)
@@ -67,7 +68,7 @@
 |------|--------|-----------|
 | Fase 1 — Setup e Infraestrutura | ✅ Completa | 7/7 |
 | Fase 2 — Banco de Dados e Segurança | ✅ Completa | 6/6 |
-| Fase 2.5 — Master Admin (extra) | ✅ Completa | 10/10 |
+| Fase 2.5 — Master Admin (extra) | ✅ Completa | 11/11 |
 | Fase 3 — Autenticação | 🟡 Quase completa | 3/4 |
 | Fase 4 — Módulo Legislativo | 🟡 Em andamento | 2/4 |
 | Fase 5 — Plenário e Votação | 🟡 Em andamento | 3/4 |
