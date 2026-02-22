@@ -44,6 +44,16 @@ export type TenantSituacao = 'ativo' | 'suspenso' | 'trial' | 'cancelado'
 
 export type LeiStatus = 'em_vigor' | 'revogada_parcialmente' | 'revogada_totalmente'
 
+export type DocumentoTipo = 'ata' | 'oficio' | 'requerimento' | 'decreto' | 'contrato' | 'portaria' | 'outro'
+
+export type AssinaturaStatus = 'pendente' | 'assinado' | 'falhou' | 'cancelado'
+
+export type TeletrabalhoStatus = 'pendente' | 'aprovado' | 'rejeitado'
+
+export type ProtocoloTipo = 'entrada' | 'saida'
+
+export type ProtocoloStatus = 'pendente' | 'em_tramitacao' | 'concluido' | 'arquivado'
+
 export interface Database {
   public: {
     Tables: {
@@ -382,6 +392,146 @@ export interface Database {
         Update: never
         Relationships: []
       }
+      documentos: {
+        Row: {
+          id: string
+          tenant_id: string
+          nome: string
+          tipo: DocumentoTipo
+          descricao: string | null
+          arquivo_path: string
+          arquivo_nome: string
+          arquivo_tamanho: number | null
+          arquivo_mime: string | null
+          enviado_por: string | null
+          assinado: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          tenant_id: string
+          nome: string
+          tipo: DocumentoTipo
+          descricao?: string | null
+          arquivo_path: string
+          arquivo_nome: string
+          arquivo_tamanho?: number | null
+          arquivo_mime?: string | null
+          enviado_por?: string | null
+          assinado?: boolean
+        }
+        Update: {
+          nome?: string
+          tipo?: DocumentoTipo
+          descricao?: string | null
+          assinado?: boolean
+        }
+        Relationships: []
+      }
+      teletrabalho_registros: {
+        Row: {
+          id: string
+          tenant_id: string
+          profile_id: string
+          data: string
+          hora_inicio: string | null
+          hora_fim: string | null
+          atividades: string
+          status: TeletrabalhoStatus
+          obs_gestor: string | null
+          aprovado_por: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          tenant_id: string
+          profile_id: string
+          data: string
+          hora_inicio?: string | null
+          hora_fim?: string | null
+          atividades: string
+          status?: TeletrabalhoStatus
+          obs_gestor?: string | null
+          aprovado_por?: string | null
+        }
+        Update: {
+          hora_inicio?: string | null
+          hora_fim?: string | null
+          atividades?: string
+          status?: TeletrabalhoStatus
+          obs_gestor?: string | null
+          aprovado_por?: string | null
+        }
+        Relationships: []
+      }
+      assinaturas: {
+        Row: {
+          id: string
+          tenant_id: string
+          documento_id: string
+          user_id: string
+          status: AssinaturaStatus
+          token: string | null
+          signed_at: string | null
+          created_at: string
+        }
+        Insert: {
+          tenant_id: string
+          documento_id: string
+          user_id: string
+          status?: AssinaturaStatus
+          token?: string | null
+          signed_at?: string | null
+        }
+        Update: {
+          status?: AssinaturaStatus
+          token?: string | null
+          signed_at?: string | null
+        }
+        Relationships: []
+      }
+      protocolos: {
+        Row: {
+          id: string
+          tenant_id: string
+          numero: string
+          ano: number
+          tipo: ProtocoloTipo
+          status: ProtocoloStatus
+          assunto: string
+          remetente: string | null
+          destinatario: string | null
+          data_recebimento: string
+          prazo: string | null
+          observacoes: string | null
+          criado_por: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          tenant_id: string
+          numero: string
+          ano: number
+          tipo: ProtocoloTipo
+          status?: ProtocoloStatus
+          assunto: string
+          remetente?: string | null
+          destinatario?: string | null
+          data_recebimento?: string
+          prazo?: string | null
+          observacoes?: string | null
+          criado_por?: string | null
+        }
+        Update: {
+          status?: ProtocoloStatus
+          assunto?: string
+          remetente?: string | null
+          destinatario?: string | null
+          prazo?: string | null
+          observacoes?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       master_tenant_overview: {
@@ -444,6 +594,10 @@ export interface Database {
       sessao_status: SessaoStatus
       tenant_plano: TenantPlano
       tenant_situacao: TenantSituacao
+      documento_tipo: DocumentoTipo
+      teletrabalho_status: TeletrabalhoStatus
+      protocolo_tipo: ProtocoloTipo
+      protocolo_status: ProtocoloStatus
     }
     CompositeTypes: Record<string, unknown>
   }

@@ -2,6 +2,8 @@ import { useAuth } from '@/hooks/useAuth'
 import {
   BookOpen,
   ChevronRight,
+  ClipboardList,
+  Clock,
   FileText,
   FolderOpen,
   Gavel,
@@ -27,6 +29,8 @@ const NAV_ITEMS: NavItem[] = [
   { label: 'Plenário', icon: Gavel, to: '/backoffice/plenario' },
   { label: 'Leis (LeisGov)', icon: BookOpen, to: '/backoffice/leis' },
   { label: 'Documentos (GED)', icon: FolderOpen, to: '/backoffice/documentos' },
+  { label: 'Teletrabalho', icon: Clock, to: '/backoffice/teletrabalho' },
+  { label: 'Protocolo', icon: ClipboardList, to: '/backoffice/protocolos' },
   { label: 'Portal Público', icon: Globe, to: '/transparencia' },
   { label: 'Usuários', icon: Users, to: '/backoffice/usuarios', roles: ['admin'] },
   { label: 'Configurações', icon: Settings, to: '/backoffice/configuracoes', roles: ['admin'] },

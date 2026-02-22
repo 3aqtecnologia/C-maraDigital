@@ -73,7 +73,8 @@
 - [x] Desenvolver registro de Teletrabalho (jornada, aprovação de gestor) → `src/hooks/useTeletrabalho.ts` + `src/pages/backoffice/Teletrabalho.tsx`
 - [x] Desenvolver módulo de Protocolo Externo (entrada/saída, rastreamento de status) → `src/hooks/useProtocolos.ts` + `src/pages/backoffice/Protocolos.tsx`
 - [x] Criar migration SQL com Storage bucket, RLS, tabelas e função `next_protocolo_numero` → `supabase/migrations/012_fase6_ged_teletrabalho_protocolo.sql`
-- [ ] Implementar API/Integração para Assinatura Digital (ICP-Brasil via API de terceiros ou Gov.br)
+- [x] Implementar API/Integração para Assinatura Digital (ICP-Brasil via Gov.br - Simulado p/ Homologação) → `src/hooks/useAssinatura.ts`
+- [x] Criar interface de assinatura no GED com status visual e verificação → `Documentos.tsx`
 - [ ] Implementar Verificador de Autenticidade (QR Code em PDFs)
 
 ## Fase 7: Portal da Transparência
@@ -98,7 +99,7 @@
 | Fase 4 — Módulo Legislativo | ✅ Completa | 9/9 |
 | Fase 5 — Plenário e Votação | ✅ Completa | 5/5 |
 | Fase 5.5 — Módulos de Suporte (extra) | ✅ Completa | 3/3 |
-| Fase 6 — Administrativo e GED | 🟡 Em andamento | 5/7 |
+| Fase 6 — Administrativo e GED | 🟡 Em andamento | 6/7 |
 | Fase 7 — Portal da Transparência | 🟡 Em andamento | 4/6 |
 
 **Próximos passos prioritários:**

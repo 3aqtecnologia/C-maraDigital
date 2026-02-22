@@ -16,6 +16,8 @@ import { ProposicaoNova } from '@/pages/backoffice/ProposicaoNova'
 import { Usuarios } from '@/pages/backoffice/Usuarios'
 import { Configuracoes } from '@/pages/backoffice/Configuracoes'
 import { Documentos } from '@/pages/backoffice/Documentos'
+import { Teletrabalho } from '@/pages/backoffice/Teletrabalho'
+import { Protocolos } from '@/pages/backoffice/Protocolos'
 import { AuditLog } from '@/pages/master/AuditLog'
 import { CamarasList } from '@/pages/master/CamarasList'
 import { MasterConfiguracoes } from '@/pages/master/MasterConfiguracoes'
@@ -94,7 +96,9 @@ export const router = createBrowserRouter([
       { path: 'plenario', element: <Plenario /> },
       { path: 'plenario/:id/gerenciar', element: <PlenarioGerenciar /> },
       { path: 'plenario/:id', element: <PlenarioAtivo /> },
-      { path: 'documentos',   element: <Documentos /> },
+      { path: 'documentos',    element: <Documentos /> },
+      { path: 'teletrabalho', element: <Teletrabalho /> },
+      { path: 'protocolos',   element: <Protocolos /> },
       { path: 'usuarios',     element: <Usuarios /> },
       { path: 'configuracoes', element: <Configuracoes /> },
     ],
