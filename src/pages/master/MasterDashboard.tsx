@@ -1,15 +1,16 @@
-import { useEffect, useState } from 'react'
-import { Building2, Users, FileText, TrendingUp, AlertTriangle, CheckCircle2 } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import type { Database, TenantSituacao } from '@/types/database'
+import { AlertTriangle, Building2, CheckCircle2, FileText, TrendingUp, Users } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 
 type TenantOverview = Database['public']['Views']['master_tenant_overview']['Row']
 
 const SITUACAO_CONFIG: Record<TenantSituacao, { label: string; color: string; dot: string }> = {
-  ativo:     { label: 'Ativo',     color: 'text-green-400 bg-green-900/30',  dot: 'bg-green-500' },
-  trial:     { label: 'Trial',     color: 'text-yellow-400 bg-yellow-900/30', dot: 'bg-yellow-500' },
-  suspenso:  { label: 'Suspenso',  color: 'text-red-400 bg-red-900/30',      dot: 'bg-red-500' },
-  cancelado: { label: 'Cancelado', color: 'text-gray-500 bg-gray-800',       dot: 'bg-gray-500' },
+  ativo: { label: 'Ativo', color: 'text-green-400 bg-green-900/30', dot: 'bg-green-500' },
+  trial: { label: 'Trial', color: 'text-yellow-400 bg-yellow-900/30', dot: 'bg-yellow-500' },
+  suspenso: { label: 'Suspenso', color: 'text-red-400 bg-red-900/30', dot: 'bg-red-500' },
+  cancelado: { label: 'Cancelado', color: 'text-gray-500 bg-gray-800', dot: 'bg-gray-500' },
 }
 
 function StatCard({ label, value, icon: Icon, color }: { label: string; value: string | number; icon: React.ElementType; color: string }) {
@@ -41,8 +42,8 @@ export function MasterDashboard() {
       })
   }, [])
 
-  const ativos    = tenants.filter(t => t.situacao === 'ativo').length
-  const trials    = tenants.filter(t => t.situacao === 'trial').length
+  const ativos = tenants.filter(t => t.situacao === 'ativo').length
+  const trials = tenants.filter(t => t.situacao === 'trial').length
   const suspensos = tenants.filter(t => t.situacao === 'suspenso').length
   const totalUsuarios = tenants.reduce((sum, t) => sum + (t.usuarios_ativos ?? 0), 0)
 
@@ -57,10 +58,10 @@ export function MasterDashboard() {
       <div className="flex-1 p-8 space-y-8 overflow-auto">
         {/* Stats */}
         <div className="grid grid-cols-2 xl:grid-cols-4 gap-4">
-          <StatCard label="Câmaras Totais"    value={tenants.length}  icon={Building2}   color="bg-indigo-600/20 text-indigo-400" />
-          <StatCard label="Câmaras Ativas"    value={ativos}          icon={CheckCircle2} color="bg-green-600/20 text-green-400" />
-          <StatCard label="Em Trial"          value={trials}          icon={TrendingUp}   color="bg-yellow-600/20 text-yellow-400" />
-          <StatCard label="Usuários Totais"   value={totalUsuarios}   icon={Users}        color="bg-purple-600/20 text-purple-400" />
+          <StatCard label="Câmaras Totais" value={tenants.length} icon={Building2} color="bg-indigo-600/20 text-indigo-400" />
+          <StatCard label="Câmaras Ativas" value={ativos} icon={CheckCircle2} color="bg-green-600/20 text-green-400" />
+          <StatCard label="Em Trial" value={trials} icon={TrendingUp} color="bg-yellow-600/20 text-yellow-400" />
+          <StatCard label="Usuários Totais" value={totalUsuarios} icon={Users} color="bg-purple-600/20 text-purple-400" />
         </div>
 
         {/* Alertas */}
@@ -144,17 +145,17 @@ export function MasterDashboard() {
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           {[
             { label: 'Provisionar nova Câmara', icon: Building2, to: '/master/provisionar', color: 'bg-indigo-600 hover:bg-indigo-700' },
-            { label: 'Ver Audit Log',           icon: FileText,  to: '/master/audit',       color: 'bg-gray-700 hover:bg-gray-600' },
-            { label: 'Configurações Globais',   icon: TrendingUp,to: '/master/configuracoes',color: 'bg-gray-700 hover:bg-gray-600' },
+            { label: 'Ver Audit Log', icon: FileText, to: '/master/audit', color: 'bg-gray-700 hover:bg-gray-600' },
+            { label: 'Configurações Globais', icon: TrendingUp, to: '/master/configuracoes', color: 'bg-gray-700 hover:bg-gray-600' },
           ].map(action => (
-            <a
+            <Link
               key={action.to}
-              href={action.to}
+              to={action.to}
               className={`flex items-center gap-3 px-5 py-4 rounded-xl text-white font-medium text-sm transition-colors ${action.color}`}
             >
               <action.icon size={18} />
               {action.label}
-            </a>
+            </Link>
           ))}
         </div>
       </div>

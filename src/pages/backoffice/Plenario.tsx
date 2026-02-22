@@ -190,11 +190,11 @@ export function Plenario() {
                 </div>
               </div>
               <button
-                onClick={() => handleIniciar(proxima.id)}
+                onClick={() => navigate(`/backoffice/plenario/${proxima.id}/gerenciar`)}
                 className="flex items-center gap-2 btn-primary text-sm flex-shrink-0"
               >
                 <Play size={15} />
-                Iniciar Sessão
+                Gerenciar Pauta
               </button>
             </div>
           </div>
@@ -263,11 +263,11 @@ export function Plenario() {
                     <div className="flex gap-2 flex-shrink-0">
                       {sessao.status === 'agendada' && isAdmin && (
                         <button
-                          onClick={e => { e.stopPropagation(); handleIniciar(sessao.id) }}
-                          className="btn-primary text-xs py-1.5 px-3 flex items-center gap-1"
+                          onClick={e => { e.stopPropagation(); navigate(`/backoffice/plenario/${sessao.id}/gerenciar`) }}
+                          className="btn-secondary text-xs py-1.5 px-3 flex items-center gap-1"
                         >
                           <Play size={12} />
-                          Iniciar
+                          Gerenciar
                         </button>
                       )}
                       {sessao.status === 'em_andamento' && (
