@@ -1,0 +1,225 @@
+// Tipos gerados para o banco de dados Supabase
+// Execute: npx supabase gen types typescript --project-id YOUR_PROJECT_ID > src/types/database.ts
+
+export type Json =
+  | string
+  | number
+  | boolean
+  | null
+  | { [key: string]: Json | undefined }
+  | Json[]
+
+export type UserRole = 'admin' | 'vereador' | 'servidor' | 'executivo' | 'cidadao'
+
+export type ProposicaoTipo =
+  | 'projeto_lei'
+  | 'projeto_lei_complementar'
+  | 'projeto_resolucao'
+  | 'requerimento'
+  | 'indicacao'
+  | 'moca_aplausos'
+  | 'voto_pesar'
+
+export type ProposicaoStatus =
+  | 'rascunho'
+  | 'protocolado'
+  | 'em_tramitacao'
+  | 'em_comissao'
+  | 'em_votacao'
+  | 'aprovado'
+  | 'rejeitado'
+  | 'arquivado'
+  | 'sancionado'
+  | 'vetado'
+
+export type VotoOpcao = 'sim' | 'nao' | 'abstencao' | 'ausente'
+
+export type SessaoTipo = 'ordinaria' | 'extraordinaria' | 'especial' | 'solene'
+
+export type SessaoStatus = 'agendada' | 'em_andamento' | 'encerrada' | 'cancelada'
+
+export type TenantPlano = 'basico' | 'profissional' | 'enterprise'
+
+export type TenantSituacao = 'ativo' | 'suspenso' | 'trial' | 'cancelado'
+
+export interface Database {
+  public: {
+    Tables: {
+      tenants: {
+        Row: {
+          id: string
+          nome: string
+          municipio: string
+          uf: string
+          cnpj: string | null
+          slug: string
+          logo_url: string | null
+          cor_primaria: string
+          ativo: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: Omit<Database['public']['Tables']['tenants']['Row'], 'id' | 'created_at' | 'updated_at'>
+        Update: Partial<Database['public']['Tables']['tenants']['Insert']>
+      }
+      master_admins: {
+        Row: {
+          id: string
+          user_id: string
+          nome: string
+          email: string
+          ativo: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: Omit<Database['public']['Tables']['master_admins']['Row'], 'id' | 'created_at' | 'updated_at'>
+        Update: Partial<Database['public']['Tables']['master_admins']['Insert']>
+      }
+      tenant_planos_config: {
+        Row: {
+          id: string
+          tenant_id: string
+          plano: TenantPlano
+          situacao: TenantSituacao
+          max_usuarios: number
+          max_storage_gb: number
+          trial_ate: string | null
+          proxima_cobranca: string | null
+          valor_mensalidade: number | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: Omit<Database['public']['Tables']['tenant_planos_config']['Row'], 'id' | 'created_at' | 'updated_at'>
+        Update: Partial<Database['public']['Tables']['tenant_planos_config']['Insert']>
+      }
+      tenant_audit_log: {
+        Row: {
+          id: string
+          master_admin_id: string
+          tenant_id: string | null
+          acao: string
+          detalhes: Json | null
+          ip_address: string | null
+          created_at: string
+        }
+        Insert: Omit<Database['public']['Tables']['tenant_audit_log']['Row'], 'id' | 'created_at'>
+        Update: never // log é imutável
+      }
+      profiles: {
+        Row: {
+          id: string
+          tenant_id: string
+          user_id: string
+          nome: string
+          email: string
+          role: UserRole
+          avatar_url: string | null
+          partido: string | null
+          matricula: string | null
+          ativo: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: Omit<Database['public']['Tables']['profiles']['Row'], 'id' | 'created_at' | 'updated_at'>
+        Update: Partial<Database['public']['Tables']['profiles']['Insert']>
+      }
+      proposicoes: {
+        Row: {
+          id: string
+          tenant_id: string
+          numero: string
+          ano: number
+          tipo: ProposicaoTipo
+          ementa: string
+          texto_integral: string | null
+          autor_id: string
+          status: ProposicaoStatus
+          data_protocolo: string
+          data_publicacao: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: Omit<Database['public']['Tables']['proposicoes']['Row'], 'id' | 'created_at' | 'updated_at'>
+        Update: Partial<Database['public']['Tables']['proposicoes']['Insert']>
+      }
+      sessoes: {
+        Row: {
+          id: string
+          tenant_id: string
+          numero: number
+          ano: number
+          tipo: SessaoTipo
+          status: SessaoStatus
+          data_inicio: string
+          data_fim: string | null
+          local: string
+          quorum_minimo: number
+          presentes: string[]
+          transmissao_url: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: Omit<Database['public']['Tables']['sessoes']['Row'], 'id' | 'created_at' | 'updated_at'>
+        Update: Partial<Database['public']['Tables']['sessoes']['Insert']>
+      }
+      votos: {
+        Row: {
+          id: string
+          tenant_id: string
+          sessao_id: string
+          proposicao_id: string
+          vereador_id: string
+          opcao: VotoOpcao
+          created_at: string
+        }
+        Insert: Omit<Database['public']['Tables']['votos']['Row'], 'id' | 'created_at'>
+        Update: never
+      }
+    }
+    Views: {
+      master_tenant_overview: {
+        Row: {
+          id: string
+          nome: string
+          municipio: string
+          uf: string
+          slug: string
+          ativo: boolean
+          created_at: string
+          plano: TenantPlano | null
+          situacao: TenantSituacao | null
+          max_usuarios: number | null
+          trial_ate: string | null
+          valor_mensalidade: number | null
+          usuarios_ativos: number
+          total_proposicoes: number
+          total_sessoes: number
+        }
+      }
+    }
+    Functions: {
+      provisionar_tenant: {
+        Args: {
+          p_nome: string
+          p_municipio: string
+          p_uf: string
+          p_cnpj: string
+          p_slug: string
+          p_plano?: TenantPlano
+          p_max_usuarios?: number
+        }
+        Returns: string
+      }
+    }
+    Enums: {
+      user_role: UserRole
+      proposicao_tipo: ProposicaoTipo
+      proposicao_status: ProposicaoStatus
+      voto_opcao: VotoOpcao
+      sessao_tipo: SessaoTipo
+      sessao_status: SessaoStatus
+      tenant_plano: TenantPlano
+      tenant_situacao: TenantSituacao
+    }
+  }
+}

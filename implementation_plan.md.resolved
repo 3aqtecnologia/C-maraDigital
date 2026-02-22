@@ -1,0 +1,36 @@
+# Implementation Plan: Plataforma SaaS de Gestão Legislativa e Administrativa
+
+## Goal Description
+Build a multi-tenant SaaS platform for City Councils (*Câmaras Municipais*) using Supabase (Backend-as-a-Service) and a modern frontend framework (React + Vite + TailwindCSS). The system will feature complete digital processes, electronic voting, and a transparency portal, adhering strictly to the provided PRD.
+
+## Proposed Changes
+
+### Frontend Platform (React + Vite + TailwindCSS)
+- Initialize a Vite project with React and TypeScript.
+- Install TailwindCSS for modern, responsive UI styling and aesthetics.
+- Install Supabase JS client for backend communication.
+- Configure `vite-plugin-pwa` for progressive web app capabilities.
+- Set up React Router for different modules:
+  - Backoffice (Admin, Legislative, EDMS)
+  - Plenary/Voting Panel
+  - Public Transparency Portal
+
+### Database Architecture & Supabase (PostgreSQL)
+- **Multi-tenancy:** All core tables will include a `tenant_id` corresponding to a specific *Câmara Municipal*.
+- **RLS Policies:** Enforce Row Level Security (RLS) to guarantee `tenant_id` matches the user's assigned tenant, ensuring absolute isolation (RN01).
+- **Authentication:** Utilize Supabase Auth linked to a custom `users` and `roles` table.
+- **Storage:** Use Supabase Storage with bucket policies to handle PDF documents securely, managing both internal documents and public transparency files.
+
+### Core Modules Implementation
+1. **Legislative Module:** CRUD for propositions, timeline tracking, and rich text editor integration (e.g., React-Quill or TinyMCE).
+2. **Plenary & Voting:** Real-time updates using Supabase Realtime for the electronic panel and remote voting interface. Immutability of votes enforced by triggers/RLS (RN02).
+3. **Admin & EDMS (GED):** Foundational logic for Digital signatures (A1/A3) integrating with a third-party API or Gov.br, and QR code generation for PDFs.
+4. **Transparency Portal:** Public-facing pages reading from published materialized views or public tables.
+
+## Verification Plan
+### Automated Tests
+- Configurar Vitest e React Testing Library para testar os componentes de UI de forma isolada e testar a lógica de negócios e as regras de RLS do Supabase localmente.
+
+### Manual Verification
+- Testar a separação multi-tenant criando dois usuários em Câmaras diferentes e verificando o isolamento de dados na interface.
+- Instalar a PWA no celular simulando o uso pelo Vereador para votação.

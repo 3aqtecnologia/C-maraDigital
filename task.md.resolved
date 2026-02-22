@@ -1,0 +1,39 @@
+# Projeto: Plataforma SaaS de Gestão Legislativa e Administrativa
+
+## Fase 1: Setup e Infraestrutura
+- [x] Inicializar projeto Frontend (Vite + React + TS)
+- [x] Configurar roteamento (React Router)
+- [x] Configurar integração com Supabase (Auth, Database, Storage) via ambiente oficial usando MCP
+- [x] Configurar layout responsivo com TailwindCSS
+- [x] Configurar PWA (vite-plugin-pwa)
+
+## Fase 2: Banco de Dados e Segurança (Supabase)
+- [x] Criar schema multi-tenant para Câmaras (organizations/tenants)
+- [x] Configurar Row Level Security (RLS) baseada em tenant_id
+- [x] Criar tabelas de Usuários e Perfis (Vereador, Servidor, Executivo, Cidadão, Admin)
+- [x] Criar tabelas do Módulo Legislativo (Proposições, Tramitações, Leis)
+- [x] Criar tabelas do Módulo Plenário (Pautas, Sessões, Votos)
+- [x] Criar repositórios do Módulo Administrativo (Documentos, Assinatura)
+
+## Fase 3: Módulo Legislativo (Processo Eletrônico)
+- [ ] Desenvolver Protocolo Digital (CRUD de proposições com numeração automática)
+- [ ] Desenvolver Fluxo de Tramitação (Linha do tempo)
+- [ ] Integrar Editor de Texto rico para Redação e Revisão
+- [ ] Desenvolver funcionalidade de Compilação de Leis (LeisGov)
+
+## Fase 4: Módulo de Plenário e Votação
+- [ ] Desenvolver Gestão de Pautas (Geração da Ordem do Dia)
+- [ ] Desenvolver Painel Eletrônico (Quórum, oradores, resultados em tempo real)
+- [ ] Desenvolver Interface Mobile para Votação (Votei.app style)
+- [ ] Implementar visualização/links de Transmissão Audiovisual
+
+## Fase 5: Módulo Administrativo e GED
+- [ ] Implementar API/Integração para Assinatura Digital (ICP-Brasil via API de terceiros ou Gov.br)
+- [ ] Implementar Verificador de Autenticidade (QR Code em PDFs)
+- [ ] Desenvolver registro de Teletrabalho e produtividade
+- [ ] Desenvolver módulo de Protocolo Externo
+
+## Fase 6: Portal da Transparência
+- [ ] Desenvolver visualização pública sincronizada
+- [ ] Desenvolver Ouvidoria e e-SIC (Sistema de tickets)
+- [ ] Desenvolver Exportação em Dados Abertos (CSV, JSON)
