@@ -1,15 +1,15 @@
-import { useEffect, useState } from 'react'
-import { ScrollText, Shield } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import type { Database } from '@/types/database'
+import { ScrollText, Shield } from 'lucide-react'
+import { useEffect, useState } from 'react'
 
 type AuditRow = Database['public']['Tables']['tenant_audit_log']['Row']
 
 const ACAO_CONFIG: Record<string, { label: string; color: string }> = {
   tenant_provisionado: { label: 'Tenant Provisionado', color: 'text-green-400 bg-green-900/30' },
-  tenant_suspenso:     { label: 'Tenant Suspenso',     color: 'text-red-400 bg-red-900/30' },
-  tenant_reativado:    { label: 'Tenant Reativado',    color: 'text-blue-400 bg-blue-900/30' },
-  plano_alterado:      { label: 'Plano Alterado',      color: 'text-yellow-400 bg-yellow-900/30' },
+  tenant_suspenso: { label: 'Tenant Suspenso', color: 'text-red-400 bg-red-900/30' },
+  tenant_reativado: { label: 'Tenant Reativado', color: 'text-blue-400 bg-blue-900/30' },
+  plano_alterado: { label: 'Plano Alterado', color: 'text-yellow-400 bg-yellow-900/30' },
 }
 
 export function AuditLog() {
@@ -80,12 +80,12 @@ export function AuditLog() {
                       <td className="px-5 py-3.5 text-gray-400 text-xs hidden md:table-cell">
                         {log.detalhes ? (
                           <span className="font-mono">
-                            {(log.detalhes as Record<string, string>)['nome'] ?? JSON.stringify(log.detalhes)}
+                            {(log.detalhes as Record<string, string>)['nome'] || String(JSON.stringify(log.detalhes))}
                           </span>
                         ) : '—'}
                       </td>
                       <td className="px-5 py-3.5 text-gray-500 text-xs font-mono hidden lg:table-cell">
-                        {log.ip_address ?? '—'}
+                        {(log.ip_address as string) || '—'}
                       </td>
                     </tr>
                   )

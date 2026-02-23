@@ -1,0 +1,57 @@
+﻿src/hooks/useDocumentos.ts(2,25): error TS2305: Module '"@/types/database"' has no exported member 'DocumentoTipo'.
+src/hooks/useDocumentos.ts(81,5): error TS2322: Type 'string | null' is not assignable to type 'string'.
+  Type 'null' is not assignable to type 'string'.
+src/hooks/usePautaItens.ts(40,8): error TS2769: No overload matches this call.
+  Overload 1 of 2, '(values: { created_at?: string | undefined; em_votacao?: boolean | undefined; id?: string | undefined; ordem: number; proposicao_id: string; sessao_id: string; tenant_id: string; }, options?: { ...; } | undefined): PostgrestFilterBuilder<...>', gave the following error.
+    Argument of type '{ sessao_id: string; proposicao_id: string; ordem: number; }' is not assignable to parameter of type '{ created_at?: string | undefined; em_votacao?: boolean | undefined; id?: string | undefined; ordem: number; proposicao_id: string; sessao_id: string; tenant_id: string; }'.
+      Property 'tenant_id' is missing in type '{ sessao_id: string; proposicao_id: string; ordem: number; }' but required in type '{ created_at?: string | undefined; em_votacao?: boolean | undefined; id?: string | undefined; ordem: number; proposicao_id: string; sessao_id: string; tenant_id: string; }'.
+  Overload 2 of 2, '(values: { created_at?: string | undefined; em_votacao?: boolean | undefined; id?: string | undefined; ordem: number; proposicao_id: string; sessao_id: string; tenant_id: string; }[], options?: { ...; } | undefined): PostgrestFilterBuilder<...>', gave the following error.
+    Object literal may only specify known properties, and 'sessao_id' does not exist in type '{ created_at?: string | undefined; em_votacao?: boolean | undefined; id?: string | undefined; ordem: number; proposicao_id: string; sessao_id: string; tenant_id: string; }[]'.
+src/hooks/useProposicoes.ts(3,25): error TS2305: Module '"@/types/database"' has no exported member 'ProposicaoStatus'.
+src/hooks/useProposicoes.ts(3,43): error TS2305: Module '"@/types/database"' has no exported member 'ProposicaoTipo'.
+src/hooks/useProtocolos.ts(2,25): error TS2305: Module '"@/types/database"' has no exported member 'ProtocoloStatus'.
+src/hooks/useProtocolos.ts(2,42): error TS2305: Module '"@/types/database"' has no exported member 'ProtocoloTipo'.
+src/hooks/useSessoes.ts(2,25): error TS2305: Module '"@/types/database"' has no exported member 'SessaoTipo'.
+src/hooks/useTeletrabalho.ts(2,25): error TS2305: Module '"@/types/database"' has no exported member 'TeletrabalhoStatus'.
+src/pages/backoffice/Documentos.tsx(232,49): error TS2339: Property 'assinante_nome' does not exist on type 'string | number | boolean | { [key: string]: Json | undefined; } | Json[]'.
+  Property 'assinante_nome' does not exist on type 'string'.
+src/pages/backoffice/Documentos.tsx(238,57): error TS2339: Property 'assinante_cpf' does not exist on type 'string | number | boolean | { [key: string]: Json | undefined; } | Json[]'.
+  Property 'assinante_cpf' does not exist on type 'string'.
+src/pages/backoffice/Documentos.tsx(244,58): error TS2339: Property 'data_assinatura' does not exist on type 'string | number | boolean | { [key: string]: Json | undefined; } | Json[]'.
+  Property 'data_assinatura' does not exist on type 'string'.
+src/pages/backoffice/Documentos.tsx(250,49): error TS2339: Property 'conexao_ip' does not exist on type 'string | number | boolean | { [key: string]: Json | undefined; } | Json[]'.
+  Property 'conexao_ip' does not exist on type 'string'.
+src/pages/backoffice/Documentos.tsx(256,49): error TS2339: Property 'tipo' does not exist on type 'string | number | boolean | { [key: string]: Json | undefined; } | Json[]'.
+  Property 'tipo' does not exist on type 'string'.
+src/pages/backoffice/Legislativo.tsx(6,15): error TS2305: Module '"@/types/database"' has no exported member 'ProposicaoStatus'.
+src/pages/backoffice/LeiDetalhe.tsx(4,15): error TS2305: Module '"@/types/database"' has no exported member 'LeiStatus'.
+src/pages/backoffice/LeisList.tsx(4,15): error TS2305: Module '"@/types/database"' has no exported member 'LeiStatus'.
+src/pages/backoffice/Ouvidoria.tsx(50,9): error TS2322: Type '{ title: string; description: string; icon: ForwardRefExoticComponent<Omit<LucideProps, "ref"> & RefAttributes<SVGSVGElement>>; }' is not assignable to type 'IntrinsicAttributes & PageHeaderProps'.
+  Property 'icon' does not exist on type 'IntrinsicAttributes & PageHeaderProps'.
+src/pages/backoffice/Plenario.tsx(4,15): error TS2305: Module '"@/types/database"' has no exported member 'SessaoStatus'.
+src/pages/backoffice/Plenario.tsx(4,29): error TS2305: Module '"@/types/database"' has no exported member 'SessaoTipo'.
+src/pages/backoffice/ProposicaoDetalhe.tsx(4,15): error TS2305: Module '"@/types/database"' has no exported member 'ProposicaoStatus'.
+src/pages/backoffice/ProposicaoNova.tsx(4,15): error TS2305: Module '"@/types/database"' has no exported member 'ProposicaoTipo'.
+src/pages/backoffice/Teletrabalho.tsx(4,15): error TS2305: Module '"@/types/database"' has no exported member 'TeletrabalhoStatus'.
+src/pages/backoffice/Usuarios.tsx(5,25): error TS2305: Module '"@/types/database"' has no exported member 'UserRole'.
+src/pages/master/AuditLog.tsx(88,25): error TS2322: Type '{}' is not assignable to type 'ReactNode'.
+src/pages/master/CamarasList.tsx(3,25): error TS2305: Module '"@/types/database"' has no exported member 'TenantPlano'.
+src/pages/master/CamarasList.tsx(3,38): error TS2305: Module '"@/types/database"' has no exported member 'TenantSituacao'.
+src/pages/master/CamarasList.tsx(205,56): error TS2345: Argument of type 'string | null' is not assignable to parameter of type 'string'.
+  Type 'null' is not assignable to type 'string'.
+src/pages/master/MasterDashboard.tsx(2,25): error TS2305: Module '"@/types/database"' has no exported member 'TenantSituacao'.
+src/pages/master/ProvisionarCamara.tsx(2,15): error TS2305: Module '"@/types/database"' has no exported member 'TenantPlano'.
+src/pages/transparencia/Verificador.tsx(103,53): error TS2339: Property 'assinante_nome' does not exist on type 'string | number | boolean | { [key: string]: Json | undefined; } | Json[]'.
+  Property 'assinante_nome' does not exist on type 'string'.
+src/pages/transparencia/Verificador.tsx(109,61): error TS2339: Property 'assinante_cpf' does not exist on type 'string | number | boolean | { [key: string]: Json | undefined; } | Json[]'.
+  Property 'assinante_cpf' does not exist on type 'string'.
+src/pages/transparencia/Verificador.tsx(115,62): error TS2339: Property 'data_assinatura' does not exist on type 'string | number | boolean | { [key: string]: Json | undefined; } | Json[]'.
+  Property 'data_assinatura' does not exist on type 'string'.
+src/pages/transparencia/Verificador.tsx(122,53): error TS2339: Property 'conexao_ip' does not exist on type 'string | number | boolean | { [key: string]: Json | undefined; } | Json[]'.
+  Property 'conexao_ip' does not exist on type 'string'.
+src/pages/transparencia/Verificador.tsx(128,53): error TS2339: Property 'tipo' does not exist on type 'string | number | boolean | { [key: string]: Json | undefined; } | Json[]'.
+  Property 'tipo' does not exist on type 'string'.
+src/pages/transparencia/Verificador.tsx(159,53): error TS2339: Property 'tipo' does not exist on type 'string | number | boolean | { [key: string]: Json | undefined; } | Json[]'.
+  Property 'tipo' does not exist on type 'string'.
+src/pages/transparencia/Verificador.tsx(162,100): error TS2339: Property 'tipo' does not exist on type 'string | number | boolean | { [key: string]: Json | undefined; } | Json[]'.
+  Property 'tipo' does not exist on type 'string'.

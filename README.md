@@ -164,7 +164,8 @@ supabase/
 - [x] Fase 4 — Plenário: sessões, votação eletrônica em tempo real
 - [x] Fase 5 — Administrativo & GED: upload de arquivos, teletrabalho e protocolo
 - [x] Fase 6 — Segurança Avançada: assinatura digital (ICP-Brasil) e verificação de QR Code
-- [ ] Fase 7 — Portal da Transparência: ouvidoria (e-SIC) e exportação de dados abertos
+- [x] Fase 7 — Portal da Transparência: visualização pública e ouvidoria (e-SIC)
+- [ ] Fase 7 — Portal da Transparência: exportação de dados abertos
 
 ---
 

@@ -1,6 +1,7 @@
-import { useEffect, useState, useCallback } from 'react'
 import { supabase } from '@/lib/supabase'
 import type { Database } from '@/types/database'
+import { useCallback, useEffect, useState } from 'react'
+import { useAuth } from './useAuth'
 
 type PautaItem = Database['public']['Tables']['pauta_itens']['Row'] & {
   proposicao: {
@@ -13,6 +14,7 @@ type PautaItem = Database['public']['Tables']['pauta_itens']['Row'] & {
 }
 
 export function usePautaItens(sessaoId: string) {
+  const { profile } = useAuth()
   const [itens, setItens] = useState<PautaItem[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -35,9 +37,12 @@ export function usePautaItens(sessaoId: string) {
       ? Math.max(...itens.map(i => i.ordem)) + 1
       : 1
 
+    if (!profile?.tenant_id) return false
+
     const { error } = await supabase
       .from('pauta_itens')
       .insert({
+        tenant_id: profile.tenant_id,
         sessao_id: sessaoId,
         proposicao_id: proposicaoId,
         ordem: proxOrdem,

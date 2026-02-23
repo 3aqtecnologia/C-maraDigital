@@ -100,32 +100,32 @@ export function Verificador() {
                 <div className="space-y-1">
                   <p className="text-xs text-gray-400 uppercase font-bold tracking-wider">Assinado por</p>
                   <p className="text-gray-900 font-bold underline decoration-blue-200 decoration-2 underline-offset-4">
-                    {documento.assinatura_metadata?.assinante_nome ?? 'Usuário Identificado'}
+                    {(documento.assinatura_metadata as any)?.assinante_nome ?? 'Usuário Identificado'}
                   </p>
                 </div>
                 <div className="space-y-1">
                   <p className="text-xs text-gray-400 uppercase font-bold tracking-wider">CPF do Assinante</p>
                   <p className="text-gray-900 font-medium">
-                    {maskCPF(documento.assinatura_metadata?.assinante_cpf)}
+                    {maskCPF((documento.assinatura_metadata as any)?.assinante_cpf)}
                   </p>
                 </div>
                 <div className="space-y-1">
                   <p className="text-xs text-gray-400 uppercase font-bold tracking-wider">Data da Assinatura</p>
                   <p className="text-gray-900 font-medium">
-                    {new Date(documento.assinatura_metadata?.data_assinatura).toLocaleString('pt-BR')}
+                    {new Date((documento.assinatura_metadata as any)?.data_assinatura).toLocaleString('pt-BR')}
                   </p>
                 </div>
                 <div className="space-y-1">
                   <p className="text-xs text-gray-400 uppercase font-bold tracking-wider">IP de Conexão</p>
                   <div className="flex items-center gap-1.5 text-gray-600 font-mono text-xs">
                     <Globe size={12} className="text-gray-400" />
-                    {documento.assinatura_metadata?.conexao_ip ?? '—'}
+                    {(documento.assinatura_metadata as any)?.conexao_ip ?? '—'}
                   </div>
                 </div>
                 <div className="space-y-1 col-span-1 md:col-span-2">
                   <p className="text-xs text-gray-400 uppercase font-bold tracking-wider">Classificação Legal (Lei 14.063/2020)</p>
                   <p className="text-blue-700 font-bold uppercase text-sm">
-                    {documento.assinatura_metadata?.tipo}
+                    {(documento.assinatura_metadata as any)?.tipo}
                   </p>
                 </div>
               </div>
@@ -156,10 +156,10 @@ export function Verificador() {
                 </p>
                 <div className="flex items-center gap-3 p-3 bg-white rounded-xl border border-gray-200">
                   <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center text-white font-bold text-xs ring-4 ring-blue-50">
-                    {documento.assinatura_metadata?.tipo?.includes('Qualificada') ? 'Q' : 'A'}
+                    {String((documento.assinatura_metadata as any)?.tipo || '').includes('Qualificada') ? 'Q' : 'A'}
                   </div>
                   <div>
-                    <p className="text-xs font-bold text-gray-900">{documento.assinatura_metadata?.tipo}</p>
+                    <p className="text-xs font-bold text-gray-900">{(documento.assinatura_metadata as any)?.tipo}</p>
                     <p className="text-[10px] text-gray-400">Validade Jurídica Plena e Integridade Garantida</p>
                   </div>
                 </div>

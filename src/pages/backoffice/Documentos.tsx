@@ -229,31 +229,31 @@ function CertificateModal({ documento, onClose }: CertificateModalProps) {
             <div className="flex justify-between py-2 border-b border-gray-50">
               <span className="text-gray-400">Assinado por:</span>
               <span className="text-gray-900 font-bold ml-4">
-                {documento.assinatura_metadata?.assinante_nome ?? 'Usuário Identificado'}
+                {(documento.assinatura_metadata as any)?.assinante_nome ?? 'Usuário Identificado'}
               </span>
             </div>
             <div className="flex justify-between py-2 border-b border-gray-50">
               <span className="text-gray-400">CPF:</span>
               <span className="text-gray-900 font-medium">
-                {maskCPF(documento.assinatura_metadata?.assinante_cpf)}
+                {maskCPF((documento.assinatura_metadata as any)?.assinante_cpf)}
               </span>
             </div>
             <div className="flex justify-between py-2 border-b border-gray-50">
               <span className="text-gray-400">Data e Hora:</span>
               <span className="text-gray-900 font-medium">
-                {new Date(documento.assinatura_metadata?.data_assinatura ?? documento.created_at).toLocaleString('pt-BR')}
+                {new Date((documento.assinatura_metadata as any)?.data_assinatura ?? documento.created_at).toLocaleString('pt-BR')}
               </span>
             </div>
             <div className="flex justify-between py-2 border-b border-gray-50">
               <span className="text-gray-400">IP de Conexão:</span>
               <span className="text-gray-900 font-medium font-mono text-xs">
-                {documento.assinatura_metadata?.conexao_ip ?? '—'}
+                {(documento.assinatura_metadata as any)?.conexao_ip ?? '—'}
               </span>
             </div>
             <div className="flex flex-col gap-1 py-1">
               <span className="text-gray-400 text-xs">Classificação Legal (Lei 14.063/2020):</span>
               <span className="text-blue-700 font-bold text-xs uppercase">
-                {documento.assinatura_metadata?.tipo ?? 'Assinatura Eletrônica Avançada'}
+                {(documento.assinatura_metadata as any)?.tipo ?? 'Assinatura Eletrônica Avançada'}
               </span>
             </div>
             <div className="flex flex-col gap-1 pt-1">

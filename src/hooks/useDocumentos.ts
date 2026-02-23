@@ -78,7 +78,7 @@ export function useDocumentos() {
 
     const link = document.createElement('a')
     link.href = data.signedUrl
-    link.download = doc.arquivo_nome
+    link.download = doc.arquivo_nome || 'documento'
     link.target = '_blank'
     link.click()
   }

@@ -202,7 +202,7 @@ export function CamarasList() {
 
                 <div className="pt-4 mt-2 border-t border-gray-700/50 flex gap-2">
                   <button
-                    onClick={() => impersonateTenant?.(camara.id)}
+                    onClick={() => impersonateTenant?.(camara.id!)}
                     className="flex-1 flex items-center justify-center gap-2 bg-gray-700 hover:bg-gray-600 text-white py-2 rounded-lg text-xs font-semibold transition-colors"
                   >
                     <ShieldCheck size={14} />

@@ -83,7 +83,7 @@
   - [x] Proposição pública → `src/pages/transparencia/ProposicaoPublicaDetalhe.tsx`
   - [x] Lei pública → `src/pages/transparencia/LeiPublicaDetalhe.tsx`
 - [x] Criar migration de views e políticas para dados públicos → `supabase/migrations/008_public_transparency.sql`
-- [ ] Desenvolver Ouvidoria e e-SIC (Sistema de tickets)
+- [x] Desenvolver Ouvidoria e e-SIC (Sistema de tickets)
 - [ ] Desenvolver Exportação em Dados Abertos (CSV, JSON)
 
 ---
@@ -100,10 +100,9 @@
 | Fase 5 — Plenário e Votação | ✅ Completa | 5/5 |
 | Fase 5.5 — Módulos de Suporte (extra) | ✅ Completa | 3/3 |
 | Fase 6 — Administrativo e GED | ✅ Completa | 8/8 |
-| Fase 7 — Portal da Transparência | 🟡 Em andamento | 4/6 |
+| Fase 7 — Portal da Transparência | 🟡 Em andamento | 5/6 |
 
 **Próximos passos prioritários:**
-1. Fase 7 — Desenvolver Ouvidoria / e-SIC (sistema de tickets para cidadãos)
-2. Fase 7 — Exportação em Dados Abertos (CSV, JSON) no portal público
-3. Técnico — Implementar code-splitting (`manualChunks`) para reduzir bundle (~1 MB atualmente)
-4. Técnico — Configurar SMTP customizado no Supabase (Gmail App Password) para recuperação de senha
+1. Fase 7 — Exportação em Dados Abertos (CSV, JSON) no portal público
+2. Técnico — Implementar code-splitting (`manualChunks`) para reduzir bundle (~1 MB atualmente)
+3. Técnico — Configurar SMTP customizado no Supabase (Gmail App Password) para recuperação de senha
