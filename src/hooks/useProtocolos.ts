@@ -5,7 +5,7 @@ import { useAuth } from './useAuth'
 
 type Protocolo = Database['public']['Tables']['protocolos']['Row']
 
-export type { Protocolo, ProtocoloTipo, ProtocoloStatus }
+export type { Protocolo, ProtocoloStatus, ProtocoloTipo }
 
 export function useProtocolos() {
   const { profile } = useAuth()
@@ -46,8 +46,8 @@ export function useProtocolos() {
       p_ano: ano,
     })
 
-    if (error || !data) return '0001'
-    return data as string
+    if (error || typeof data !== 'string') return '0001'
+    return data
   }
 
   async function criarProtocolo(payload: {

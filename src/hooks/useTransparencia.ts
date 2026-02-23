@@ -5,9 +5,14 @@ import { useCallback, useEffect, useState } from 'react'
 type Proposicao = Database['public']['Tables']['proposicoes']['Row']
 type Lei = Database['public']['Tables']['leis']['Row']
 type Sessao = Database['public']['Tables']['sessoes']['Row']
+type Tramitacao = Database['public']['Tables']['tramitacoes']['Row']
 
 export interface ProposicaoPublica extends Proposicao {
   autor: { nome: string; partido: string | null } | null
+}
+
+export interface TramitacaoPublica extends Tramitacao {
+  responsavel: { nome: string } | null
 }
 
 export function useTransparencia(tenantId?: string) {
@@ -105,7 +110,7 @@ export function useTransparencia(tenantId?: string) {
 // Hook para detalhe público de proposição
 export function useProposicaoPublica(id: string) {
   const [proposicao, setProposicao] = useState<ProposicaoPublica | null>(null)
-  const [tramitacoes, setTramitacoes] = useState<any[]>([])
+  const [tramitacoes, setTramitacoes] = useState<TramitacaoPublica[]>([])
   const [loading, setLoading] = useState(true)
 
   const fetch = useCallback(async () => {
@@ -127,7 +132,7 @@ export function useProposicaoPublica(id: string) {
     ])
 
     setProposicao(propResp.data as unknown as ProposicaoPublica)
-    setTramitacoes(tramResp.data || [])
+    setTramitacoes((tramResp.data || []) as unknown as TramitacaoPublica[])
     setLoading(false)
   }, [id])
 

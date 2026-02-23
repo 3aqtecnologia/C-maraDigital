@@ -13,46 +13,24 @@ export function useAssinatura() {
    * Simulação de integração com Gov.br / ICP-Brasil
    * Em produção, isso redirecionaria para o fluxo OAuth2 do Gov.br
    */
-  const assinarDocumento = useCallback(async (documentoId: string) => {
+  const assinarDocumento = useCallback(async (documentoId: string, nivel_govbr: 'Prata' | 'Ouro' = 'Prata') => {
     if (!profile?.tenant_id || !user?.id) return { error: 'Usuário não autenticado' }
 
     setLoading(true)
 
     try {
-      // 1. Cria o registro da intenção de assinatura
-      const { data: signatureReq, error: reqError } = await supabase
-        .from('assinaturas')
-        .insert({
-          tenant_id: profile.tenant_id,
-          documento_id: documentoId,
-          user_id: user.id,
-          status: 'pendente'
-        })
-        .select()
-        .single()
+      // Chamada para a Edge Function real que calcula o HASH do arquivo e valida
+      const { data, error: fnError } = await supabase.functions.invoke('sign-document', {
+        body: { documento_id: documentoId, nivel_govbr }
+      })
 
-      if (reqError) throw new Error(reqError.message)
-
-      // 2. Simula o "Handshake" com a API de Assinatura (Gov.br)
-      // Aqui o usuário seria enviado para o Gov.br e voltaria com um token.
-      // Vamos simular um delay e o sucesso da operação.
-      await new Promise(resolve => setTimeout(resolve, 2000))
-
-      // 3. Confirmar a assinatura (O backend do Gov.br faria este callback em prod)
-      const { error: updateError } = await supabase
-        .from('assinaturas')
-        .update({
-          status: 'assinado',
-          token: `govbr_simulated_${crypto.randomUUID()}`,
-          signed_at: new Date().toISOString()
-        })
-        .eq('id', signatureReq.id)
-
-      if (updateError) throw new Error(updateError.message)
+      if (fnError) throw new Error(fnError.message)
+      if (data.error) throw new Error(data.error)
 
       return { error: null }
-    } catch (err: any) {
-      return { error: err.message }
+    } catch (err) {
+      console.error('Erro na assinatura:', err)
+      return { error: err instanceof Error ? err.message : String(err) }
     } finally {
       setLoading(false)
     }

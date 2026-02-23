@@ -27,6 +27,7 @@ export function PortalPublico() {
     if (tenant?.id) {
       handleSearch()
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tenant?.id, activeTab])
 
   async function handleSearch() {

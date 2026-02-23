@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
+import { useEffect, useState } from 'react'
 import { useAuth } from './useAuth'
 import type { ProposicaoComAutor } from './useProposicoes'
 
@@ -10,7 +10,7 @@ interface DashboardStats {
   leisAprovadas: number
 }
 
-interface ProposicoesRecentes extends ProposicaoComAutor {}
+type ProposicoesRecentes = ProposicaoComAutor
 
 interface ProximaSessao {
   id: string

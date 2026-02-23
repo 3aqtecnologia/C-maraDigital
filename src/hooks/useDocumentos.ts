@@ -5,8 +5,7 @@ import { useAuth } from './useAuth'
 
 type Documento = Database['public']['Tables']['documentos']['Row']
 
-export type { DocumentoTipo }
-export type { Documento }
+export type { Documento, DocumentoTipo }
 
 export function useDocumentos() {
   const { profile } = useAuth()

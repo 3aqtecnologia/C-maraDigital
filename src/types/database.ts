@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // Tipos para o banco de dados Supabase
 // Para regenerar: npx supabase gen types typescript --project-id joecchvnzxcnsgzyugdh
 
@@ -185,6 +186,7 @@ export interface Database {
           ativo: boolean
           created_at: string
           updated_at: string
+          cpf: string | null
         }
         Insert: {
           tenant_id: string
@@ -196,6 +198,9 @@ export interface Database {
           partido?: string | null
           matricula?: string | null
           ativo?: boolean
+          created_at?: string
+          updated_at?: string
+          cpf?: string | null
         }
         Update: {
           nome?: string
@@ -205,6 +210,8 @@ export interface Database {
           partido?: string | null
           matricula?: string | null
           ativo?: boolean
+          updated_at?: string
+          cpf?: string | null
         }
         Relationships: []
       }
@@ -405,6 +412,8 @@ export interface Database {
           arquivo_mime: string | null
           enviado_por: string | null
           assinado: boolean
+          arquivo_hash: string | null
+          assinatura_metadata: any | null
           created_at: string
           updated_at: string
         }
@@ -419,12 +428,16 @@ export interface Database {
           arquivo_mime?: string | null
           enviado_por?: string | null
           assinado?: boolean
+          arquivo_hash?: string | null
+          assinatura_metadata?: any | null
         }
         Update: {
           nome?: string
           tipo?: DocumentoTipo
           descricao?: string | null
           assinado?: boolean
+          arquivo_hash?: string | null
+          assinatura_metadata?: any | null
         }
         Relationships: []
       }
@@ -580,6 +593,13 @@ export interface Database {
         Args: {
           p_tenant_id: string
           p_tipo: string
+          p_ano: number
+        }
+        Returns: string
+      }
+      next_protocolo_numero: {
+        Args: {
+          p_tenant_id: string
           p_ano: number
         }
         Returns: string

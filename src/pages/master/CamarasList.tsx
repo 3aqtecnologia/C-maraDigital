@@ -1,6 +1,6 @@
 import { useAuth } from '@/hooks/useAuth'
 import { supabase } from '@/lib/supabase'
-import type { Database, TenantSituacao } from '@/types/database'
+import type { Database, TenantPlano, TenantSituacao } from '@/types/database'
 import { AlertTriangle, Building2, ExternalLink, KeyRound, MoreVertical, Save, Search, Settings, ShieldCheck, Trash2, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useLocation } from 'react-router-dom'
@@ -20,7 +20,7 @@ export function CamarasList() {
 
   const [camaras, setCamaras] = useState<TenantOverview[]>([])
   const [loading, setLoading] = useState(true)
-  const [search, setSearch] = useState((location.state as any)?.preSearch || '')
+  const [search, setSearch] = useState((location.state as { preSearch?: string })?.preSearch || '')
 
   const [editingCamara, setEditingCamara] = useState<TenantOverview | null>(null)
   const [editForm, setEditForm] = useState<Partial<TenantOverview>>({})
@@ -86,6 +86,7 @@ export function CamarasList() {
   async function handleSave() {
     if (!editingCamara) return
     setSaving(true)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { error } = await (supabase.rpc as any)('admin_update_tenant', {
       p_tenant_id: editingCamara.id,
       p_nome: editForm.nome,
@@ -301,7 +302,7 @@ export function CamarasList() {
                       <label className="block text-xs text-gray-400 mb-1 font-medium">Plano de Assinatura</label>
                       <select
                         value={editForm.plano || 'basico'}
-                        onChange={e => setEditForm({ ...editForm, plano: e.target.value as any })}
+                        onChange={e => setEditForm({ ...editForm, plano: e.target.value as TenantPlano })}
                         className="w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-200 focus:ring-1 focus:ring-indigo-500 capitalize"
                       >
                         <option value="basico">Básico</option>
@@ -313,7 +314,7 @@ export function CamarasList() {
                       <label className="block text-xs text-gray-400 mb-1 font-medium">Status Operacional</label>
                       <select
                         value={editForm.situacao || 'ativo'}
-                        onChange={e => setEditForm({ ...editForm, situacao: e.target.value as any })}
+                        onChange={e => setEditForm({ ...editForm, situacao: e.target.value as TenantSituacao })}
                         className={`w-full bg-gray-900 border rounded-lg px-3 py-2 text-sm text-gray-200 focus:ring-1 focus:outline-none capitalize font-semibold ${editForm.situacao === 'cancelado' ? 'border-red-500/50 text-red-400' :
                           editForm.situacao === 'suspenso' ? 'border-orange-500/50 text-orange-400' : 'border-gray-700 focus:ring-indigo-500'
                           }`}

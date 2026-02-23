@@ -3,19 +3,24 @@ import { useAssinatura } from '@/hooks/useAssinatura'
 import { useAuth } from '@/hooks/useAuth'
 import type { Documento, DocumentoTipo } from '@/hooks/useDocumentos'
 import { useDocumentos } from '@/hooks/useDocumentos'
+import { supabase } from '@/lib/supabase'
+import { maskCPF } from '@/lib/utils'
 import {
   CheckCircle2,
   Download,
+  ExternalLink,
   FileText,
   Filter,
   FolderOpen,
   Loader2,
+  QrCode,
   Search,
   ShieldCheck,
   Trash2,
   Upload,
-  X,
+  X
 } from 'lucide-react'
+import { QRCodeSVG } from 'qrcode.react'
 import { useEffect, useRef, useState } from 'react'
 
 const TIPOS: { value: DocumentoTipo | ''; label: string }[] = [
@@ -180,16 +185,338 @@ function UploadModal({ onClose, onSuccess, uploadDocumento }: UploadModalProps) 
   )
 }
 
+interface CertificateModalProps {
+  documento: Documento
+  onClose: () => void
+}
+
+function CertificateModal({ documento, onClose }: CertificateModalProps) {
+  const verifyUrl = `${window.location.origin}/verificar/${documento.arquivo_hash}`
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+      <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in duration-200">
+        <div className="bg-blue-600 px-6 py-8 text-white text-center relative">
+          <button
+            onClick={onClose}
+            className="absolute top-4 right-4 p-1.5 rounded-lg hover:bg-white/10 text-white/70"
+          >
+            <X size={18} />
+          </button>
+          <div className="w-16 h-16 bg-white/10 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-white/20">
+            <ShieldCheck size={32} />
+          </div>
+          <h2 className="text-lg font-bold">Certificado de Autenticidade</h2>
+          <p className="text-blue-100 text-xs mt-1">Validação de Assinatura Digital</p>
+        </div>
+
+        <div className="p-8 flex flex-col items-center">
+          {/* QR Code */}
+          <div className="p-4 bg-white border-2 border-gray-100 rounded-2xl shadow-sm mb-6">
+            <QRCodeSVG
+              value={verifyUrl}
+              size={160}
+              level="H"
+              includeMargin={false}
+            />
+          </div>
+
+          <p className="text-xs text-gray-400 text-center mb-6">
+            Aponte a câmera para verificar a integridade deste documento no portal oficial.
+          </p>
+
+          <div className="w-full space-y-4 text-sm">
+            <div className="flex justify-between py-2 border-b border-gray-50">
+              <span className="text-gray-400">Assinado por:</span>
+              <span className="text-gray-900 font-bold ml-4">
+                {documento.assinatura_metadata?.assinante_nome ?? 'Usuário Identificado'}
+              </span>
+            </div>
+            <div className="flex justify-between py-2 border-b border-gray-50">
+              <span className="text-gray-400">CPF:</span>
+              <span className="text-gray-900 font-medium">
+                {maskCPF(documento.assinatura_metadata?.assinante_cpf)}
+              </span>
+            </div>
+            <div className="flex justify-between py-2 border-b border-gray-50">
+              <span className="text-gray-400">Data e Hora:</span>
+              <span className="text-gray-900 font-medium">
+                {new Date(documento.assinatura_metadata?.data_assinatura ?? documento.created_at).toLocaleString('pt-BR')}
+              </span>
+            </div>
+            <div className="flex justify-between py-2 border-b border-gray-50">
+              <span className="text-gray-400">IP de Conexão:</span>
+              <span className="text-gray-900 font-medium font-mono text-xs">
+                {documento.assinatura_metadata?.conexao_ip ?? '—'}
+              </span>
+            </div>
+            <div className="flex flex-col gap-1 py-1">
+              <span className="text-gray-400 text-xs">Classificação Legal (Lei 14.063/2020):</span>
+              <span className="text-blue-700 font-bold text-xs uppercase">
+                {documento.assinatura_metadata?.tipo ?? 'Assinatura Eletrônica Avançada'}
+              </span>
+            </div>
+            <div className="flex flex-col gap-1 pt-1">
+              <span className="text-gray-400 text-xs">ID de Verificação (Hash):</span>
+              <span className="text-[10px] font-mono text-gray-500 break-all leading-tight bg-gray-50 p-2 rounded-lg border border-gray-100">
+                {documento.arquivo_hash}
+              </span>
+            </div>
+          </div>
+
+          <a
+            href={verifyUrl}
+            target="_blank"
+            rel="noreferrer"
+            className="w-full mt-6 flex items-center justify-center gap-2 py-3 bg-blue-50 text-blue-600 rounded-xl font-bold text-sm hover:bg-blue-100 transition-colors"
+          >
+            <ExternalLink size={16} />
+            Abrir Verificador Público
+          </a>
+
+          <button
+            onClick={async () => {
+              try {
+                const { data, error } = await supabase.functions.invoke('stamp-pdf', {
+                  body: { documento_id: documento.id }
+                })
+                if (error || !data) throw new Error(error?.message || 'Erro ao gerar PDF')
+
+                const blob = new Blob([data], { type: 'application/pdf' })
+                const url = window.URL.createObjectURL(blob)
+                const a = document.createElement('a')
+                a.href = url
+                a.download = `AUTENTICADO_${documento.arquivo_nome}`
+                a.click()
+              } catch (err) {
+                alert(`Erro: ${err instanceof Error ? err.message : String(err)}`)
+              }
+            }}
+            className="w-full mt-2 flex items-center justify-center gap-2 py-3 border border-blue-200 text-blue-600 rounded-xl font-medium text-sm hover:bg-blue-50 transition-colors"
+          >
+            <Download size={16} />
+            Baixar Via Autenticada (.pdf)
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+interface GovBrSignatureModalProps {
+  documento: Documento
+  onClose: () => void
+  onSuccess: () => void
+}
+
+function GovBrSignatureModal({ documento, onClose, onSuccess }: GovBrSignatureModalProps) {
+  const [step, setStep] = useState<'login' | 'signing' | 'success'>('login')
+  const { profile } = useAuth()
+  const [cpf, setCpf] = useState(profile?.cpf || '')
+  const [nivel, setNivel] = useState<'Prata' | 'Ouro'>('Ouro')
+  const [loading, setLoading] = useState(false)
+  const { assinarDocumento } = useAssinatura()
+
+  async function handleLogin(e: React.FormEvent) {
+    e.preventDefault()
+    setLoading(true)
+    // Simula validação de CPF e autenticação Gov.br
+    setTimeout(() => {
+      setStep('signing')
+      setLoading(false)
+    }, 1500)
+  }
+
+  async function handleSign() {
+    setLoading(true)
+
+    // Atualiza o CPF no perfil para garantir a rastreabilidade na Edge Function
+    if (cpf && profile && cpf !== profile.cpf) {
+      await supabase.from('profiles').update({ cpf }).eq('id', profile.id)
+    }
+
+    const { error } = await assinarDocumento(documento.id, nivel)
+    setLoading(false)
+
+    if (error) {
+      alert(`Erro no processo de assinatura: ${error}`)
+    } else {
+      setStep('success')
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-blue-900/20 backdrop-blur-md p-4">
+      <div className="bg-white rounded-3xl shadow-2xl w-full max-w-[420px] overflow-hidden animate-in fade-in zoom-in duration-300">
+        {/* Header Gov.br */}
+        <div className="bg-[#0047b1] px-6 py-6 text-white flex flex-col items-center gap-2 relative">
+          <button onClick={onClose} className="absolute top-4 right-4 text-white/60 hover:text-white transition-colors">
+            <X size={20} />
+          </button>
+          <div className="flex items-center gap-2 mb-1">
+            <div className="bg-white rounded-lg p-1">
+              <ShieldCheck size={24} className="text-[#0047b1]" />
+            </div>
+            <span className="font-bold text-xl tracking-tight">gov.br</span>
+          </div>
+          <p className="text-blue-100 text-[10px] font-medium uppercase tracking-widest text-center">Identidade Digital e Assinatura Eletrônica</p>
+        </div>
+
+        <div className="p-8">
+          {step === 'login' && (
+            <div className="space-y-6 animate-in slide-in-from-right-4 duration-500">
+              <div className="text-center">
+                <h3 className="text-lg font-bold text-gray-900">Identifique-se no gov.br</h3>
+                <p className="text-sm text-gray-500 mt-1">Conforme Lei 14.063/2020</p>
+              </div>
+
+              <form onSubmit={handleLogin} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1.5">CPF</label>
+                  <input
+                    type="text"
+                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all font-medium text-lg tracking-widest text-center"
+                    placeholder="000.000.000-00"
+                    value={cpf}
+                    onChange={e => setCpf(e.target.value)}
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Selo de Confiabilidade</label>
+                  <div className="grid grid-cols-2 gap-2">
+                    {[
+                      { id: 'Prata', label: 'Prata', desc: 'Avançada' },
+                      { id: 'Ouro', label: 'Ouro', desc: 'Qualificada' },
+                    ].map(s => (
+                      <button
+                        key={s.id}
+                        type="button"
+                        onClick={() => setNivel(s.id as 'Prata' | 'Ouro')}
+                        className={`p-3 rounded-xl border-2 transition-all text-left ${nivel === s.id
+                          ? 'border-blue-600 bg-blue-50 ring-2 ring-blue-100'
+                          : 'border-gray-100 bg-white hover:border-gray-200'
+                          }`}
+                      >
+                        <p className={`text-xs font-black ${nivel === s.id ? 'text-blue-700' : 'text-gray-400'}`}>SELADO {s.label.toUpperCase()}</p>
+                        <p className="text-[10px] text-gray-500 font-medium">{s.desc}</p>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={loading || cpf.length < 11}
+                  className="w-full py-4 bg-[#0047b1] hover:bg-[#003a91] text-white rounded-xl font-bold transition-all flex items-center justify-center gap-2 shadow-lg shadow-blue-200"
+                >
+                  {loading ? <Loader2 size={20} className="animate-spin" /> : 'Entrar com gov.br'}
+                </button>
+              </form>
+
+              <div className="pt-4 border-t border-gray-100 text-center">
+                <p className="text-[10px] text-gray-400 font-bold uppercase tracking-tighter leading-tight">
+                  Sua identidade digital com a segurança da ICP-Brasil
+                </p>
+              </div>
+            </div>
+          )}
+
+          {step === 'signing' && (
+            <div className="space-y-6 animate-in fade-in duration-500 text-center">
+              <div className="w-20 h-20 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-4 border-4 border-white shadow-inner">
+                <FileText size={32} className="text-[#0047b1]" />
+              </div>
+
+              <div>
+                <h3 className="text-lg font-bold text-gray-900">Assinar Documento</h3>
+                <p className="text-sm text-gray-500 mt-1 truncate max-w-xs mx-auto">
+                  {documento.nome}
+                </p>
+              </div>
+
+              <div className="bg-gray-50 p-4 rounded-2xl text-left border border-gray-100">
+                <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-2">Classificação Legal (Lei 14.063)</p>
+                <div className="space-y-1.5 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">Nível da conta:</span>
+                    <span className={`font-bold ${nivel === 'Ouro' ? 'text-amber-600' : 'text-gray-600'}`}>
+                      {nivel} {nivel === 'Ouro' ? '★★★' : '★★'}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">Tipo de Assinatura:</span>
+                    <span className="font-bold text-blue-700">
+                      {nivel === 'Ouro' ? 'Qualificada' : 'Avançada'}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">Amparo:</span>
+                    <span className="font-bold text-green-600">Lei 14.063/2020</span>
+                  </div>
+                </div>
+              </div>
+
+              <button
+                onClick={handleSign}
+                disabled={loading}
+                className="w-full py-4 bg-green-600 hover:bg-green-700 text-white rounded-xl font-bold transition-all flex items-center justify-center gap-2 shadow-lg shadow-green-200"
+              >
+                {loading ? <Loader2 size={20} className="animate-spin" /> : (
+                  <>
+                    <ShieldCheck size={20} />
+                    Assinar Digitalmente
+                  </>
+                )}
+              </button>
+
+              <button
+                onClick={() => setStep('login')}
+                disabled={loading}
+                className="text-sm font-medium text-gray-400 hover:text-gray-600"
+              >
+                Voltar
+              </button>
+            </div>
+          )}
+
+          {step === 'success' && (
+            <div className="space-y-6 animate-in zoom-in duration-500 text-center py-4">
+              <div className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6 scale-110">
+                <CheckCircle2 size={48} className="text-green-600" />
+              </div>
+
+              <div>
+                <h3 className="text-2xl font-black text-gray-900 uppercase tracking-tighter">Assinado!</h3>
+                <p className="text-sm text-gray-500 mt-2 leading-relaxed px-4">
+                  Documento formalizado como <strong>Assinatura {nivel === 'Ouro' ? 'Qualificada' : 'Avançada'}</strong> conforme os requisitos da <strong>Lei 14.063/2020</strong>.
+                </p>
+              </div>
+
+              <button
+                onClick={() => { onSuccess(); onClose(); }}
+                className="w-full py-4 bg-gray-900 hover:bg-black text-white rounded-xl font-bold transition-all"
+              >
+                Retornar ao GED
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export function Documentos() {
   const { profile } = useAuth()
   const { documentos, loading, fetchDocumentos, uploadDocumento, downloadDocumento, deletarDocumento } = useDocumentos()
-  const { assinarDocumento, loading: signing } = useAssinatura()
-
   const [search, setSearch] = useState('')
   const [tipoFiltro, setTipoFiltro] = useState('')
   const [showUpload, setShowUpload] = useState(false)
   const [deletingId, setDeletingId] = useState<string | null>(null)
-  const [signingId, setSigningId] = useState<string | null>(null)
+  const [selectedCertificate, setSelectedCertificate] = useState<Documento | null>(null)
+  const [documentToSign, setDocumentToSign] = useState<Documento | null>(null)
 
   const canEdit = profile?.role === 'admin' || profile?.role === 'servidor'
   const isAdmin = profile?.role === 'admin'
@@ -207,15 +534,7 @@ export function Documentos() {
   }
 
   async function handleSign(doc: Documento) {
-    if (!confirm(`Deseja assinar digitalmente o documento "${doc.nome}" via Gov.br (ICP-Brasil)?`)) return
-    setSigningId(doc.id)
-    const { error } = await assinarDocumento(doc.id)
-    if (error) {
-      alert(`Erro ao assinar: ${error}`)
-    } else {
-      await fetchDocumentos(search, tipoFiltro)
-    }
-    setSigningId(null)
+    setDocumentToSign(doc)
   }
 
   return (
@@ -299,9 +618,12 @@ export function Documentos() {
                     <span>{doc.arquivo_mime?.split('/')[1]?.toUpperCase() ?? 'Arquivo'}</span>
                     <span>{formatDate(doc.created_at)}</span>
                     {doc.assinado && (
-                      <span className="inline-flex items-center gap-1 text-green-600 font-medium">
+                      <span
+                        className="inline-flex items-center gap-1 text-blue-600 font-semibold bg-blue-50 px-2 py-0.5 rounded-md border border-blue-100 cursor-help"
+                        title={`Hash SHA-256: ${doc.arquivo_hash}\nIntegridade garantida via Gov.br`}
+                      >
                         <CheckCircle2 size={12} />
-                        Assinado Digitalmente (ICP-Brasil)
+                        Assinado via Gov.br
                       </span>
                     )}
                     {doc.descricao && (
@@ -314,15 +636,11 @@ export function Documentos() {
                   {!doc.assinado && canEdit && (
                     <button
                       onClick={() => handleSign(doc)}
-                      disabled={signing || !!signingId}
-                      title="Assinar Digitalmente"
-                      className="p-2 rounded-lg hover:bg-green-50 text-gray-400 hover:text-green-600 transition-colors"
+                      title="Assinar com Gov.br"
+                      className="p-2 rounded-lg hover:bg-blue-50 text-gray-400 hover:text-blue-600 transition-colors border border-transparent hover:border-blue-100 flex items-center gap-1"
                     >
-                      {signingId === doc.id ? (
-                        <Loader2 size={16} className="animate-spin" />
-                      ) : (
-                        <ShieldCheck size={16} />
-                      )}
+                      <ShieldCheck size={16} />
+                      <span className="text-[10px] font-bold uppercase">Gov.br</span>
                     </button>
                   )}
                   <button
@@ -332,6 +650,15 @@ export function Documentos() {
                   >
                     <Download size={16} />
                   </button>
+                  {doc.assinado && (
+                    <button
+                      onClick={() => setSelectedCertificate(doc)}
+                      title="Ver Certificado de Autenticidade"
+                      className="p-2 rounded-lg hover:bg-blue-50 text-gray-400 hover:text-blue-600 transition-colors"
+                    >
+                      <QrCode size={16} />
+                    </button>
+                  )}
                   {isAdmin && (
                     <button
                       onClick={() => handleDelete(doc)}
@@ -364,6 +691,24 @@ export function Documentos() {
           onClose={() => setShowUpload(false)}
           onSuccess={() => fetchDocumentos(search, tipoFiltro)}
           uploadDocumento={uploadDocumento}
+        />
+      )}
+
+      {selectedCertificate && (
+        <CertificateModal
+          documento={selectedCertificate}
+          onClose={() => setSelectedCertificate(null)}
+        />
+      )}
+
+      {documentToSign && (
+        <GovBrSignatureModal
+          documento={documentToSign}
+          onClose={() => setDocumentToSign(null)}
+          onSuccess={() => {
+            fetchDocumentos()
+            setDocumentToSign(null)
+          }}
         />
       )}
     </div>

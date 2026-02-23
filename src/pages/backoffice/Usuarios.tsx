@@ -1,18 +1,19 @@
-import { useState, useEffect, useCallback } from 'react'
-import { Users, Plus, Search, MoreVertical, Mail, Shield, CheckCircle2, XCircle, RefreshCw, X } from 'lucide-react'
 import { PageHeader } from '@/components/layout/PageHeader'
 import { useAuth } from '@/hooks/useAuth'
 import { supabase } from '@/lib/supabase'
+import { maskCPF } from '@/lib/utils'
 import type { Database, UserRole } from '@/types/database'
+import { CheckCircle2, Fingerprint, Mail, MoreVertical, Plus, RefreshCw, Search, Shield, Users, X, XCircle } from 'lucide-react'
+import { useCallback, useEffect, useState } from 'react'
 
 type Profile = Database['public']['Tables']['profiles']['Row']
 
 const ROLE_CONFIG: Record<UserRole, { label: string; color: string }> = {
-  admin:     { label: 'Administrador', color: 'bg-purple-100 text-purple-700' },
-  vereador:  { label: 'Vereador',      color: 'bg-blue-100 text-blue-700' },
-  servidor:  { label: 'Servidor',      color: 'bg-green-100 text-green-700' },
-  executivo: { label: 'Executivo',     color: 'bg-orange-100 text-orange-700' },
-  cidadao:   { label: 'Cidadão',       color: 'bg-gray-100 text-gray-600' },
+  admin: { label: 'Administrador', color: 'bg-purple-100 text-purple-700' },
+  vereador: { label: 'Vereador', color: 'bg-blue-100 text-blue-700' },
+  servidor: { label: 'Servidor', color: 'bg-green-100 text-green-700' },
+  executivo: { label: 'Executivo', color: 'bg-orange-100 text-orange-700' },
+  cidadao: { label: 'Cidadão', color: 'bg-gray-100 text-gray-600' },
 }
 
 export function Usuarios() {
@@ -24,7 +25,7 @@ export function Usuarios() {
   const [showConvidar, setShowConvidar] = useState(false)
   const [menuAberto, setMenuAberto] = useState<string | null>(null)
 
-  const [convidarForm, setConvidarForm] = useState({ nome: '', email: '', role: 'vereador' as UserRole, partido: '' })
+  const [convidarForm, setConvidarForm] = useState({ nome: '', email: '', role: 'vereador' as UserRole, partido: '', cpf: '' })
   const [convidando, setConvidando] = useState(false)
   const [convidadoOk, setConvidadoOk] = useState(false)
 
@@ -66,23 +67,24 @@ export function Usuarios() {
     // Cria o usuário via Supabase Auth e insere o perfil
     const { data: authData, error: authErr } = await supabase.auth.admin
       ? // client-side não tem acesso ao admin API — apenas cria o perfil com email
-        { data: null, error: null }
+      { data: null, error: null }
       : { data: null, error: null }
 
     // Insere convite na tabela profiles (usuário deve completar o cadastro via e-mail)
     const { error } = await supabase.from('profiles').insert({
-      tenant_id:  currentProfile!.tenant_id,
-      user_id:    '00000000-0000-0000-0000-000000000000', // placeholder até o usuário aceitar
-      nome:       convidarForm.nome,
-      email:      convidarForm.email,
-      role:       convidarForm.role,
-      partido:    convidarForm.partido || null,
-      ativo:      false,
+      tenant_id: currentProfile!.tenant_id,
+      user_id: '00000000-0000-0000-0000-000000000000', // placeholder até o usuário aceitar
+      nome: convidarForm.nome,
+      email: convidarForm.email,
+      role: convidarForm.role,
+      partido: convidarForm.partido || null,
+      cpf: convidarForm.cpf || null,
+      ativo: false,
     })
 
     if (!error) {
       setConvidadoOk(true)
-      setConvidarForm({ nome: '', email: '', role: 'vereador', partido: '' })
+      setConvidarForm({ nome: '', email: '', role: 'vereador', partido: '', cpf: '' })
       await fetch()
     }
     setConvidando(false)
@@ -126,6 +128,10 @@ export function Usuarios() {
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1.5">Nome completo</label>
                       <input type="text" className="input" value={convidarForm.nome} onChange={e => setConvidarForm(f => ({ ...f, nome: e.target.value }))} />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1.5">CPF</label>
+                      <input type="text" className="input" placeholder="000.000.000-00" value={convidarForm.cpf} onChange={e => setConvidarForm(f => ({ ...f, cpf: e.target.value }))} />
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1.5">E-mail</label>
@@ -200,9 +206,8 @@ export function Usuarios() {
               return (
                 <div key={u.id} className="card flex items-center gap-4">
                   {/* Avatar */}
-                  <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm flex-shrink-0 ${
-                    u.ativo ? 'bg-primary-100 text-primary-700' : 'bg-gray-100 text-gray-400'
-                  }`}>
+                  <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm flex-shrink-0 ${u.ativo ? 'bg-primary-100 text-primary-700' : 'bg-gray-100 text-gray-400'
+                    }`}>
                     {u.nome.charAt(0).toUpperCase()}
                   </div>
 
@@ -214,8 +219,11 @@ export function Usuarios() {
                     </div>
                     <div className="flex items-center gap-3 mt-0.5 text-xs text-gray-500">
                       <span className="flex items-center gap-1"><Mail size={11} />{u.email}</span>
+                      <span className="flex items-center gap-1 text-gray-400">
+                        <Fingerprint size={11} />
+                        {maskCPF(u.cpf)}
+                      </span>
                       {u.partido && <span>· {u.partido}</span>}
-                      {u.matricula && <span>· Mat. {u.matricula}</span>}
                     </div>
                   </div>
 

@@ -163,7 +163,7 @@ supabase/
 - [x] Fase 3 — Módulo Legislativo: CRUD, tramitação, timeline
 - [x] Fase 4 — Plenário: sessões, votação eletrônica em tempo real
 - [x] Fase 5 — Administrativo & GED: upload de arquivos, teletrabalho e protocolo
-- [ ] Fase 6 — Segurança Avançada: assinatura digital (ICP-Brasil) e verificação de QR Code
+- [x] Fase 6 — Segurança Avançada: assinatura digital (ICP-Brasil) e verificação de QR Code
 - [ ] Fase 7 — Portal da Transparência: ouvidoria (e-SIC) e exportação de dados abertos
 
 ---

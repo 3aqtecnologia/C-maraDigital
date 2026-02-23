@@ -3,7 +3,9 @@ import { LoginPage } from '@/components/auth/LoginPage'
 import { ResetPasswordPage } from '@/components/auth/ResetPasswordPage'
 import { AppLayout } from '@/components/layout/AppLayout'
 import { MasterLayout } from '@/components/master/MasterLayout'
+import { Configuracoes } from '@/pages/backoffice/Configuracoes'
 import { Dashboard } from '@/pages/backoffice/Dashboard'
+import { Documentos } from '@/pages/backoffice/Documentos'
 import { Legislativo } from '@/pages/backoffice/Legislativo'
 import { LeiDetalhe } from '@/pages/backoffice/LeiDetalhe'
 import { LeiNova } from '@/pages/backoffice/LeiNova'
@@ -13,11 +15,9 @@ import { PlenarioAtivo } from '@/pages/backoffice/PlenarioAtivo'
 import { PlenarioGerenciar } from '@/pages/backoffice/PlenarioGerenciar'
 import { ProposicaoDetalhe } from '@/pages/backoffice/ProposicaoDetalhe'
 import { ProposicaoNova } from '@/pages/backoffice/ProposicaoNova'
-import { Usuarios } from '@/pages/backoffice/Usuarios'
-import { Configuracoes } from '@/pages/backoffice/Configuracoes'
-import { Documentos } from '@/pages/backoffice/Documentos'
-import { Teletrabalho } from '@/pages/backoffice/Teletrabalho'
 import { Protocolos } from '@/pages/backoffice/Protocolos'
+import { Teletrabalho } from '@/pages/backoffice/Teletrabalho'
+import { Usuarios } from '@/pages/backoffice/Usuarios'
 import { AuditLog } from '@/pages/master/AuditLog'
 import { CamarasList } from '@/pages/master/CamarasList'
 import { MasterConfiguracoes } from '@/pages/master/MasterConfiguracoes'
@@ -26,6 +26,7 @@ import { ProvisionarCamara } from '@/pages/master/ProvisionarCamara'
 import { LeiPublicaDetalhe } from '@/pages/transparencia/LeiPublicaDetalhe'
 import { PortalPublico } from '@/pages/transparencia/PortalPublico'
 import { ProposicaoPublicaDetalhe } from '@/pages/transparencia/ProposicaoPublicaDetalhe'
+import { Verificador } from '@/pages/transparencia/Verificador'
 import { createBrowserRouter, Navigate } from 'react-router-dom'
 import { AuthGuard } from './AuthGuard'
 import { MasterGuard } from './MasterGuard'
@@ -58,6 +59,10 @@ export const router = createBrowserRouter([
   {
     path: '/transparencia/lei/:id',
     element: <LeiPublicaDetalhe />,
+  },
+  {
+    path: '/verificar/:hash',
+    element: <Verificador />,
   },
 
   // ── Master Admin ────────────────────────────────────────────
@@ -96,10 +101,10 @@ export const router = createBrowserRouter([
       { path: 'plenario', element: <Plenario /> },
       { path: 'plenario/:id/gerenciar', element: <PlenarioGerenciar /> },
       { path: 'plenario/:id', element: <PlenarioAtivo /> },
-      { path: 'documentos',    element: <Documentos /> },
+      { path: 'documentos', element: <Documentos /> },
       { path: 'teletrabalho', element: <Teletrabalho /> },
-      { path: 'protocolos',   element: <Protocolos /> },
-      { path: 'usuarios',     element: <Usuarios /> },
+      { path: 'protocolos', element: <Protocolos /> },
+      { path: 'usuarios', element: <Usuarios /> },
       { path: 'configuracoes', element: <Configuracoes /> },
     ],
   },

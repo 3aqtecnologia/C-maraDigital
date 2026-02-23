@@ -36,7 +36,7 @@ export function useTeletrabalho() {
     }
 
     const { data, error } = await query
-    if (!error && data) setRegistros(data as TeletrabalhoComNome[])
+    if (!error && data) setRegistros((data as unknown) as TeletrabalhoComNome[])
     setLoading(false)
   }, [profile?.tenant_id, profile?.id, isAdmin])
 
