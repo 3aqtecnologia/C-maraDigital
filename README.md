@@ -71,6 +71,11 @@ npm run dev
 - Vereador: voto eletrônico — **SIM / NÃO / ABSTENÇÃO** — imutável via trigger no banco
 - **Transmissão:** suporte a URL de vídeo com player integrado no painel.
 
+### 🌐 Portal da Transparência (Público)
+- Visualização pública de proposições, leis e sessões — sem necessidade de login.
+- **Ouvidoria / e-SIC:** sistema de tickets para denúncias, reclamações e pedidos de informação com SLA de 20 dias (Lei 12.527/2011).
+- **Exportação em Dados Abertos:** download de leis e proposições em **CSV** (compatível com Excel, BOM UTF-8) e **JSON** diretamente no portal.
+
 ### 📁 Módulo Administrativo (GED & Processos)
 - **GED (Gestão Eletrônica de Documentos):** sistema de arquivos com upload via Supabase Storage, categorização por tipo (Ata, Ofício, Portaria, etc.) e isolamento total por Câmara.
 - **Protocolo Externo:** registro e rastreamento de entrada e saída de documentos com numeração seqüencial anual e controle de status.
@@ -165,7 +170,7 @@ supabase/
 - [x] Fase 5 — Administrativo & GED: upload de arquivos, teletrabalho e protocolo
 - [x] Fase 6 — Segurança Avançada: assinatura digital (ICP-Brasil) e verificação de QR Code
 - [x] Fase 7 — Portal da Transparência: visualização pública e ouvidoria (e-SIC)
-- [ ] Fase 7 — Portal da Transparência: exportação de dados abertos
+- [x] Fase 7 — Portal da Transparência: exportação de dados abertos (CSV, JSON)
 
 ---
 

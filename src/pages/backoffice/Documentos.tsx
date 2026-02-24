@@ -2,6 +2,7 @@ import { PageHeader } from '@/components/layout/PageHeader'
 import { useAssinatura } from '@/hooks/useAssinatura'
 import { useAuth } from '@/hooks/useAuth'
 import type { Documento, DocumentoTipo } from '@/hooks/useDocumentos'
+import type { AssinaturaMetadata } from '@/types/database'
 import { useDocumentos } from '@/hooks/useDocumentos'
 import { supabase } from '@/lib/supabase'
 import { maskCPF } from '@/lib/utils'
@@ -192,6 +193,7 @@ interface CertificateModalProps {
 
 function CertificateModal({ documento, onClose }: CertificateModalProps) {
   const verifyUrl = `${window.location.origin}/verificar/${documento.arquivo_hash}`
+  const meta = documento.assinatura_metadata as unknown as AssinaturaMetadata | null
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
@@ -229,31 +231,31 @@ function CertificateModal({ documento, onClose }: CertificateModalProps) {
             <div className="flex justify-between py-2 border-b border-gray-50">
               <span className="text-gray-400">Assinado por:</span>
               <span className="text-gray-900 font-bold ml-4">
-                {(documento.assinatura_metadata as any)?.assinante_nome ?? 'Usuário Identificado'}
+                {meta?.assinante_nome ?? 'Usuário Identificado'}
               </span>
             </div>
             <div className="flex justify-between py-2 border-b border-gray-50">
               <span className="text-gray-400">CPF:</span>
               <span className="text-gray-900 font-medium">
-                {maskCPF((documento.assinatura_metadata as any)?.assinante_cpf)}
+                {maskCPF(meta?.assinante_cpf)}
               </span>
             </div>
             <div className="flex justify-between py-2 border-b border-gray-50">
               <span className="text-gray-400">Data e Hora:</span>
               <span className="text-gray-900 font-medium">
-                {new Date((documento.assinatura_metadata as any)?.data_assinatura ?? documento.created_at).toLocaleString('pt-BR')}
+                {new Date(meta?.data_assinatura ?? documento.created_at).toLocaleString('pt-BR')}
               </span>
             </div>
             <div className="flex justify-between py-2 border-b border-gray-50">
               <span className="text-gray-400">IP de Conexão:</span>
               <span className="text-gray-900 font-medium font-mono text-xs">
-                {(documento.assinatura_metadata as any)?.conexao_ip ?? '—'}
+                {meta?.conexao_ip ?? '—'}
               </span>
             </div>
             <div className="flex flex-col gap-1 py-1">
               <span className="text-gray-400 text-xs">Classificação Legal (Lei 14.063/2020):</span>
               <span className="text-blue-700 font-bold text-xs uppercase">
-                {(documento.assinatura_metadata as any)?.tipo ?? 'Assinatura Eletrônica Avançada'}
+                {meta?.tipo ?? 'Assinatura Eletrônica Avançada'}
               </span>
             </div>
             <div className="flex flex-col gap-1 pt-1">

@@ -24,7 +24,7 @@ export function AuthGuard({ children }: AuthGuardProps) {
     )
   }
 
-  if (!session) return <Navigate to="/login" replace />
+  if (!session || userType === null) return <Navigate to="/login" replace />
 
   // Master admins não devem acessar o backoffice do tenant
   if (userType === 'master') return <Navigate to="/master" replace />

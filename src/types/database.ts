@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 export type Json =
   | string
   | number
@@ -324,8 +323,8 @@ export type Database = {
           descricao: string
           id?: string
           prazo_prorrogado?: boolean | null
-          prazo_vencimento: string
-          protocolo: string
+          prazo_vencimento?: string
+          protocolo?: string
           sigiloso?: boolean
           status?: Database["public"]["Enums"]["ouvidoria_status"]
           tenant_id: string
@@ -1431,3 +1430,11 @@ export type TenantPlano = Database['public']['Enums']['tenant_plano']
 export type TenantSituacao = Database['public']['Enums']['tenant_situacao']
 export type UserRole = Database['public']['Enums']['user_role']
 export type VotoOpcao = Database['public']['Enums']['voto_opcao']
+
+export interface AssinaturaMetadata {
+  assinante_nome?: string
+  assinante_cpf?: string
+  data_assinatura?: string
+  conexao_ip?: string
+  tipo?: string
+}

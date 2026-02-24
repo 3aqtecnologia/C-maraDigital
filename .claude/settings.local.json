@@ -4,7 +4,12 @@
       "Bash(npm create:*)",
       "Bash(npx --yes create-vite@latest:*)",
       "Bash(npm install)",
-      "Bash(npm run build:*)"
+      "Bash(npm run build:*)",
+      "Bash(grep -r \"export const\\\\|export function\\\\|export interface\\\\|export type\" /d/projetos/C-maraDigital/src/hooks/*.ts)",
+      "Bash(xargs -I {} sh -c 'echo \"\"=== {} ===\"\" && head -20 {}')",
+      "Bash(npx tsc -b --noEmit)",
+      "Bash(npx eslint src --format=compact)",
+      "Bash(npx eslint src)"
     ]
   }
 }

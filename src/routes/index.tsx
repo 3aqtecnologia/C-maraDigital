@@ -15,6 +15,7 @@ import { PlenarioAtivo } from '@/pages/backoffice/PlenarioAtivo'
 import { PlenarioGerenciar } from '@/pages/backoffice/PlenarioGerenciar'
 import { ProposicaoDetalhe } from '@/pages/backoffice/ProposicaoDetalhe'
 import { ProposicaoNova } from '@/pages/backoffice/ProposicaoNova'
+import { Ouvidoria } from '@/pages/backoffice/Ouvidoria'
 import { Protocolos } from '@/pages/backoffice/Protocolos'
 import { Teletrabalho } from '@/pages/backoffice/Teletrabalho'
 import { Usuarios } from '@/pages/backoffice/Usuarios'
@@ -103,6 +104,7 @@ export const router = createBrowserRouter([
       { path: 'plenario/:id', element: <PlenarioAtivo /> },
       { path: 'documentos', element: <Documentos /> },
       { path: 'teletrabalho', element: <Teletrabalho /> },
+      { path: 'ouvidoria', element: <Ouvidoria /> },
       { path: 'protocolos', element: <Protocolos /> },
       { path: 'usuarios', element: <Usuarios /> },
       { path: 'configuracoes', element: <Configuracoes /> },

@@ -1,0 +1,646 @@
+﻿diff --git a/.claude/settings.local.json b/.claude/settings.local.json
+index 19be1cc..1e16c01 100644
+--- a/.claude/settings.local.json
++++ b/.claude/settings.local.json
+@@ -4,7 +4,12 @@
+       "Bash(npm create:*)",
+       "Bash(npx --yes create-vite@latest:*)",
+       "Bash(npm install)",
+-      "Bash(npm run build:*)"
++      "Bash(npm run build:*)",
++      "Bash(grep -r \"export const\\\\|export function\\\\|export interface\\\\|export type\" /d/projetos/C-maraDigital/src/hooks/*.ts)",
++      "Bash(xargs -I {} sh -c 'echo \"\"=== {} ===\"\" && head -20 {}')",
++      "Bash(npx tsc -b --noEmit)",
++      "Bash(npx eslint src --format=compact)",
++      "Bash(npx eslint src)"
+     ]
+   }
+ }
+diff --git a/README.md b/README.md
+index 7552549..fcd6309 100644
+--- a/README.md
++++ b/README.md
+@@ -71,6 +71,11 @@ npm run dev
+ - Vereador: voto eletr├┤nico ÔÇö **SIM / N├âO / ABSTEN├ç├âO** ÔÇö imut├ível via trigger no banco
+ - **Transmiss├úo:** suporte a URL de v├¡deo com player integrado no painel.
+ 
++### ­ƒîÉ Portal da Transpar├¬ncia (P├║blico)
++- Visualiza├º├úo p├║blica de proposi├º├Áes, leis e sess├Áes ÔÇö sem necessidade de login.
++- **Ouvidoria / e-SIC:** sistema de tickets para den├║ncias, reclama├º├Áes e pedidos de informa├º├úo com SLA de 20 dias (Lei 12.527/2011).
++- **Exporta├º├úo em Dados Abertos:** download de leis e proposi├º├Áes em **CSV** (compat├¡vel com Excel, BOM UTF-8) e **JSON** diretamente no portal.
++
+ ### ­ƒôü M├│dulo Administrativo (GED & Processos)
+ - **GED (Gest├úo Eletr├┤nica de Documentos):** sistema de arquivos com upload via Supabase Storage, categoriza├º├úo por tipo (Ata, Of├¡cio, Portaria, etc.) e isolamento total por C├ómara.
+ - **Protocolo Externo:** registro e rastreamento de entrada e sa├¡da de documentos com numera├º├úo seq├╝encial anual e controle de status.
+@@ -165,7 +170,7 @@ supabase/
+ - [x] Fase 5 ÔÇö Administrativo & GED: upload de arquivos, teletrabalho e protocolo
+ - [x] Fase 6 ÔÇö Seguran├ºa Avan├ºada: assinatura digital (ICP-Brasil) e verifica├º├úo de QR Code
+ - [x] Fase 7 ÔÇö Portal da Transpar├¬ncia: visualiza├º├úo p├║blica e ouvidoria (e-SIC)
+-- [ ] Fase 7 ÔÇö Portal da Transpar├¬ncia: exporta├º├úo de dados abertos
++- [x] Fase 7 ÔÇö Portal da Transpar├¬ncia: exporta├º├úo de dados abertos (CSV, JSON)
+ 
+ ---
+ 
+diff --git a/package-lock.json b/package-lock.json
+index 0dcb455..92940e7 100644
+--- a/package-lock.json
++++ b/package-lock.json
+@@ -83,6 +83,7 @@
+       "integrity": "sha512-CGOfOJqWjg2qW/Mb6zNsDm+u5vFQ8DxXfbM09z69p5Z6+mE1ikP2jUXw+j42Pf1XTYED2Rni5f95npYeuwMDQA==",
+       "dev": true,
+       "license": "MIT",
++      "peer": true,
+       "dependencies": {
+         "@babel/code-frame": "^7.29.0",
+         "@babel/generator": "^7.29.0",
+@@ -2217,17 +2218,6 @@
+         "@floating-ui/utils": "^0.2.10"
+       }
+     },
+-    "node_modules/@floating-ui/dom": {
+-      "version": "1.7.5",
+-      "resolved": "https://registry.npmjs.org/@floating-ui/dom/-/dom-1.7.5.tgz",
+-      "integrity": "sha512-N0bD2kIPInNHUHehXhMke1rBGs1dwqvC9O9KYMyyjK7iXt7GAhnro7UlcuYcGdS/yYOlq0MAVgrow8IbWJwyqg==",
+-      "license": "MIT",
+-      "optional": true,
+-      "dependencies": {
+-        "@floating-ui/core": "^1.7.4",
+-        "@floating-ui/utils": "^0.2.10"
+-      }
+-    },
+     "node_modules/@floating-ui/utils": {
+       "version": "0.2.10",
+       "resolved": "https://registry.npmjs.org/@floating-ui/utils/-/utils-0.2.10.tgz",
+@@ -2968,6 +2958,7 @@
+       "resolved": "https://registry.npmjs.org/@tiptap/core/-/core-3.20.0.tgz",
+       "integrity": "sha512-aC9aROgia/SpJqhsXFiX9TsligL8d+oeoI8W3u00WI45s0VfsqjgeKQLDLF7Tu7hC+7F02teC84SAHuup003VQ==",
+       "license": "MIT",
++      "peer": true,
+       "funding": {
+         "type": "github",
+         "url": "https://github.com/sponsors/ueberdosis"
+@@ -3190,6 +3181,7 @@
+       "resolved": "https://registry.npmjs.org/@tiptap/extension-list/-/extension-list-3.20.0.tgz",
+       "integrity": "sha512-+V0/gsVWAv+7vcY0MAe6D52LYTIicMSHw00wz3ISZgprSb2yQhJ4+4gurOnUrQ4Du3AnRQvxPROaofwxIQ66WQ==",
+       "license": "MIT",
++      "peer": true,
+       "funding": {
+         "type": "github",
+         "url": "https://github.com/sponsors/ueberdosis"
+@@ -3308,6 +3300,7 @@
+       "resolved": "https://registry.npmjs.org/@tiptap/extensions/-/extensions-3.20.0.tgz",
+       "integrity": "sha512-HIsXX942w3nbxEQBlMAAR/aa6qiMBEP7CsSMxaxmTIVAmW35p6yUASw6GdV1u0o3lCZjXq2OSRMTskzIqi5uLg==",
+       "license": "MIT",
++      "peer": true,
+       "funding": {
+         "type": "github",
+         "url": "https://github.com/sponsors/ueberdosis"
+@@ -3322,6 +3315,7 @@
+       "resolved": "https://registry.npmjs.org/@tiptap/pm/-/pm-3.20.0.tgz",
+       "integrity": "sha512-jn+2KnQZn+b+VXr8EFOJKsnjVNaA4diAEr6FOazupMt8W8ro1hfpYtZ25JL87Kao/WbMze55sd8M8BDXLUKu1A==",
+       "license": "MIT",
++      "peer": true,
+       "dependencies": {
+         "prosemirror-changeset": "^2.3.0",
+         "prosemirror-collab": "^1.3.1",
+@@ -3511,6 +3505,7 @@
+       "resolved": "https://registry.npmjs.org/@types/react/-/react-19.2.14.tgz",
+       "integrity": "sha512-ilcTH/UniCkMdtexkoCN0bI7pMcJDvmQFPvuPvmEaYA/NSfFTAgdUSLAoVjaRJm7+6PvcM+q1zYOwS4wTYMF9w==",
+       "license": "MIT",
++      "peer": true,
+       "dependencies": {
+         "csstype": "^3.2.2"
+       }
+@@ -3520,6 +3515,7 @@
+       "resolved": "https://registry.npmjs.org/@types/react-dom/-/react-dom-19.2.3.tgz",
+       "integrity": "sha512-jp2L/eY6fn+KgVVQAOqYItbF0VY/YApe5Mz2F0aykSO8gx31bYCZyvSeYxCHKvzHG5eZjc+zyaS5BrBWya2+kQ==",
+       "license": "MIT",
++      "peer": true,
+       "peerDependencies": {
+         "@types/react": "^19.2.0"
+       }
+@@ -3598,6 +3594,7 @@
+       "integrity": "sha512-IgSWvLobTDOjnaxAfDTIHaECbkNlAlKv2j5SjpB2v7QHKv1FIfjwMy8FsDbVfDX/KjmCmYICcw7uGaXLhtsLNg==",
+       "dev": true,
+       "license": "MIT",
++      "peer": true,
+       "dependencies": {
+         "@typescript-eslint/scope-manager": "8.56.0",
+         "@typescript-eslint/types": "8.56.0",
+@@ -3875,6 +3872,7 @@
+       "integrity": "sha512-UVJyE9MttOsBQIDKw1skb9nAwQuR5wuGD3+82K6JgJlm/Y+KI92oNsMNGZCYdDsVtRHSak0pcV5Dno5+4jh9sw==",
+       "dev": true,
+       "license": "MIT",
++      "peer": true,
+       "bin": {
+         "acorn": "bin/acorn"
+       },
+@@ -4197,6 +4195,7 @@
+         }
+       ],
+       "license": "MIT",
++      "peer": true,
+       "dependencies": {
+         "baseline-browser-mapping": "^2.9.0",
+         "caniuse-lite": "^1.0.30001759",
+@@ -4890,6 +4889,7 @@
+       "integrity": "sha512-VmQ+sifHUbI/IcSopBCF/HO3YiHQx/AVd3UVyYL6weuwW+HvON9VYn5l6Zl1WZzPWXPNZrSQpxwkkZ/VuvJZzg==",
+       "dev": true,
+       "license": "MIT",
++      "peer": true,
+       "dependencies": {
+         "@eslint-community/eslint-utils": "^4.8.0",
+         "@eslint-community/regexpp": "^4.12.1",
+@@ -6243,6 +6243,7 @@
+       "integrity": "sha512-/imKNG4EbWNrVjoNC/1H5/9GFy+tqjGBHCaSsN+P2RnPqjsLmv6UD3Ej+Kj8nBWaRAwyk7kK5ZUc+OEatnTR3A==",
+       "dev": true,
+       "license": "MIT",
++      "peer": true,
+       "bin": {
+         "jiti": "bin/jiti.js"
+       }
+@@ -6910,6 +6911,7 @@
+         }
+       ],
+       "license": "MIT",
++      "peer": true,
+       "dependencies": {
+         "nanoid": "^3.3.11",
+         "picocolors": "^1.1.1",
+@@ -7188,6 +7190,7 @@
+       "resolved": "https://registry.npmjs.org/prosemirror-model/-/prosemirror-model-1.25.4.tgz",
+       "integrity": "sha512-PIM7E43PBxKce8OQeezAs9j4TP+5yDpZVbuurd1h5phUxEKIu+G2a+EUZzIC5nS1mJktDJWzbqS23n1tsAf5QA==",
+       "license": "MIT",
++      "peer": true,
+       "dependencies": {
+         "orderedmap": "^2.0.0"
+       }
+@@ -7217,6 +7220,7 @@
+       "resolved": "https://registry.npmjs.org/prosemirror-state/-/prosemirror-state-1.4.4.tgz",
+       "integrity": "sha512-6jiYHH2CIGbCfnxdHbXZ12gySFY/fz/ulZE333G6bPqIZ4F+TXo9ifiR86nAHpWnfoNjOb3o5ESi7J8Uz1jXHw==",
+       "license": "MIT",
++      "peer": true,
+       "dependencies": {
+         "prosemirror-model": "^1.0.0",
+         "prosemirror-transform": "^1.0.0",
+@@ -7265,6 +7269,7 @@
+       "resolved": "https://registry.npmjs.org/prosemirror-view/-/prosemirror-view-1.41.6.tgz",
+       "integrity": "sha512-mxpcDG4hNQa/CPtzxjdlir5bJFDlm0/x5nGBbStB2BWX+XOQ9M8ekEG+ojqB5BcVu2Rc80/jssCMZzSstJuSYg==",
+       "license": "MIT",
++      "peer": true,
+       "dependencies": {
+         "prosemirror-model": "^1.20.0",
+         "prosemirror-state": "^1.0.0",
+@@ -7335,6 +7340,7 @@
+       "resolved": "https://registry.npmjs.org/react/-/react-19.2.4.tgz",
+       "integrity": "sha512-9nfp2hYpCwOjAN+8TZFGhtWEwgvWHXqESH8qT89AT/lWklpLON22Lc8pEtnpsZz7VmawabSU0gCjnj8aC0euHQ==",
+       "license": "MIT",
++      "peer": true,
+       "engines": {
+         "node": ">=0.10.0"
+       }
+@@ -7344,6 +7350,7 @@
+       "resolved": "https://registry.npmjs.org/react-dom/-/react-dom-19.2.4.tgz",
+       "integrity": "sha512-AXJdLo8kgMbimY95O2aKQqsz2iWi9jMgKJhRBAxECE4IFxfcazB2LmzloIoibJI3C12IlY20+KFaLv+71bUJeQ==",
+       "license": "MIT",
++      "peer": true,
+       "dependencies": {
+         "scheduler": "^0.27.0"
+       },
+@@ -8177,6 +8184,7 @@
+       "integrity": "sha512-3ofp+LL8E+pK/JuPLPggVAIaEuhvIz4qNcf3nA1Xn2o/7fb7s/TYpHhwGDv1ZU3PkBluUVaF8PyCHcm48cKLWQ==",
+       "dev": true,
+       "license": "MIT",
++      "peer": true,
+       "dependencies": {
+         "@alloc/quick-lru": "^5.2.0",
+         "arg": "^5.0.2",
+@@ -8244,6 +8252,7 @@
+       "integrity": "sha512-jTwoImyr/QbOWFFso3YoU3ik0jBBDJ6JTOQiy/J2YxVJdZCc+5u7skhNwiOR3FQIygFqVUPHl7qbbxtjW2K3Qg==",
+       "dev": true,
+       "license": "BSD-2-Clause",
++      "peer": true,
+       "dependencies": {
+         "@jridgewell/source-map": "^0.3.3",
+         "acorn": "^8.15.0",
+@@ -8328,6 +8337,7 @@
+       "integrity": "sha512-5gTmgEY/sqK6gFXLIsQNH19lWb4ebPDLA4SdLP7dsWkIXHWlG66oPuVvXSGFPppYZz8ZDZq0dYYrbHfBCVUb1Q==",
+       "dev": true,
+       "license": "MIT",
++      "peer": true,
+       "engines": {
+         "node": ">=12"
+       },
+@@ -8494,6 +8504,7 @@
+       "integrity": "sha512-84MVSjMEHP+FQRPy3pX9sTVV/INIex71s9TL2Gm5FG/WG1SqXeKyZ0k7/blY/4FdOzI12CBy1vGc4og/eus0fw==",
+       "dev": true,
+       "license": "Apache-2.0",
++      "peer": true,
+       "bin": {
+         "tsc": "bin/tsc",
+         "tsserver": "bin/tsserver"
+@@ -8698,6 +8709,7 @@
+       "integrity": "sha512-+Oxm7q9hDoLMyJOYfUYBuHQo+dkAloi33apOPP56pzj+vsdJDzr+j1NISE5pyaAuKL4A3UD34qd0lx5+kfKp2g==",
+       "dev": true,
+       "license": "MIT",
++      "peer": true,
+       "dependencies": {
+         "esbuild": "^0.25.0",
+         "fdir": "^6.4.4",
+@@ -8822,6 +8834,7 @@
+       "integrity": "sha512-5gTmgEY/sqK6gFXLIsQNH19lWb4ebPDLA4SdLP7dsWkIXHWlG66oPuVvXSGFPppYZz8ZDZq0dYYrbHfBCVUb1Q==",
+       "dev": true,
+       "license": "MIT",
++      "peer": true,
+       "engines": {
+         "node": ">=12"
+       },
+@@ -9126,6 +9139,7 @@
+       "integrity": "sha512-PlXPeEWMXMZ7sPYOHqmDyCJzcfNrUr3fGNKtezX14ykXOEIvyK81d+qydx89KY5O71FKMPaQ2vBfBFI5NHR63A==",
+       "dev": true,
+       "license": "MIT",
++      "peer": true,
+       "dependencies": {
+         "fast-deep-equal": "^3.1.3",
+         "fast-uri": "^3.0.1",
+@@ -9170,6 +9184,7 @@
+       "integrity": "sha512-cIFJOD1DESzpjOBl763Kp1AH7UE/0fcdHe6rZXUdQ9c50uvgigvW97u3IcSeBwOkgqL/PXPBktBCh0KEu5L8XQ==",
+       "dev": true,
+       "license": "MIT",
++      "peer": true,
+       "bin": {
+         "rollup": "dist/bin/rollup"
+       },
+diff --git a/src/hooks/useOuvidoria.ts b/src/hooks/useOuvidoria.ts
+index 9f6f3d7..43639e8 100644
+--- a/src/hooks/useOuvidoria.ts
++++ b/src/hooks/useOuvidoria.ts
+@@ -21,11 +21,11 @@ export function useOuvidoria() {
+     try {
+       // O RLS j├í se encarrega de filtrar o que o perfil pode ver
+       // Cidad├úo ver├í s├│ os dele, admin ver├í todos do tenant
+-      const { data, error: fetchError } = await (supabase
++      const { data, error: fetchError } = await supabase
+         .from('ouvidoria_tickets')
+         .select('*')
+-        .eq('tenant_id', profile.tenant_id)
+-        .order('created_at', { ascending: false }) as any)
++        .eq('tenant_id', profile.tenant_id!)
++        .order('created_at', { ascending: false })
+ 
+       if (fetchError) throw fetchError
+       setTickets(data || [])
+@@ -35,7 +35,7 @@ export function useOuvidoria() {
+     } finally {
+       setLoading(false)
+     }
+-  }, [profile?.tenant_id, profile])
++  }, [profile])
+ 
+   const addTicket = async (ticket: Pick<OuvidoriaTicket, 'assunto' | 'descricao' | 'tipo' | 'sigiloso'>) => {
+     if (!profile?.tenant_id || !profile) return { error: 'Sess├úo inv├ílida' }
+@@ -46,11 +46,10 @@ export function useOuvidoria() {
+         .from('ouvidoria_tickets')
+         .insert({
+           ...ticket,
+-          tenant_id: profile.tenant_id,
++          tenant_id: profile.tenant_id!,
+           cidadao_id: profile.id,
+           status: 'novo',
+-          protocolo: '', // gerado por trigger
+-        } as any)
++        })
+         .select()
+         .single()
+ 
+@@ -94,7 +93,7 @@ export function useOuvidoriaDetalhe(ticketId?: string) {
+           .from('ouvidoria_mensagens')
+           .select('*')
+           .eq('ticket_id', ticketId)
+-          .order('created_at', { ascending: true }) as any
++          .order('created_at', { ascending: true })
+       ])
+ 
+       if (ticketResp.error) throw ticketResp.error
+@@ -124,10 +123,10 @@ export function useOuvidoriaDetalhe(ticketId?: string) {
+           ticket_id: ticket.id,
+           autor_id: profile.id,
+           origem,
+-          mensagem: mensagemText
+-        } as any)
++          mensagem: mensagemText,
++        })
+         .select()
+-        .single() as any
++        .single()
+ 
+       if (error) throw error
+       setMensagens((prev) => [...prev, data])
+diff --git a/src/pages/backoffice/Documentos.tsx b/src/pages/backoffice/Documentos.tsx
+index e78e66a..635c2f1 100644
+--- a/src/pages/backoffice/Documentos.tsx
++++ b/src/pages/backoffice/Documentos.tsx
+@@ -2,6 +2,7 @@ import { PageHeader } from '@/components/layout/PageHeader'
+ import { useAssinatura } from '@/hooks/useAssinatura'
+ import { useAuth } from '@/hooks/useAuth'
+ import type { Documento, DocumentoTipo } from '@/hooks/useDocumentos'
++import type { AssinaturaMetadata } from '@/types/database'
+ import { useDocumentos } from '@/hooks/useDocumentos'
+ import { supabase } from '@/lib/supabase'
+ import { maskCPF } from '@/lib/utils'
+@@ -192,6 +193,7 @@ interface CertificateModalProps {
+ 
+ function CertificateModal({ documento, onClose }: CertificateModalProps) {
+   const verifyUrl = `${window.location.origin}/verificar/${documento.arquivo_hash}`
++  const meta = documento.assinatura_metadata as unknown as AssinaturaMetadata | null
+ 
+   return (
+     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+@@ -229,31 +231,31 @@ function CertificateModal({ documento, onClose }: CertificateModalProps) {
+             <div className="flex justify-between py-2 border-b border-gray-50">
+               <span className="text-gray-400">Assinado por:</span>
+               <span className="text-gray-900 font-bold ml-4">
+-                {(documento.assinatura_metadata as any)?.assinante_nome ?? 'Usu├írio Identificado'}
++                {meta?.assinante_nome ?? 'Usu├írio Identificado'}
+               </span>
+             </div>
+             <div className="flex justify-between py-2 border-b border-gray-50">
+               <span className="text-gray-400">CPF:</span>
+               <span className="text-gray-900 font-medium">
+-                {maskCPF((documento.assinatura_metadata as any)?.assinante_cpf)}
++                {maskCPF(meta?.assinante_cpf)}
+               </span>
+             </div>
+             <div className="flex justify-between py-2 border-b border-gray-50">
+               <span className="text-gray-400">Data e Hora:</span>
+               <span className="text-gray-900 font-medium">
+-                {new Date((documento.assinatura_metadata as any)?.data_assinatura ?? documento.created_at).toLocaleString('pt-BR')}
++                {new Date(meta?.data_assinatura ?? documento.created_at).toLocaleString('pt-BR')}
+               </span>
+             </div>
+             <div className="flex justify-between py-2 border-b border-gray-50">
+               <span className="text-gray-400">IP de Conex├úo:</span>
+               <span className="text-gray-900 font-medium font-mono text-xs">
+-                {(documento.assinatura_metadata as any)?.conexao_ip ?? 'ÔÇö'}
++                {meta?.conexao_ip ?? 'ÔÇö'}
+               </span>
+             </div>
+             <div className="flex flex-col gap-1 py-1">
+               <span className="text-gray-400 text-xs">Classifica├º├úo Legal (Lei 14.063/2020):</span>
+               <span className="text-blue-700 font-bold text-xs uppercase">
+-                {(documento.assinatura_metadata as any)?.tipo ?? 'Assinatura Eletr├┤nica Avan├ºada'}
++                {meta?.tipo ?? 'Assinatura Eletr├┤nica Avan├ºada'}
+               </span>
+             </div>
+             <div className="flex flex-col gap-1 pt-1">
+diff --git a/src/pages/transparencia/PortalPublico.tsx b/src/pages/transparencia/PortalPublico.tsx
+index 6d558cf..a25759d 100644
+--- a/src/pages/transparencia/PortalPublico.tsx
++++ b/src/pages/transparencia/PortalPublico.tsx
+@@ -1,6 +1,6 @@
+ import { ProposicaoPublica, useTenantBySlug, useTransparencia } from '@/hooks/useTransparencia'
+ import type { Database } from '@/types/database'
+-import { ArrowLeft, Clock, ExternalLink, FileText, Gavel, LayoutDashboard, Search, User } from 'lucide-react'
++import { ArrowLeft, Clock, Download, ExternalLink, FileText, Gavel, LayoutDashboard, Search, User } from 'lucide-react'
+ import { useEffect, useState } from 'react'
+ import { Link } from 'react-router-dom'
+ 
+@@ -45,6 +45,52 @@ export function PortalPublico() {
+     setSearching(false)
+   }
+ 
++  function downloadFile(content: string, filename: string, mimeType: string) {
++    const BOM = mimeType.includes('csv') ? '\uFEFF' : ''
++    const blob = new Blob([BOM + content], { type: mimeType })
++    const url = URL.createObjectURL(blob)
++    const a = document.createElement('a')
++    a.href = url
++    a.download = filename
++    a.click()
++    URL.revokeObjectURL(url)
++  }
++
++  function exportarCSV() {
++    const municipio = tenant?.municipio ?? 'export'
++    if (activeTab === 'leis') {
++      const headers = ['N├║mero', 'Esfera', 'Ementa', 'Data Publica├º├úo', 'Status']
++      const rows = recentLeis.map(l => [
++        l.numero,
++        l.esfera,
++        `"${l.ementa.replace(/"/g, '""')}"`,
++        new Date(l.data_publicacao).toLocaleDateString('pt-BR'),
++        l.status,
++      ])
++      const csv = [headers.join(';'), ...rows.map(r => r.join(';'))].join('\n')
++      downloadFile(csv, `leis-${municipio}.csv`, 'text/csv;charset=utf-8;')
++    } else {
++      const headers = ['N├║mero', 'Tipo', 'Ementa', 'Autor', 'Status', 'Protocolo']
++      const rows = recentProposicoes.map(p => [
++        p.numero,
++        p.tipo.replace(/_/g, ' '),
++        `"${p.ementa.replace(/"/g, '""')}"`,
++        p.autor?.nome ?? '',
++        p.status,
++        new Date(p.created_at).toLocaleDateString('pt-BR'),
++      ])
++      const csv = [headers.join(';'), ...rows.map(r => r.join(';'))].join('\n')
++      downloadFile(csv, `proposicoes-${municipio}.csv`, 'text/csv;charset=utf-8;')
++    }
++  }
++
++  function exportarJSON() {
++    const municipio = tenant?.municipio ?? 'export'
++    const data = activeTab === 'leis' ? recentLeis : recentProposicoes
++    const json = JSON.stringify(data, null, 2)
++    downloadFile(json, `${activeTab}-${municipio}.json`, 'application/json')
++  }
++
+   if (loadingTenant) {
+     return (
+       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+@@ -168,8 +214,26 @@ export function PortalPublico() {
+               {activeTab === 'proposicoes' && <div className="absolute bottom-0 left-0 right-0 h-1 bg-primary-600 rounded-t-full" />}
+             </button>
+           </div>
+-          <div className="text-xs text-gray-400 font-medium hidden md:block">
+-            {activeTab === 'leis' ? `${recentLeis.length} leis encontradas` : `${recentProposicoes.length} mat├®rias encontradas`}
++          <div className="hidden md:flex items-center gap-3">
++            <span className="text-xs text-gray-400 font-medium">
++              {activeTab === 'leis' ? `${recentLeis.length} leis encontradas` : `${recentProposicoes.length} mat├®rias encontradas`}
++            </span>
++            <div className="flex items-center gap-1 border border-gray-200 rounded-xl p-1">
++              <button
++                onClick={exportarCSV}
++                title="Exportar CSV"
++                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
++              >
++                <Download size={13} /> CSV
++              </button>
++              <button
++                onClick={exportarJSON}
++                title="Exportar JSON"
++                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
++              >
++                <Download size={13} /> JSON
++              </button>
++            </div>
+           </div>
+         </div>
+ 
+diff --git a/src/pages/transparencia/Verificador.tsx b/src/pages/transparencia/Verificador.tsx
+index 40ef5cf..27944b4 100644
+--- a/src/pages/transparencia/Verificador.tsx
++++ b/src/pages/transparencia/Verificador.tsx
+@@ -1,6 +1,6 @@
+ import { supabase } from '@/lib/supabase'
+ import { maskCPF } from '@/lib/utils'
+-import type { Database } from '@/types/database'
++import type { AssinaturaMetadata, Database } from '@/types/database'
+ import { CheckCircle2, FileText, Globe, Loader2, ShieldCheck, XCircle } from 'lucide-react'
+ import { useEffect, useState } from 'react'
+ import { useParams } from 'react-router-dom'
+@@ -83,6 +83,9 @@ export function Verificador() {
+               </div>
+ 
+               {/* Detalhes */}
++              {(() => {
++                const meta = documento.assinatura_metadata as unknown as AssinaturaMetadata | null
++                return (
+               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                 <div className="space-y-1">
+                   <p className="text-xs text-gray-400 uppercase font-bold tracking-wider">Documento</p>
+@@ -100,35 +103,37 @@ export function Verificador() {
+                 <div className="space-y-1">
+                   <p className="text-xs text-gray-400 uppercase font-bold tracking-wider">Assinado por</p>
+                   <p className="text-gray-900 font-bold underline decoration-blue-200 decoration-2 underline-offset-4">
+-                    {(documento.assinatura_metadata as any)?.assinante_nome ?? 'Usu├írio Identificado'}
++                    {meta?.assinante_nome ?? 'Usu├írio Identificado'}
+                   </p>
+                 </div>
+                 <div className="space-y-1">
+                   <p className="text-xs text-gray-400 uppercase font-bold tracking-wider">CPF do Assinante</p>
+                   <p className="text-gray-900 font-medium">
+-                    {maskCPF((documento.assinatura_metadata as any)?.assinante_cpf)}
++                    {maskCPF(meta?.assinante_cpf)}
+                   </p>
+                 </div>
+                 <div className="space-y-1">
+                   <p className="text-xs text-gray-400 uppercase font-bold tracking-wider">Data da Assinatura</p>
+                   <p className="text-gray-900 font-medium">
+-                    {new Date((documento.assinatura_metadata as any)?.data_assinatura).toLocaleString('pt-BR')}
++                    {new Date(meta?.data_assinatura ?? '').toLocaleString('pt-BR')}
+                   </p>
+                 </div>
+                 <div className="space-y-1">
+                   <p className="text-xs text-gray-400 uppercase font-bold tracking-wider">IP de Conex├úo</p>
+                   <div className="flex items-center gap-1.5 text-gray-600 font-mono text-xs">
+                     <Globe size={12} className="text-gray-400" />
+-                    {(documento.assinatura_metadata as any)?.conexao_ip ?? 'ÔÇö'}
++                    {meta?.conexao_ip ?? 'ÔÇö'}
+                   </div>
+                 </div>
+                 <div className="space-y-1 col-span-1 md:col-span-2">
+                   <p className="text-xs text-gray-400 uppercase font-bold tracking-wider">Classifica├º├úo Legal (Lei 14.063/2020)</p>
+                   <p className="text-blue-700 font-bold uppercase text-sm">
+-                    {(documento.assinatura_metadata as any)?.tipo}
++                    {meta?.tipo}
+                   </p>
+                 </div>
+               </div>
++                )
++              })()}
+ 
+               {/* Hash */}
+               <div className="mt-8 pt-8 border-t border-gray-100">
+@@ -156,10 +161,10 @@ export function Verificador() {
+                 </p>
+                 <div className="flex items-center gap-3 p-3 bg-white rounded-xl border border-gray-200">
+                   <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center text-white font-bold text-xs ring-4 ring-blue-50">
+-                    {String((documento.assinatura_metadata as any)?.tipo || '').includes('Qualificada') ? 'Q' : 'A'}
++                    {String((documento.assinatura_metadata as unknown as AssinaturaMetadata | null)?.tipo || '').includes('Qualificada') ? 'Q' : 'A'}
+                   </div>
+                   <div>
+-                    <p className="text-xs font-bold text-gray-900">{(documento.assinatura_metadata as any)?.tipo}</p>
++                    <p className="text-xs font-bold text-gray-900">{(documento.assinatura_metadata as unknown as AssinaturaMetadata | null)?.tipo}</p>
+                     <p className="text-[10px] text-gray-400">Validade Jur├¡dica Plena e Integridade Garantida</p>
+                   </div>
+                 </div>
+diff --git a/src/routes/index.tsx b/src/routes/index.tsx
+index 82d3c32..ca4c465 100644
+--- a/src/routes/index.tsx
++++ b/src/routes/index.tsx
+@@ -15,6 +15,7 @@ import { PlenarioAtivo } from '@/pages/backoffice/PlenarioAtivo'
+ import { PlenarioGerenciar } from '@/pages/backoffice/PlenarioGerenciar'
+ import { ProposicaoDetalhe } from '@/pages/backoffice/ProposicaoDetalhe'
+ import { ProposicaoNova } from '@/pages/backoffice/ProposicaoNova'
++import { Ouvidoria } from '@/pages/backoffice/Ouvidoria'
+ import { Protocolos } from '@/pages/backoffice/Protocolos'
+ import { Teletrabalho } from '@/pages/backoffice/Teletrabalho'
+ import { Usuarios } from '@/pages/backoffice/Usuarios'
+@@ -103,6 +104,7 @@ export const router = createBrowserRouter([
+       { path: 'plenario/:id', element: <PlenarioAtivo /> },
+       { path: 'documentos', element: <Documentos /> },
+       { path: 'teletrabalho', element: <Teletrabalho /> },
++      { path: 'ouvidoria', element: <Ouvidoria /> },
+       { path: 'protocolos', element: <Protocolos /> },
+       { path: 'usuarios', element: <Usuarios /> },
+       { path: 'configuracoes', element: <Configuracoes /> },
+diff --git a/src/types/database.ts b/src/types/database.ts
+index 14dd68b..58f87b8 100644
+--- a/src/types/database.ts
++++ b/src/types/database.ts
+@@ -1,4 +1,3 @@
+-/* eslint-disable @typescript-eslint/no-explicit-any */
+ export type Json =
+   | string
+   | number
+@@ -324,8 +323,8 @@ export type Database = {
+           descricao: string
+           id?: string
+           prazo_prorrogado?: boolean | null
+-          prazo_vencimento: string
+-          protocolo: string
++          prazo_vencimento?: string
++          protocolo?: string
+           sigiloso?: boolean
+           status?: Database["public"]["Enums"]["ouvidoria_status"]
+           tenant_id: string
+@@ -1431,3 +1430,11 @@ export type TenantPlano = Database['public']['Enums']['tenant_plano']
+ export type TenantSituacao = Database['public']['Enums']['tenant_situacao']
+ export type UserRole = Database['public']['Enums']['user_role']
+ export type VotoOpcao = Database['public']['Enums']['voto_opcao']
++
++export interface AssinaturaMetadata {
++  assinante_nome?: string
++  assinante_cpf?: string
++  data_assinatura?: string
++  conexao_ip?: string
++  tipo?: string
++}
+diff --git a/task.md.resolved b/task.md.resolved
+index f3dea56..4d0e36b 100644
+--- a/task.md.resolved
++++ b/task.md.resolved
+@@ -84,7 +84,7 @@
+   - [x] Lei p├║blica ÔåÆ `src/pages/transparencia/LeiPublicaDetalhe.tsx`
+ - [x] Criar migration de views e pol├¡ticas para dados p├║blicos ÔåÆ `supabase/migrations/008_public_transparency.sql`
+ - [x] Desenvolver Ouvidoria e e-SIC (Sistema de tickets)
+-- [ ] Desenvolver Exporta├º├úo em Dados Abertos (CSV, JSON)
++- [x] Desenvolver Exporta├º├úo em Dados Abertos (CSV, JSON)
+ 
+ ---
+ 
+@@ -100,9 +100,9 @@
+ | Fase 5 ÔÇö Plen├írio e Vota├º├úo | Ô£à Completa | 5/5 |
+ | Fase 5.5 ÔÇö M├│dulos de Suporte (extra) | Ô£à Completa | 3/3 |
+ | Fase 6 ÔÇö Administrativo e GED | Ô£à Completa | 8/8 |
+-| Fase 7 ÔÇö Portal da Transpar├¬ncia | ­ƒƒí Em andamento | 5/6 |
++| Fase 7 ÔÇö Portal da Transpar├¬ncia | Ô£à Completa | 6/6 |
+ 
+ **Pr├│ximos passos priorit├írios:**
+-1. Fase 7 ÔÇö Exporta├º├úo em Dados Abertos (CSV, JSON) no portal p├║blico
+-2. T├®cnico ÔÇö Implementar code-splitting (`manualChunks`) para reduzir bundle (~1 MB atualmente)
+-3. T├®cnico ÔÇö Configurar SMTP customizado no Supabase (Gmail App Password) para recupera├º├úo de senha
++1. T├®cnico ÔÇö Implementar code-splitting (`manualChunks`) para reduzir bundle (~1 MB atualmente)
++2. T├®cnico ÔÇö Configurar SMTP customizado no Supabase (Gmail App Password) para recupera├º├úo de senha
++3. Qualidade ÔÇö Testes e2e (Playwright ou Cypress)

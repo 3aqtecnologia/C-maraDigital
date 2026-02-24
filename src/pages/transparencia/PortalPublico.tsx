@@ -1,6 +1,6 @@
 import { ProposicaoPublica, useTenantBySlug, useTransparencia } from '@/hooks/useTransparencia'
 import type { Database } from '@/types/database'
-import { ArrowLeft, Clock, ExternalLink, FileText, Gavel, LayoutDashboard, Search, User } from 'lucide-react'
+import { ArrowLeft, Clock, Download, ExternalLink, FileText, Gavel, LayoutDashboard, Search, User } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 
@@ -43,6 +43,52 @@ export function PortalPublico() {
     }
 
     setSearching(false)
+  }
+
+  function downloadFile(content: string, filename: string, mimeType: string) {
+    const BOM = mimeType.includes('csv') ? '\uFEFF' : ''
+    const blob = new Blob([BOM + content], { type: mimeType })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = filename
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+
+  function exportarCSV() {
+    const municipio = tenant?.municipio ?? 'export'
+    if (activeTab === 'leis') {
+      const headers = ['Número', 'Esfera', 'Ementa', 'Data Publicação', 'Status']
+      const rows = recentLeis.map(l => [
+        l.numero,
+        l.esfera,
+        `"${l.ementa.replace(/"/g, '""')}"`,
+        new Date(l.data_publicacao).toLocaleDateString('pt-BR'),
+        l.status,
+      ])
+      const csv = [headers.join(';'), ...rows.map(r => r.join(';'))].join('\n')
+      downloadFile(csv, `leis-${municipio}.csv`, 'text/csv;charset=utf-8;')
+    } else {
+      const headers = ['Número', 'Tipo', 'Ementa', 'Autor', 'Status', 'Protocolo']
+      const rows = recentProposicoes.map(p => [
+        p.numero,
+        p.tipo.replace(/_/g, ' '),
+        `"${p.ementa.replace(/"/g, '""')}"`,
+        p.autor?.nome ?? '',
+        p.status,
+        new Date(p.created_at).toLocaleDateString('pt-BR'),
+      ])
+      const csv = [headers.join(';'), ...rows.map(r => r.join(';'))].join('\n')
+      downloadFile(csv, `proposicoes-${municipio}.csv`, 'text/csv;charset=utf-8;')
+    }
+  }
+
+  function exportarJSON() {
+    const municipio = tenant?.municipio ?? 'export'
+    const data = activeTab === 'leis' ? recentLeis : recentProposicoes
+    const json = JSON.stringify(data, null, 2)
+    downloadFile(json, `${activeTab}-${municipio}.json`, 'application/json')
   }
 
   if (loadingTenant) {
@@ -168,8 +214,26 @@ export function PortalPublico() {
               {activeTab === 'proposicoes' && <div className="absolute bottom-0 left-0 right-0 h-1 bg-primary-600 rounded-t-full" />}
             </button>
           </div>
-          <div className="text-xs text-gray-400 font-medium hidden md:block">
-            {activeTab === 'leis' ? `${recentLeis.length} leis encontradas` : `${recentProposicoes.length} matérias encontradas`}
+          <div className="hidden md:flex items-center gap-3">
+            <span className="text-xs text-gray-400 font-medium">
+              {activeTab === 'leis' ? `${recentLeis.length} leis encontradas` : `${recentProposicoes.length} matérias encontradas`}
+            </span>
+            <div className="flex items-center gap-1 border border-gray-200 rounded-xl p-1">
+              <button
+                onClick={exportarCSV}
+                title="Exportar CSV"
+                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                <Download size={13} /> CSV
+              </button>
+              <button
+                onClick={exportarJSON}
+                title="Exportar JSON"
+                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                <Download size={13} /> JSON
+              </button>
+            </div>
           </div>
         </div>
 

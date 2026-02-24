@@ -21,11 +21,11 @@ export function useOuvidoria() {
     try {
       // O RLS já se encarrega de filtrar o que o perfil pode ver
       // Cidadão verá só os dele, admin verá todos do tenant
-      const { data, error: fetchError } = await (supabase
+      const { data, error: fetchError } = await supabase
         .from('ouvidoria_tickets')
         .select('*')
-        .eq('tenant_id', profile.tenant_id)
-        .order('created_at', { ascending: false }) as any)
+        .eq('tenant_id', profile.tenant_id!)
+        .order('created_at', { ascending: false })
 
       if (fetchError) throw fetchError
       setTickets(data || [])
@@ -35,7 +35,7 @@ export function useOuvidoria() {
     } finally {
       setLoading(false)
     }
-  }, [profile?.tenant_id, profile])
+  }, [profile])
 
   const addTicket = async (ticket: Pick<OuvidoriaTicket, 'assunto' | 'descricao' | 'tipo' | 'sigiloso'>) => {
     if (!profile?.tenant_id || !profile) return { error: 'Sessão inválida' }
@@ -46,11 +46,10 @@ export function useOuvidoria() {
         .from('ouvidoria_tickets')
         .insert({
           ...ticket,
-          tenant_id: profile.tenant_id,
+          tenant_id: profile.tenant_id!,
           cidadao_id: profile.id,
           status: 'novo',
-          protocolo: '', // gerado por trigger
-        } as any)
+        })
         .select()
         .single()
 
@@ -94,7 +93,7 @@ export function useOuvidoriaDetalhe(ticketId?: string) {
           .from('ouvidoria_mensagens')
           .select('*')
           .eq('ticket_id', ticketId)
-          .order('created_at', { ascending: true }) as any
+          .order('created_at', { ascending: true })
       ])
 
       if (ticketResp.error) throw ticketResp.error
@@ -124,10 +123,10 @@ export function useOuvidoriaDetalhe(ticketId?: string) {
           ticket_id: ticket.id,
           autor_id: profile.id,
           origem,
-          mensagem: mensagemText
-        } as any)
+          mensagem: mensagemText,
+        })
         .select()
-        .single() as any
+        .single()
 
       if (error) throw error
       setMensagens((prev) => [...prev, data])
