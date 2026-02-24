@@ -102,7 +102,7 @@
 | Fase 6 — Administrativo e GED | ✅ Completa | 8/8 |
 | Fase 7 — Portal da Transparência | ✅ Completa | 6/6 |
 
-## Melhorias Técnicas (pós-Fase 7)
+## Melhorias Técnicas — Rodada 1 (pós-Fase 7)
 
 | Melhoria | Status | Detalhe |
 |----------|--------|---------|
@@ -112,6 +112,24 @@
 | AuthProvider com React Context | ✅ Implementado | 1 assinatura Supabase (vs 30+ antes) |
 | Error Boundary global | ✅ Implementado | `src/components/ui/ErrorBoundary.tsx` |
 | Página 404 + catch-all route | ✅ Implementado | `src/pages/NotFound.tsx` |
+
+## Melhorias Técnicas — Rodada 2 (auditoria completa)
+
+| # | Melhoria | Status | Arquivo(s) |
+|---|----------|--------|------------|
+| 1 | Paginação defensiva `.limit(100)` | ✅ Implementado | `useProposicoes`, `useLeis`, `useProtocolos`, `useDocumentos` |
+| 2 | Impersonation async com validação de tenant | ✅ Implementado | `src/contexts/AuthContext.tsx` |
+| 3 | Tipos TypeScript para RPCs admin | ✅ Implementado | `src/types/rpc.ts` + `CamarasList.tsx` |
+| 4 | Toast system — remove `alert()` nativo | ✅ Implementado | `ToastContext.tsx`, `useToast.ts`, `Toast.tsx`, `App.tsx` |
+| 5 | ARIA completo nos modais | ✅ Implementado | `UploadModal`, `CertificateModal`, `GovBrSignatureModal`, `Protocolos.tsx` |
+| 6 | Sidebar responsiva (mobile) | ✅ Implementado | `AppLayout.tsx`, `Sidebar.tsx` |
+| 7 | Extração de modais de `Documentos.tsx` | ✅ Implementado | `src/pages/backoffice/documentos/` (3 arquivos) |
+| 8 | Mutex em `resolveUserType` (race condition) | ✅ Implementado | `src/contexts/AuthContext.tsx` |
+| 9 | Dashboard resiliente com `safeRun` + timeout 8 s | ✅ Implementado | `src/hooks/useDashboard.ts` |
+| 10 | Logger wrapper (silenciado em produção) | ✅ Implementado | `src/lib/logger.ts` |
+| 11 | PWA Workbox runtime caching | ✅ Implementado | `vite.config.ts` |
+
+**Verificação Rodada 2:** `tsc` 0 erros · `eslint` 0 warnings · build OK
 
 **Próximos passos prioritários:**
 1. Técnico — Configurar SMTP customizado no Supabase (Gmail App Password) para recuperação de senha

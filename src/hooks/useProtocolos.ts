@@ -22,6 +22,7 @@ export function useProtocolos() {
       .eq('tenant_id', profile.tenant_id)
       .order('ano', { ascending: false })
       .order('numero', { ascending: false })
+      .limit(100)
 
     if (search) {
       query = query.or(`assunto.ilike.%${search}%,numero.ilike.%${search}%,remetente.ilike.%${search}%`)

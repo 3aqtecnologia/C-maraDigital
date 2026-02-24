@@ -21,6 +21,7 @@ export function useDocumentos() {
       .select('*')
       .eq('tenant_id', profile.tenant_id)
       .order('created_at', { ascending: false })
+      .limit(100)
 
     if (search) {
       query = query.ilike('nome', `%${search}%`)

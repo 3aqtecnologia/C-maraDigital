@@ -39,6 +39,11 @@ interface NovoProtocoloModalProps {
 function NovoProtocoloModal({ onClose, onSuccess, criar }: NovoProtocoloModalProps) {
   const hoje = new Date().toISOString().split('T')[0]
   const [tipo, setTipo] = useState<ProtocoloTipo>('entrada')
+
+  useEffect(() => {
+    const firstEl = document.querySelector<HTMLElement>('[role="dialog"] input, [role="dialog"] button')
+    firstEl?.focus()
+  }, [])
   const [assunto, setAssunto] = useState('')
   const [remetente, setRemetente] = useState('')
   const [destinatario, setDestinatario] = useState('')
@@ -71,11 +76,15 @@ function NovoProtocoloModal({ onClose, onSuccess, criar }: NovoProtocoloModalPro
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+    <div
+      role="presentation"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4"
+      onClick={e => { if (e.target === e.currentTarget) onClose() }}
+    >
+      <div role="dialog" aria-modal="true" aria-labelledby="protocolo-modal-title" className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 sticky top-0 bg-white">
-          <h2 className="text-base font-semibold text-gray-900">Novo Protocolo</h2>
-          <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400">
+          <h2 id="protocolo-modal-title" className="text-base font-semibold text-gray-900">Novo Protocolo</h2>
+          <button onClick={onClose} aria-label="Fechar" className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400">
             <X size={18} />
           </button>
         </div>

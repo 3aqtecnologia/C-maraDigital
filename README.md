@@ -50,10 +50,11 @@ npm run dev
 - **Gestão de Câmaras:** modal administrativo com edição de dados em tempo real, controle dinâmico do Slug Base (subdomínio dinâmico via URL linkável) e controle de Lifecycle do cliente (Status: Ativo, Trial, Suspenso e Cancelado).
 - **Reset de Senha Mestre (Hard Reset):** funcionalidade para resetar remotamente a senha do administrador da câmara em caso de perda total de acesso, com geração de nova credencial provisória e log de auditoria.
 - **Configurações Globais:** edição dinâmica de limites e recursos dos planos de assinatura (Básico, Profissional, Enterprise), segurança com MFA e whitelist IP, e outras permissões.
-- **Representação Autenticada (Impersonation):** função de acessar áreas restritas do tenant via painel Mestre com faixa de alerta para suporte técnico rápido.
+- **Representação Autenticada (Impersonation):** impersonation validada no banco antes do redirecionamento — previne acesso a tenants inexistentes.
 - **Audit Log:** histórico de ações administrativas com filtros.
 - **Dashboard Master:** visão geral de todas as câmaras com hiperlinks espertos para filtragem automática e isolamento na visualização.
 - **Forçar Troca de Senha:** garantia de segurança que obriga o administrador a definir uma senha definitiva no primeiro acesso ou após um reset mestre.
+- **Notificações Toast:** feedback visual não-bloqueante substitui `alert()` nativo em todas as ações do painel master.
 
 ### 📋 Módulo Legislativo
 - **Lista de Proposições** com filtros por status e busca por número/ementa/tipo
@@ -90,9 +91,22 @@ npm run dev
 
 ### ⚡ Performance & Resiliência
 - **Code-splitting com React.lazy:** todas as 26 páginas carregadas sob demanda — bundle inicial reduzido de 1,1 MB para **497 KB (−55%)**.
-- **AuthProvider com React Context:** estado de autenticação compartilhado em memória com uma única assinatura Supabase para toda a aplicação.
+- **AuthProvider com React Context:** estado de autenticação compartilhado em memória com uma única assinatura Supabase para toda a aplicação. Mutex `useRef` previne race condition em `resolveUserType`.
 - **Error Boundary global:** tela de fallback amigável com botão "Tentar novamente" — exceções em páginas não mais causam tela branca.
 - **Página 404:** rota catch-all com links de retorno para o início e o portal público.
+- **Paginação defensiva:** `.limit(100)` em todos os hooks de listagem — previne OOM em câmaras com grande volume de dados.
+- **Dashboard resiliente:** `safeRun` com timeout de 8 s por query — o dashboard carrega parcialmente mesmo se uma consulta falhar ou demorar.
+- **PWA com Workbox runtime caching:** `NetworkFirst` para a API Supabase (10 s timeout) e `CacheFirst` para assets estáticos — funciona offline com dados recentes em cache.
+
+### ♿ Acessibilidade & UX Mobile
+- **Sidebar responsiva:** hambúrguer no mobile abre a sidebar com transição suave e overlay de fechamento — layout funcional em telas < 768 px.
+- **ARIA completo nos modais:** `role="dialog"`, `aria-modal`, `aria-labelledby`, `aria-label` e focus trap automático em todos os 4 modais da aplicação (Upload, Certificado, Gov.br, Protocolo).
+- **Toast system:** notificações não-bloqueantes com auto-dismiss (4 s) e ícones por tipo (sucesso/erro/info) — sem `alert()` nativo no código.
+
+### 🧱 Qualidade de Código
+- **Logger wrapper:** `src/lib/logger.ts` — logs suprimidos em produção, ativos apenas em desenvolvimento.
+- **Tipos RPC:** `src/types/rpc.ts` — interfaces TypeScript para todas as funções RPC admin (elimina `as any`).
+- **Modais extraídos:** `Documentos.tsx` reduzido de 719 para ~200 linhas; 3 modais movidos para `src/pages/backoffice/documentos/`.
 
 ---
 
@@ -115,19 +129,25 @@ npm run dev
 src/
 ├── components/
 │   ├── auth/           # LoginPage, ForgotPasswordPage, ResetPasswordPage
-│   ├── layout/         # AppLayout (com Suspense + ErrorBoundary), Sidebar, PageHeader
+│   ├── layout/         # AppLayout (sidebar mobile + hamburger), Sidebar, PageHeader
 │   ├── master/         # MasterLayout (com Suspense + ErrorBoundary)
-│   └── ui/             # ErrorBoundary, PageLoader
+│   └── ui/             # ErrorBoundary, PageLoader, Toast
 ├── contexts/
-│   └── AuthContext.tsx       # AuthProvider + AuthContext (1 assinatura Supabase global)
+│   ├── AuthContext.tsx       # AuthProvider + AuthContext (1 assinatura Supabase global)
+│   └── ToastContext.tsx      # ToastProvider + sistema de notificações
 ├── hooks/
 │   ├── useAuth.ts            # Re-exporta useAuth() do AuthContext
+│   ├── useToast.ts           # Hook para exibir toasts
 │   ├── useProposicoes.ts     # CRUD proposições + tramitações
+│   ├── useDashboard.ts       # Queries com safeRun (timeout + fallback)
 │   └── useSessoes.ts         # Sessões + votação em tempo real
 ├── lib/
-│   └── supabase.ts           # Cliente Supabase tipado
+│   ├── supabase.ts           # Cliente Supabase tipado
+│   └── logger.ts             # Logger wrapper (silenciado em produção)
 ├── pages/
-│   ├── backoffice/           # 17 páginas (Dashboard, Legislativo, Plenário, GED, Ouvidoria…)
+│   ├── backoffice/
+│   │   ├── documentos/       # UploadModal, CertificateModal, GovBrSignatureModal
+│   │   └── …                 # 17 páginas (Dashboard, Legislativo, Plenário, GED, Ouvidoria…)
 │   ├── master/               # 5 páginas (MasterDashboard, ProvisionarCamara, AuditLog…)
 │   ├── transparencia/        # 4 páginas (PortalPublico, detalhe público, Verificador)
 │   └── NotFound.tsx          # Página 404 com catch-all route
@@ -136,7 +156,8 @@ src/
 │   ├── AuthGuard.tsx     # Proteção de rotas tenant (valida session + userType)
 │   └── MasterGuard.tsx
 └── types/
-    └── database.ts       # Tipagem completa do schema Supabase
+    ├── database.ts       # Tipagem completa do schema Supabase
+    └── rpc.ts            # Interfaces TypeScript para RPCs admin
 supabase/
 └── migrations/
     ├── 001_initial_schema.sql    # Tabelas, enums, RLS, triggers
@@ -169,6 +190,7 @@ supabase/
 - [x] Fase 7 — Portal da Transparência: visualização pública e ouvidoria (e-SIC)
 - [x] Fase 7 — Portal da Transparência: exportação de dados abertos (CSV, JSON)
 - [x] Melhorias — Code-splitting (React.lazy), AuthProvider, Error Boundary e página 404
+- [x] Melhorias — Toast system, logger, tipos RPC, paginação defensiva, sidebar mobile, ARIA, dashboard resiliente, PWA workbox
 
 ---
 

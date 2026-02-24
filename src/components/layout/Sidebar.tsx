@@ -38,7 +38,12 @@ const NAV_ITEMS: NavItem[] = [
   { label: 'Configurações', icon: Settings, to: '/backoffice/configuracoes', roles: ['admin'] },
 ]
 
-export function Sidebar() {
+interface SidebarProps {
+  open?: boolean
+  onClose?: () => void
+}
+
+export function Sidebar({ open = false, onClose }: SidebarProps) {
   const { profile, masterAdmin, signOut, stopImpersonating } = useAuth()
 
   const visibleItems = NAV_ITEMS.filter(item =>
@@ -46,7 +51,7 @@ export function Sidebar() {
   )
 
   return (
-    <aside className="flex flex-col w-64 min-h-screen bg-primary-600 text-white">
+    <aside className={`flex flex-col w-64 min-h-screen bg-primary-600 text-white fixed inset-y-0 left-0 z-40 transition-transform duration-300 lg:static lg:translate-x-0 ${open ? 'translate-x-0' : '-translate-x-full'}`}>
       {/* Logo */}
       <div className="flex items-center gap-3 px-6 py-5 border-b border-primary-500">
         <div className="w-8 h-8 bg-accent rounded-lg flex items-center justify-center flex-shrink-0">
@@ -94,6 +99,7 @@ export function Sidebar() {
             key={item.to}
             to={item.to}
             end={item.to === '/backoffice'}
+            onClick={() => onClose?.()}
             className={({ isActive }) =>
               `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors group ${isActive
                 ? 'bg-white text-primary-600'

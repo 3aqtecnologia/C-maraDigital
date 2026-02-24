@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger'
 import { supabase } from '@/lib/supabase'
 import type { Database } from '@/types/database'
 import { useCallback, useState } from 'react'
@@ -21,6 +22,7 @@ export function useLeis() {
       .eq('tenant_id', profile.tenant_id)
       .order('ano', { ascending: false })
       .order('numero', { ascending: false })
+      .limit(100)
 
     if (searchQuery) {
       query = query.or(`numero.ilike.%${searchQuery}%,ementa.ilike.%${searchQuery}%,esfera.ilike.%${searchQuery}%`)
@@ -47,7 +49,7 @@ export function useLeis() {
       .single()
 
     if (error) {
-      console.error('Erro ao criar lei:', error)
+      logger.error('Erro ao criar lei:', error)
       return null
     }
 
@@ -64,7 +66,7 @@ export function useLeis() {
       .eq('tenant_id', profile.tenant_id)
 
     if (error) {
-      console.error('Erro ao atualizar lei:', error)
+      logger.error('Erro ao atualizar lei:', error)
       return false
     }
 

@@ -22,6 +22,20 @@ interface ProximaSessao {
   status: string
 }
 
+// Executa uma query com timeout; retorna null se falhar ou exceder o prazo
+async function safeRun<T>(p: PromiseLike<T>, ms = 8000): Promise<T | null> {
+  try {
+    return await Promise.race([
+      Promise.resolve(p),
+      new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error('timeout')), ms)
+      ),
+    ])
+  } catch {
+    return null
+  }
+}
+
 export function useDashboard() {
   const { profile } = useAuth()
   const [stats, setStats] = useState<DashboardStats>({
@@ -52,47 +66,59 @@ export function useDashboard() {
         recentesResp,
         proximaResp,
       ] = await Promise.all([
-        supabase
-          .from('proposicoes')
-          .select('*', { count: 'exact', head: true })
-          .in('status', ['protocolado', 'em_tramitacao', 'em_comissao', 'em_votacao']),
-        supabase
-          .from('sessoes')
-          .select('*', { count: 'exact', head: true })
-          .gte('data_inicio', inicioMes)
-          .lte('data_inicio', fimMes),
-        supabase
-          .from('profiles')
-          .select('*', { count: 'exact', head: true })
-          .eq('role', 'vereador')
-          .eq('ativo', true),
-        supabase
-          .from('proposicoes')
-          .select('*', { count: 'exact', head: true })
-          .in('status', ['aprovado', 'sancionado'])
-          .eq('ano', agora.getFullYear()),
-        supabase
-          .from('proposicoes')
-          .select('*, autor:profiles!autor_id(nome, partido)')
-          .order('created_at', { ascending: false })
-          .limit(5),
-        supabase
-          .from('sessoes')
-          .select('id, tipo, numero, ano, data_inicio, local, status')
-          .in('status', ['agendada', 'em_andamento'])
-          .order('data_inicio', { ascending: true })
-          .limit(1)
-          .single(),
+        safeRun(
+          supabase
+            .from('proposicoes')
+            .select('*', { count: 'exact', head: true })
+            .in('status', ['protocolado', 'em_tramitacao', 'em_comissao', 'em_votacao'])
+        ),
+        safeRun(
+          supabase
+            .from('sessoes')
+            .select('*', { count: 'exact', head: true })
+            .gte('data_inicio', inicioMes)
+            .lte('data_inicio', fimMes)
+        ),
+        safeRun(
+          supabase
+            .from('profiles')
+            .select('*', { count: 'exact', head: true })
+            .eq('role', 'vereador')
+            .eq('ativo', true)
+        ),
+        safeRun(
+          supabase
+            .from('proposicoes')
+            .select('*', { count: 'exact', head: true })
+            .in('status', ['aprovado', 'sancionado'])
+            .eq('ano', agora.getFullYear())
+        ),
+        safeRun(
+          supabase
+            .from('proposicoes')
+            .select('*, autor:profiles!autor_id(nome, partido)')
+            .order('created_at', { ascending: false })
+            .limit(5)
+        ),
+        safeRun(
+          supabase
+            .from('sessoes')
+            .select('id, tipo, numero, ano, data_inicio, local, status')
+            .in('status', ['agendada', 'em_andamento'])
+            .order('data_inicio', { ascending: true })
+            .limit(1)
+            .single()
+        ),
       ])
 
       setStats({
-        proposicoesEmTramitacao: tramitacaoResp.count ?? 0,
-        sessoesNoMes: sessoesResp.count ?? 0,
-        vereadores: vereRes.count ?? 0,
-        leisAprovadas: leisRes.count ?? 0,
+        proposicoesEmTramitacao: tramitacaoResp?.count ?? 0,
+        sessoesNoMes: sessoesResp?.count ?? 0,
+        vereadores: vereRes?.count ?? 0,
+        leisAprovadas: leisRes?.count ?? 0,
       })
-      setRecentes((recentesResp.data ?? []) as unknown as ProposicoesRecentes[])
-      setProximaSessao((proximaResp.data as ProximaSessao | null) ?? null)
+      setRecentes((recentesResp?.data ?? []) as unknown as ProposicoesRecentes[])
+      setProximaSessao((proximaResp?.data ?? null) as ProximaSessao | null)
       setLoading(false)
     }
 

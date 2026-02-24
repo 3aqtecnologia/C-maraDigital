@@ -1,9 +1,24 @@
 import { useAuth } from '@/hooks/useAuth'
+import { useToast } from '@/hooks/useToast'
 import { supabase } from '@/lib/supabase'
 import type { Database, TenantPlano, TenantSituacao } from '@/types/database'
+import type {
+  AdminDeletarTenantParams,
+  AdminDeletarTenantResult,
+  AdminResetarSenhaParams,
+  AdminResetarSenhaResult,
+  AdminUpdateTenantParams,
+} from '@/types/rpc'
 import { AlertTriangle, Building2, ExternalLink, KeyRound, MoreVertical, Save, Search, Settings, ShieldCheck, Trash2, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useLocation } from 'react-router-dom'
+
+// Helpers tipados para chamadas RPC (Supabase v2 não gera tipos para RPCs automaticamente)
+type RpcFn<P, R> = (fn: string, params: P) => Promise<{ data: R | null; error: Error | null }>
+
+const rpcDeletar = supabase.rpc as unknown as RpcFn<AdminDeletarTenantParams, AdminDeletarTenantResult>
+const rpcResetar = supabase.rpc as unknown as RpcFn<AdminResetarSenhaParams, AdminResetarSenhaResult>
+const rpcUpdate  = supabase.rpc as unknown as RpcFn<AdminUpdateTenantParams, { success: boolean }>
 
 type TenantOverview = Database['public']['Views']['master_tenant_overview']['Row']
 
@@ -16,6 +31,7 @@ const SITUACAO_LABELS: Record<TenantSituacao, string> = {
 
 export function CamarasList() {
   const { impersonateTenant } = useAuth()
+  const { showToast } = useToast()
   const location = useLocation()
 
   const [camaras, setCamaras] = useState<TenantOverview[]>([])
@@ -43,20 +59,16 @@ export function CamarasList() {
   async function handleDeleteTenant() {
     if (!editingCamara) return
     setDeleting(true)
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data, error } = await (supabase.rpc as any)('admin_deletar_tenant', {
-      p_tenant_id: editingCamara.id,
-    })
+    const { data, error } = await rpcDeletar('admin_deletar_tenant', { p_tenant_id: editingCamara.id! })
     setDeleting(false)
     if (error) {
-      alert('Erro ao deletar: ' + error.message)
-    } else {
-      const resultado = data as { nome_tenant: string; usuarios_removidos: number }
+      showToast('Erro ao remover câmara. Tente novamente.', 'error')
+    } else if (data) {
       setCamaras(prev => prev.filter(c => c.id !== editingCamara.id))
       setEditingCamara(null)
       setShowDeleteConfirm(false)
       setDeleteConfirmText('')
-      alert(`Câmara "${resultado.nome_tenant}" deletada permanentemente. ${resultado.usuarios_removidos} usuário(s) removido(s).`)
+      showToast(`Câmara "${data.nome_tenant}" removida. ${data.usuarios_removidos} usuário(s) removido(s).`, 'success')
     }
   }
 
@@ -69,40 +81,37 @@ export function CamarasList() {
     setResettingPassword(true)
     setNewCredentials(null)
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data, error } = await (supabase.rpc as any)('admin_resetar_senha_tenant', {
-      p_tenant_id: editingCamara.id
-    })
+    const { data, error } = await rpcResetar('admin_resetar_senha_tenant', { p_tenant_id: editingCamara.id! })
 
     setResettingPassword(false)
 
     if (error) {
-      alert("Erro ao resetar: " + error.message)
-    } else {
-      setNewCredentials(data as { admin_email: string, admin_password: string })
+      showToast('Erro ao resetar senha. Tente novamente.', 'error')
+    } else if (data) {
+      setNewCredentials({ admin_email: data.email_admin, admin_password: data.nova_senha })
     }
   }
 
   async function handleSave() {
     if (!editingCamara) return
     setSaving(true)
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { error } = await (supabase.rpc as any)('admin_update_tenant', {
-      p_tenant_id: editingCamara.id,
-      p_nome: editForm.nome,
-      p_municipio: editForm.municipio,
-      p_uf: editForm.uf,
-      p_slug: editForm.slug,
-      p_plano: editForm.plano,
-      p_situacao: editForm.situacao,
+    const { error } = await rpcUpdate('admin_update_tenant', {
+      p_tenant_id: editingCamara.id!,
+      p_nome: editForm.nome ?? undefined,
+      p_municipio: editForm.municipio ?? undefined,
+      p_uf: editForm.uf ?? undefined,
+      p_slug: editForm.slug ?? undefined,
+      p_plano: editForm.plano ?? undefined,
+      p_situacao: editForm.situacao ?? undefined,
     })
 
     setSaving(false)
     if (error) {
-      alert('Erro ao atualizar: ' + error.message)
+      showToast('Erro ao salvar configurações. Tente novamente.', 'error')
     } else {
       setCamaras(prev => prev.map(c => c.id === editingCamara.id ? { ...c, ...editForm } as TenantOverview : c))
       setEditingCamara(null)
+      showToast('Configurações salvas com sucesso.', 'success')
     }
   }
 

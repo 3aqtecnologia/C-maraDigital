@@ -25,6 +25,7 @@ export function useProposicoes(filtroStatus?: ProposicaoStatus | 'todos') {
       .from('proposicoes')
       .select('*, autor:profiles!autor_id(nome, partido)')
       .order('created_at', { ascending: false })
+      .limit(100)
 
     if (filtroStatus && filtroStatus !== 'todos') {
       query = query.eq('status', filtroStatus)
