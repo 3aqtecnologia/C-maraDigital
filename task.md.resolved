@@ -102,7 +102,17 @@
 | Fase 6 — Administrativo e GED | ✅ Completa | 8/8 |
 | Fase 7 — Portal da Transparência | ✅ Completa | 6/6 |
 
+## Melhorias Técnicas (pós-Fase 7)
+
+| Melhoria | Status | Detalhe |
+|----------|--------|---------|
+| Bug: rota `/backoffice/ouvidoria` ausente no router | ✅ Corrigido | `src/routes/index.tsx` |
+| Segurança: AuthGuard sem validação de `userType` | ✅ Corrigido | `!session \|\| userType === null` |
+| Code-splitting com React.lazy | ✅ Implementado | Bundle inicial: 1.123 KB → 497 KB (−55%) |
+| AuthProvider com React Context | ✅ Implementado | 1 assinatura Supabase (vs 30+ antes) |
+| Error Boundary global | ✅ Implementado | `src/components/ui/ErrorBoundary.tsx` |
+| Página 404 + catch-all route | ✅ Implementado | `src/pages/NotFound.tsx` |
+
 **Próximos passos prioritários:**
-1. Técnico — Implementar code-splitting (`manualChunks`) para reduzir bundle (~1 MB atualmente)
-2. Técnico — Configurar SMTP customizado no Supabase (Gmail App Password) para recuperação de senha
-3. Qualidade — Testes e2e (Playwright ou Cypress)
+1. Técnico — Configurar SMTP customizado no Supabase (Gmail App Password) para recuperação de senha
+2. Qualidade — Testes e2e (Playwright ou Cypress)

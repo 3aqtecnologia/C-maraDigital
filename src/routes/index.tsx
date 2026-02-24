@@ -1,36 +1,59 @@
-import { ForgotPasswordPage } from '@/components/auth/ForgotPasswordPage'
-import { LoginPage } from '@/components/auth/LoginPage'
-import { ResetPasswordPage } from '@/components/auth/ResetPasswordPage'
-import { AppLayout } from '@/components/layout/AppLayout'
-import { MasterLayout } from '@/components/master/MasterLayout'
-import { Configuracoes } from '@/pages/backoffice/Configuracoes'
-import { Dashboard } from '@/pages/backoffice/Dashboard'
-import { Documentos } from '@/pages/backoffice/Documentos'
-import { Legislativo } from '@/pages/backoffice/Legislativo'
-import { LeiDetalhe } from '@/pages/backoffice/LeiDetalhe'
-import { LeiNova } from '@/pages/backoffice/LeiNova'
-import { LeisList } from '@/pages/backoffice/LeisList'
-import { Plenario } from '@/pages/backoffice/Plenario'
-import { PlenarioAtivo } from '@/pages/backoffice/PlenarioAtivo'
-import { PlenarioGerenciar } from '@/pages/backoffice/PlenarioGerenciar'
-import { ProposicaoDetalhe } from '@/pages/backoffice/ProposicaoDetalhe'
-import { ProposicaoNova } from '@/pages/backoffice/ProposicaoNova'
-import { Ouvidoria } from '@/pages/backoffice/Ouvidoria'
-import { Protocolos } from '@/pages/backoffice/Protocolos'
-import { Teletrabalho } from '@/pages/backoffice/Teletrabalho'
-import { Usuarios } from '@/pages/backoffice/Usuarios'
-import { AuditLog } from '@/pages/master/AuditLog'
-import { CamarasList } from '@/pages/master/CamarasList'
-import { MasterConfiguracoes } from '@/pages/master/MasterConfiguracoes'
-import { MasterDashboard } from '@/pages/master/MasterDashboard'
-import { ProvisionarCamara } from '@/pages/master/ProvisionarCamara'
-import { LeiPublicaDetalhe } from '@/pages/transparencia/LeiPublicaDetalhe'
-import { PortalPublico } from '@/pages/transparencia/PortalPublico'
-import { ProposicaoPublicaDetalhe } from '@/pages/transparencia/ProposicaoPublicaDetalhe'
-import { Verificador } from '@/pages/transparencia/Verificador'
+import { PageLoader } from '@/components/ui/PageLoader'
+import { NotFound } from '@/pages/NotFound'
+import { lazy, Suspense } from 'react'
 import { createBrowserRouter, Navigate } from 'react-router-dom'
 import { AuthGuard } from './AuthGuard'
 import { MasterGuard } from './MasterGuard'
+
+// Helper: transforma named exports em default exports para React.lazy
+function lazy$<T extends Record<string, React.ComponentType>>(
+  load: () => Promise<T>,
+  name: keyof T
+) {
+  return lazy(() => load().then(m => ({ default: m[name] as React.ComponentType })))
+}
+
+// ── Auth pages (eager — usadas antes da autenticação) ────────────
+import { ForgotPasswordPage } from '@/components/auth/ForgotPasswordPage'
+import { LoginPage } from '@/components/auth/LoginPage'
+import { ResetPasswordPage } from '@/components/auth/ResetPasswordPage'
+
+// ── Layouts (eager — são shells, não têm código pesado) ──────────
+import { AppLayout } from '@/components/layout/AppLayout'
+import { MasterLayout } from '@/components/master/MasterLayout'
+
+// ── Backoffice pages (lazy) ──────────────────────────────────────
+const Dashboard        = lazy$(() => import('@/pages/backoffice/Dashboard'),        'Dashboard')
+const Legislativo      = lazy$(() => import('@/pages/backoffice/Legislativo'),      'Legislativo')
+const ProposicaoNova   = lazy$(() => import('@/pages/backoffice/ProposicaoNova'),   'ProposicaoNova')
+const ProposicaoDetalhe = lazy$(() => import('@/pages/backoffice/ProposicaoDetalhe'), 'ProposicaoDetalhe')
+const LeisList         = lazy$(() => import('@/pages/backoffice/LeisList'),         'LeisList')
+const LeiNova          = lazy$(() => import('@/pages/backoffice/LeiNova'),          'LeiNova')
+const LeiDetalhe       = lazy$(() => import('@/pages/backoffice/LeiDetalhe'),       'LeiDetalhe')
+const Plenario         = lazy$(() => import('@/pages/backoffice/Plenario'),         'Plenario')
+const PlenarioAtivo    = lazy$(() => import('@/pages/backoffice/PlenarioAtivo'),    'PlenarioAtivo')
+const PlenarioGerenciar = lazy$(() => import('@/pages/backoffice/PlenarioGerenciar'), 'PlenarioGerenciar')
+const Documentos       = lazy$(() => import('@/pages/backoffice/Documentos'),       'Documentos')
+const Teletrabalho     = lazy$(() => import('@/pages/backoffice/Teletrabalho'),     'Teletrabalho')
+const Ouvidoria        = lazy$(() => import('@/pages/backoffice/Ouvidoria'),        'Ouvidoria')
+const Protocolos       = lazy$(() => import('@/pages/backoffice/Protocolos'),       'Protocolos')
+const Usuarios         = lazy$(() => import('@/pages/backoffice/Usuarios'),         'Usuarios')
+const Configuracoes    = lazy$(() => import('@/pages/backoffice/Configuracoes'),    'Configuracoes')
+
+// ── Master pages (lazy) ──────────────────────────────────────────
+const MasterDashboard     = lazy$(() => import('@/pages/master/MasterDashboard'),     'MasterDashboard')
+const CamarasList         = lazy$(() => import('@/pages/master/CamarasList'),         'CamarasList')
+const ProvisionarCamara   = lazy$(() => import('@/pages/master/ProvisionarCamara'),   'ProvisionarCamara')
+const AuditLog            = lazy$(() => import('@/pages/master/AuditLog'),            'AuditLog')
+const MasterConfiguracoes = lazy$(() => import('@/pages/master/MasterConfiguracoes'), 'MasterConfiguracoes')
+
+// ── Public (transparência) pages (lazy) ─────────────────────────
+const PortalPublico            = lazy$(() => import('@/pages/transparencia/PortalPublico'),            'PortalPublico')
+const ProposicaoPublicaDetalhe = lazy$(() => import('@/pages/transparencia/ProposicaoPublicaDetalhe'), 'ProposicaoPublicaDetalhe')
+const LeiPublicaDetalhe        = lazy$(() => import('@/pages/transparencia/LeiPublicaDetalhe'),        'LeiPublicaDetalhe')
+const Verificador              = lazy$(() => import('@/pages/transparencia/Verificador'),              'Verificador')
+
+const loader = <PageLoader />
 
 export const router = createBrowserRouter([
   {
@@ -51,19 +74,19 @@ export const router = createBrowserRouter([
   },
   {
     path: '/transparencia',
-    element: <PortalPublico />,
+    element: <Suspense fallback={loader}><PortalPublico /></Suspense>,
   },
   {
     path: '/transparencia/proposicao/:id',
-    element: <ProposicaoPublicaDetalhe />,
+    element: <Suspense fallback={loader}><ProposicaoPublicaDetalhe /></Suspense>,
   },
   {
     path: '/transparencia/lei/:id',
-    element: <LeiPublicaDetalhe />,
+    element: <Suspense fallback={loader}><LeiPublicaDetalhe /></Suspense>,
   },
   {
     path: '/verificar/:hash',
-    element: <Verificador />,
+    element: <Suspense fallback={loader}><Verificador /></Suspense>,
   },
 
   // ── Master Admin ────────────────────────────────────────────
@@ -110,4 +133,7 @@ export const router = createBrowserRouter([
       { path: 'configuracoes', element: <Configuracoes /> },
     ],
   },
+
+  // ── Catch-all ────────────────────────────────────────────────
+  { path: '*', element: <NotFound /> },
 ])

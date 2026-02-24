@@ -1,3 +1,6 @@
+import { ErrorBoundary } from '@/components/ui/ErrorBoundary'
+import { PageLoader } from '@/components/ui/PageLoader'
+import { Suspense } from 'react'
 import { NavLink, Outlet } from 'react-router-dom'
 import {
   LayoutDashboard,
@@ -82,7 +85,11 @@ export function MasterLayout() {
 
       {/* Main */}
       <main className="flex-1 flex flex-col min-w-0">
-        <Outlet />
+        <ErrorBoundary>
+          <Suspense fallback={<PageLoader />}>
+            <Outlet />
+          </Suspense>
+        </ErrorBoundary>
       </main>
     </div>
   )

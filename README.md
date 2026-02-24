@@ -88,6 +88,12 @@ npm run dev
 - **Sanitização de Dados Auth:** normalização do banco de dados para evitar erros de processamento em instâncias legadas de tokens nulos no Supabase.
 - Funções auxiliares no schema `public`: `get_user_tenant_id()`, `get_user_role()`, `is_master_admin()`.
 
+### ⚡ Performance & Resiliência
+- **Code-splitting com React.lazy:** todas as 26 páginas carregadas sob demanda — bundle inicial reduzido de 1,1 MB para **497 KB (−55%)**.
+- **AuthProvider com React Context:** estado de autenticação compartilhado em memória com uma única assinatura Supabase para toda a aplicação.
+- **Error Boundary global:** tela de fallback amigável com botão "Tentar novamente" — exceções em páginas não mais causam tela branca.
+- **Página 404:** rota catch-all com links de retorno para o início e o portal público.
+
 ---
 
 ## 🛠️ Stack Tecnológico
@@ -108,35 +114,26 @@ npm run dev
 ```
 src/
 ├── components/
-│   ├── auth/           # LoginPage
-│   ├── layout/         # AppLayout, Sidebar, PageHeader
-│   └── master/         # MasterLayout
+│   ├── auth/           # LoginPage, ForgotPasswordPage, ResetPasswordPage
+│   ├── layout/         # AppLayout (com Suspense + ErrorBoundary), Sidebar, PageHeader
+│   ├── master/         # MasterLayout (com Suspense + ErrorBoundary)
+│   └── ui/             # ErrorBoundary, PageLoader
+├── contexts/
+│   └── AuthContext.tsx       # AuthProvider + AuthContext (1 assinatura Supabase global)
 ├── hooks/
-│   ├── useAuth.ts            # Autenticação + resolução de tipo de usuário
+│   ├── useAuth.ts            # Re-exporta useAuth() do AuthContext
 │   ├── useProposicoes.ts     # CRUD proposições + tramitações
 │   └── useSessoes.ts         # Sessões + votação em tempo real
 ├── lib/
 │   └── supabase.ts           # Cliente Supabase tipado
 ├── pages/
-│   ├── backoffice/
-│   │   ├── Dashboard.tsx
-│   │   ├── Legislativo.tsx         # Lista de proposições
-│   │   ├── ProposicaoNova.tsx      # Formulário de criação
-│   │   ├── ProposicaoDetalhe.tsx   # Detalhe + timeline de tramitação
-│   │   ├── LeisList.tsx            # Lista de leis compiladas (LeisGov)
-│   │   ├── LeiNova.tsx             # Cadastro de nova lei
-│   │   ├── LeiDetalhe.tsx          # Detalhe estilizado da lei
-│   │   ├── Plenario.tsx            # Lista de sessões + criação
-│   │   └── PlenarioAtivo.tsx       # Painel ao vivo (Realtime)
-│   ├── master/
-│   │   ├── MasterDashboard.tsx
-│   │   ├── ProvisionarCamara.tsx
-│   │   └── AuditLog.tsx
-│   └── transparencia/
-│       └── PortalPublico.tsx
+│   ├── backoffice/           # 17 páginas (Dashboard, Legislativo, Plenário, GED, Ouvidoria…)
+│   ├── master/               # 5 páginas (MasterDashboard, ProvisionarCamara, AuditLog…)
+│   ├── transparencia/        # 4 páginas (PortalPublico, detalhe público, Verificador)
+│   └── NotFound.tsx          # Página 404 com catch-all route
 ├── routes/
-│   ├── index.tsx         # Definição de todas as rotas
-│   ├── AuthGuard.tsx     # Proteção de rotas tenant
+│   ├── index.tsx         # Rotas com React.lazy (code-splitting) + Suspense
+│   ├── AuthGuard.tsx     # Proteção de rotas tenant (valida session + userType)
 │   └── MasterGuard.tsx
 └── types/
     └── database.ts       # Tipagem completa do schema Supabase
@@ -171,6 +168,7 @@ supabase/
 - [x] Fase 6 — Segurança Avançada: assinatura digital (ICP-Brasil) e verificação de QR Code
 - [x] Fase 7 — Portal da Transparência: visualização pública e ouvidoria (e-SIC)
 - [x] Fase 7 — Portal da Transparência: exportação de dados abertos (CSV, JSON)
+- [x] Melhorias — Code-splitting (React.lazy), AuthProvider, Error Boundary e página 404
 
 ---
 
