@@ -9,7 +9,9 @@
       "Bash(xargs -I {} sh -c 'echo \"\"=== {} ===\"\" && head -20 {}')",
       "Bash(npx tsc -b --noEmit)",
       "Bash(npx eslint src --format=compact)",
-      "Bash(npx eslint src)"
+      "Bash(npx eslint src)",
+      "Bash(git add README.md src/App.tsx src/components/layout/AppLayout.tsx src/components/master/MasterLayout.tsx src/hooks/useAuth.ts src/routes/index.tsx task.md.resolved src/components/ui/ErrorBoundary.tsx src/components/ui/PageLoader.tsx src/contexts/ src/pages/NotFound.tsx)",
+      "Bash(git commit:*)"
     ]
   }
 }

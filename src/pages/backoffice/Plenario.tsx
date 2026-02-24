@@ -1,7 +1,8 @@
+import { useConfiguracoes } from '@/hooks/useConfiguracoes'
 import { PageHeader } from '@/components/layout/PageHeader'
 import { useAuth } from '@/hooks/useAuth'
 import { useSessoes } from '@/hooks/useSessoes'
-import type { SessaoStatus, SessaoTipo } from '@/types/database'
+import type { SessaoStatus } from '@/types/database'
 import { AlertCircle, Clock, Gavel, Play, Plus, Radio, RefreshCw, Users, X } from 'lucide-react'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
@@ -13,23 +14,34 @@ const STATUS_CONFIG: Record<SessaoStatus, { label: string; color: string; dot: s
   cancelada: { label: 'Cancelada', color: 'bg-red-100 text-red-600', dot: 'bg-red-400' },
 }
 
-const TIPO_LABELS: Record<SessaoTipo, string> = {
-  ordinaria: 'Sessão Ordinária',
-  extraordinaria: 'Sessão Extraordinária',
-  especial: 'Sessão Especial',
-  solene: 'Sessão Solene',
-}
-
 export function Plenario() {
   const navigate = useNavigate()
   const { profile } = useAuth()
   const { sessoes, loading, error, fetch, criar } = useSessoes()
+  const { tiposSessao } = useConfiguracoes()
+
+  const tiposAtivos = tiposSessao.filter(t => t.ativo)
+
+  // Fallback para quando os tipos ainda não carregaram
+  const TIPO_LABELS_FALLBACK: Record<string, string> = {
+    ordinaria:     'Sessão Ordinária',
+    extraordinaria:'Sessão Extraordinária',
+    especial:      'Sessão Especial',
+    solene:        'Sessão Solene',
+  }
+
+  function getTipoLabel(tipo: string): string {
+    const custom = tiposAtivos.find(t => t.nome.toLowerCase().replace(/\s+/g, '_') === tipo || t.nome === tipo)
+    return custom?.nome ?? TIPO_LABELS_FALLBACK[tipo] ?? tipo
+  }
 
   const isAdmin = profile?.role === 'admin' || profile?.role === 'servidor'
 
+  const primeiroTipo = tiposAtivos[0]?.nome ?? 'ordinaria'
+
   const [showForm, setShowForm] = useState(false)
   const [formData, setFormData] = useState({
-    tipo: 'ordinaria' as SessaoTipo,
+    tipo: primeiroTipo,
     data_inicio: '',
     local: 'Câmara Municipal',
     quorum_minimo: 6,
@@ -47,7 +59,7 @@ export function Plenario() {
     setSaving(false)
     if (result) {
       setShowForm(false)
-      setFormData({ tipo: 'ordinaria', data_inicio: '', local: 'Câmara Municipal', quorum_minimo: 6, transmissao_url: '' })
+      setFormData({ tipo: primeiroTipo, data_inicio: '', local: 'Câmara Municipal', quorum_minimo: 6, transmissao_url: '' })
     }
   }
 
@@ -88,11 +100,12 @@ export function Plenario() {
                   <select
                     className="input"
                     value={formData.tipo}
-                    onChange={e => setFormData(f => ({ ...f, tipo: e.target.value as SessaoTipo }))}
+                    onChange={e => setFormData(f => ({ ...f, tipo: e.target.value }))}
                   >
-                    {(Object.entries(TIPO_LABELS) as [SessaoTipo, string][]).map(([v, l]) => (
-                      <option key={v} value={v}>{l}</option>
-                    ))}
+                    {tiposAtivos.length > 0
+                      ? tiposAtivos.map(t => <option key={t.nome} value={t.nome}>{t.nome}</option>)
+                      : Object.entries(TIPO_LABELS_FALLBACK).map(([v, l]) => <option key={v} value={v}>{l}</option>)
+                    }
                   </select>
                 </div>
                 <div>
@@ -162,7 +175,7 @@ export function Plenario() {
                   Sessão em andamento
                 </p>
                 <h2 className="text-xl font-bold mt-1">
-                  {TIPO_LABELS[sessaoAtiva.tipo]} nº {sessaoAtiva.numero}/{sessaoAtiva.ano}
+                  {getTipoLabel(sessaoAtiva.tipo)} nº {sessaoAtiva.numero}/{sessaoAtiva.ano}
                 </h2>
                 <div className="flex items-center gap-4 mt-2 text-primary-200 text-sm">
                   <span className="flex items-center gap-1.5">
@@ -186,7 +199,7 @@ export function Plenario() {
               <div>
                 <p className="text-primary-600 text-sm">Próxima sessão</p>
                 <h2 className="text-lg font-bold text-primary-800 mt-0.5">
-                  {TIPO_LABELS[proxima.tipo]} nº {proxima.numero}/{proxima.ano}
+                  {getTipoLabel(proxima.tipo)} nº {proxima.numero}/{proxima.ano}
                 </h2>
                 <div className="flex items-center gap-4 mt-1.5 text-primary-500 text-sm">
                   <span className="flex items-center gap-1.5">
@@ -254,7 +267,7 @@ export function Plenario() {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
                         <p className="font-medium text-gray-900">
-                          {TIPO_LABELS[sessao.tipo]} — {sessao.numero}/{sessao.ano}
+                          {getTipoLabel(sessao.tipo)} — {sessao.numero}/{sessao.ano}
                         </p>
                         <span className={`badge ${config.color} flex items-center gap-1`}>
                           <span className={`w-1.5 h-1.5 rounded-full ${config.dot}`} />

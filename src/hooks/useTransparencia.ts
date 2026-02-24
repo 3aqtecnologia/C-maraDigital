@@ -165,6 +165,8 @@ export function useLeiPublica(id: string) {
   return { lei, loading }
 }
 
+const TENANT_PUBLIC_FIELDS = 'id, nome, municipio, uf, logo_url, cor_primaria, cor_secundaria, endereco, telefone, whatsapp, email_geral, site_url, horario_atendimento'
+
 // Hook para buscar dados básicos do tenant via slug
 export function useTenantBySlug(slug: string | null) {
   const [tenant, setTenant] = useState<Partial<Database['public']['Tables']['tenants']['Row']> | null>(null)
@@ -178,7 +180,7 @@ export function useTenantBySlug(slug: string | null) {
 
     supabase
       .from('tenants')
-      .select('id, nome, municipio, uf, logo_url, cor_primaria')
+      .select(TENANT_PUBLIC_FIELDS)
       .eq('slug', slug)
       .eq('ativo', true)
       .single()
@@ -187,6 +189,58 @@ export function useTenantBySlug(slug: string | null) {
         setLoading(false)
       })
   }, [slug])
+
+  return { tenant, loading }
+}
+
+// Hook para buscar dados básicos do tenant via id (usado em dev quando não há subdomínio)
+export function useTenantById(id: string | null) {
+  const [tenant, setTenant] = useState<Partial<Database['public']['Tables']['tenants']['Row']> | null>(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    if (!id) {
+      setLoading(false)
+      return
+    }
+
+    supabase
+      .from('tenants')
+      .select(TENANT_PUBLIC_FIELDS)
+      .eq('id', id)
+      .eq('ativo', true)
+      .single()
+      .then(({ data }) => {
+        setTenant(data)
+        setLoading(false)
+      })
+  }, [id])
+
+  return { tenant, loading }
+}
+
+// Hook para pegar o primeiro tenant ativo (fallback para dev)
+export function useFirstActiveTenant(enabled: boolean) {
+  const [tenant, setTenant] = useState<Partial<Database['public']['Tables']['tenants']['Row']> | null>(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    if (!enabled) {
+      setLoading(false)
+      return
+    }
+
+    supabase
+      .from('tenants')
+      .select(TENANT_PUBLIC_FIELDS)
+      .eq('ativo', true)
+      .limit(1)
+      .single()
+      .then(({ data }) => {
+        setTenant(data)
+        setLoading(false)
+      })
+  }, [enabled])
 
   return { tenant, loading }
 }

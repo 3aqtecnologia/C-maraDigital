@@ -1,4 +1,5 @@
-import { ProposicaoPublica, useTenantBySlug, useTransparencia } from '@/hooks/useTransparencia'
+import { useAuth } from '@/hooks/useAuth'
+import { ProposicaoPublica, useFirstActiveTenant, useTenantById, useTenantBySlug, useTransparencia } from '@/hooks/useTransparencia'
 import type { Database } from '@/types/database'
 import { ArrowLeft, Clock, Download, ExternalLink, FileText, Gavel, LayoutDashboard, Search, User } from 'lucide-react'
 import { useEffect, useState } from 'react'
@@ -9,15 +10,39 @@ type Lei = Database['public']['Tables']['leis']['Row']
 export function PortalPublico() {
   const [search, setSearch] = useState('')
   const [activeTab, setActiveTab] = useState<'leis' | 'proposicoes'>('leis')
+  const { profile } = useAuth()
 
-  // Detecção de tenant via subdomínio (slug)
+  // Múltiplos métodos de detecção de tenant para dar suporte ao modo dev local
+  const searchParams = new URLSearchParams(window.location.search)
+  const querySlug = searchParams.get('slug')
+
   const hostname = window.location.hostname
-  const slug = hostname.includes('localhost') || hostname.includes('127.0.0.1')
-    ? 'camarajn' // Fallback para desenvolvimento
-    : hostname.split('.')[0]
+  const isLocalhost = hostname.includes('localhost') || hostname.includes('127.0.0.1')
 
-  const { tenant, loading: loadingTenant } = useTenantBySlug(slug)
+  // 1. Em produção, usa o subdomínio; Em dev, tenta via ?slug=...
+  const slugFromHost = isLocalhost ? querySlug : hostname.split('.')[0]
+
+  const { tenant: tenantBySlug, loading: loadingBySlug } = useTenantBySlug(slugFromHost)
+
+  // 2. Em dev, se não passou slug na query, tenta usar o tenant do profile logado
+  const { tenant: tenantById, loading: loadingById } = useTenantById(isLocalhost && !slugFromHost ? (profile?.tenant_id ?? null) : null)
+
+  // 3. Fallback final para dev: pega o primeiro tenant ativo se não estiver logado
+  const { tenant: defaultTenant, loading: loadingDefault } = useFirstActiveTenant(isLocalhost && !slugFromHost && !profile?.tenant_id)
+
+  const tenant = tenantBySlug || tenantById || defaultTenant
+  const loadingTenant = loadingBySlug && loadingById && loadingDefault
   const { stats, fetchLeis, fetchProposicoes } = useTransparencia(tenant?.id)
+
+  // Aplicar cor primária do tenant como CSS custom property
+  useEffect(() => {
+    if (tenant?.cor_primaria) {
+      document.documentElement.style.setProperty('--tenant-primary', tenant.cor_primaria)
+    }
+    return () => {
+      document.documentElement.style.removeProperty('--tenant-primary')
+    }
+  }, [tenant?.cor_primaria])
 
   const [recentLeis, setRecentLeis] = useState<Lei[]>([])
   const [recentProposicoes, setRecentProposicoes] = useState<ProposicaoPublica[]>([])

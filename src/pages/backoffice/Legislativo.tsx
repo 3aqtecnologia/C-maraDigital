@@ -1,9 +1,10 @@
+import { useConfiguracoes } from '@/hooks/useConfiguracoes'
+import { useProposicoes } from '@/hooks/useProposicoes'
+import { PageHeader } from '@/components/layout/PageHeader'
+import type { ProposicaoStatus } from '@/types/database'
+import { AlertCircle, FileText, Filter, Plus, RefreshCw, Search } from 'lucide-react'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Plus, Search, Filter, FileText, RefreshCw, AlertCircle } from 'lucide-react'
-import { PageHeader } from '@/components/layout/PageHeader'
-import { useProposicoes } from '@/hooks/useProposicoes'
-import type { ProposicaoStatus } from '@/types/database'
 
 const STATUS_LABELS: Record<ProposicaoStatus, { label: string; color: string }> = {
   rascunho:      { label: 'Rascunho',       color: 'bg-gray-100 text-gray-600' },
@@ -24,6 +25,7 @@ export function Legislativo() {
   const [statusFilter, setStatusFilter] = useState<ProposicaoStatus | 'todos'>('todos')
 
   const { proposicoes, loading, error, fetch } = useProposicoes(statusFilter)
+  const { tiposProposicao } = useConfiguracoes()
 
   const filtered = proposicoes.filter(p => {
     const term = search.toLowerCase()
@@ -34,17 +36,23 @@ export function Legislativo() {
     )
   })
 
-  function formatNumero(p: typeof proposicoes[0]) {
-    const siglas: Record<string, string> = {
-      projeto_lei:             'PL',
-      projeto_lei_complementar:'PLC',
-      projeto_resolucao:       'PR',
-      requerimento:            'REQ',
-      indicacao:               'IND',
-      moca_aplausos:           'MOC',
-      voto_pesar:              'VP',
+  function getSigla(tipoCodigo: string): string {
+    const custom = tiposProposicao.find(t => t.codigo === tipoCodigo)
+    if (custom) return custom.sigla
+    const legado: Record<string, string> = {
+      projeto_lei:              'PL',
+      projeto_lei_complementar: 'PLC',
+      projeto_resolucao:        'PR',
+      requerimento:             'REQ',
+      indicacao:                'IND',
+      moca_aplausos:            'MOC',
+      voto_pesar:               'VP',
     }
-    return `${siglas[p.tipo] ?? p.tipo} ${p.numero}/${p.ano}`
+    return legado[tipoCodigo] ?? tipoCodigo.toUpperCase()
+  }
+
+  function formatNumero(p: typeof proposicoes[0]) {
+    return `${getSigla(p.tipo)} ${p.numero}/${p.ano}`
   }
 
   return (
@@ -154,8 +162,8 @@ export function Legislativo() {
                       {new Date(p.data_protocolo).toLocaleDateString('pt-BR')}
                     </td>
                     <td className="px-6 py-4">
-                      <span className={`badge ${STATUS_LABELS[p.status].color}`}>
-                        {STATUS_LABELS[p.status].label}
+                      <span className={`badge ${STATUS_LABELS[p.status]?.color ?? 'bg-gray-100 text-gray-600'}`}>
+                        {STATUS_LABELS[p.status]?.label ?? p.status}
                       </span>
                     </td>
                   </tr>

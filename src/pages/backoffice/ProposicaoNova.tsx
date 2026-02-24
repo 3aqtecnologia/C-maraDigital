@@ -1,43 +1,50 @@
+import { useConfiguracoes } from '@/hooks/useConfiguracoes'
+import { useProposicoes } from '@/hooks/useProposicoes'
 import { PageHeader } from '@/components/layout/PageHeader'
 import { RichTextEditor } from '@/components/ui/RichTextEditor'
-import { useProposicoes } from '@/hooks/useProposicoes'
-import type { ProposicaoTipo } from '@/types/database'
 import { AlertCircle, ArrowLeft, Save, Send } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
-const TIPOS: { value: ProposicaoTipo; label: string; desc: string }[] = [
-  { value: 'projeto_lei', label: 'Projeto de Lei (PL)', desc: 'Proposta de criação, alteração ou revogação de lei municipal' },
-  { value: 'projeto_lei_complementar', label: 'Proj. Lei Complementar (PLC)', desc: 'Complementa a Lei Orgânica ou outras leis fundamentais' },
-  { value: 'projeto_resolucao', label: 'Projeto de Resolução (PR)', desc: 'Disciplina assuntos internos da Câmara' },
-  { value: 'requerimento', label: 'Requerimento (REQ)', desc: 'Solicita informações, providências ou manifestações' },
-  { value: 'indicacao', label: 'Indicação (IND)', desc: 'Sugere ao Executivo adoção de providências' },
-  { value: 'moca_aplausos', label: 'Moção de Aplausos (MOC)', desc: 'Homenagem ou reconhecimento público' },
-  { value: 'voto_pesar', label: 'Voto de Pesar (VP)', desc: 'Manifestação de condolências' },
-]
-
-const TEMPLATES: Record<ProposicaoTipo, string> = {
+// Templates para os tipos legislativos padrão
+const TEMPLATES: Record<string, string> = {
   projeto_lei: `<h3 style="text-align: center">CÂMARA MUNICIPAL</h3><p style="text-align: center"><strong>PROJETO DE LEI Nº ___/2025</strong></p><p><strong>Autor:</strong> ___________________</p><p><em>Dispõe sobre... e dá outras providências.</em></p><p>A Câmara Municipal aprova:</p><p><strong>Art. 1º</strong> ...</p><p><strong>Art. 2º</strong> Esta lei entra em vigor na data de sua publicação.</p><p style="text-align: right">Sala das Sessões, ___ de _______ de 2025.</p><p style="text-align: center">___________________________<br>Assinatura do Autor</p>`,
   projeto_lei_complementar: `<h3 style="text-align: center">CÂMARA MUNICIPAL</h3><p style="text-align: center"><strong>PROJETO DE LEI COMPLEMENTAR Nº ___/2025</strong></p><p><strong>Autor:</strong> ___________________</p><p><em>Dispõe sobre... e dá outras providências.</em></p><p>A Câmara Municipal aprova:</p><p><strong>Art. 1º</strong> ...</p><p><strong>Art. 2º</strong> Esta lei complementar entra em vigor na data de sua publicação.</p><p style="text-align: right">Sala das Sessões, ___ de _______ de 2025.</p><p style="text-align: center">___________________________<br>Assinatura do Autor</p>`,
   projeto_resolucao: `<h3 style="text-align: center">CÂMARA MUNICIPAL</h3><p style="text-align: center"><strong>PROJETO DE RESOLUÇÃO Nº ___/2025</strong></p><p><strong>Autor:</strong> ___________________</p><p><em>Dispõe sobre...</em></p><p>A Câmara Municipal resolve:</p><p><strong>Art. 1º</strong> ...</p><p><strong>Art. 2º</strong> Esta resolução entra em vigor na data de sua publicação.</p><p style="text-align: right">Sala das Sessões, ___ de _______ de 2025.</p><p style="text-align: center">___________________________<br>Assinatura do Autor</p>`,
   requerimento: `<h3 style="text-align: center">CÂMARA MUNICIPAL</h3><p style="text-align: center"><strong>REQUERIMENTO Nº ___/2025</strong></p><p><strong>Autor:</strong> ___________________</p><p>O Vereador que este subscreve, requer à Mesa Diretora, após ouvido o Plenário, que seja oficiado ao Senhor Prefeito Municipal para que informe a esta Casa sobre:</p><ol><li>...</li><li>...</li></ol><p><strong>Justificativa:</strong></p><p>...</p><p style="text-align: right">Sala das Sessões, ___ de _______ de 2025.</p><p style="text-align: center">___________________________<br>Assinatura do Autor</p>`,
   indicacao: `<h3 style="text-align: center">CÂMARA MUNICIPAL</h3><p style="text-align: center"><strong>INDICAÇÃO Nº ___/2025</strong></p><p><strong>Autor:</strong> ___________________</p><p>O Vereador que a esta subscreve, nos termos regimentais, INDICA ao Chefe do Poder Executivo Municipal a necessidade de se tomar providências junto ao setor competente visando:</p><p>...</p><p><strong>Justificativa:</strong></p><p>...</p><p style="text-align: right">Sala das Sessões, ___ de _______ de 2025.</p><p style="text-align: center">___________________________<br>Assinatura do Autor</p>`,
   moca_aplausos: `<h3 style="text-align: center">CÂMARA MUNICIPAL</h3><p style="text-align: center"><strong>MOÇÃO DE APLAUSOS E RECONHECIMENTO Nº ___/2025</strong></p><p><strong>Autor:</strong> ___________________</p><p>A Câmara Municipal, por seus vereadores, aprova a presente Moção de Aplausos e Reconhecimento a(o):</p><p style="text-align: center"><strong>[NOME DO HOMENAGEADO]</strong></p><p>Pelos relevantes serviços prestados...</p><p style="text-align: right">Sala das Sessões, ___ de _______ de 2025.</p><p style="text-align: center">___________________________<br>Assinatura do Autor</p>`,
-  voto_pesar: `<h3 style="text-align: center">CÂMARA MUNICIPAL</h3><p style="text-align: center"><strong>VOTO DE PESAR Nº ___/2025</strong></p><p><strong>Autor:</strong> ___________________</p><p>A Câmara Municipal expressa seu profundo pesar pelo falecimento de:</p><p style="text-align: center"><strong>[NOME DO FALECIDO]</strong></p><p>Apresentamos nossas sinceras condolências aos familiares e amigos, rogando a Deus que traga conforto neste momento de dor.</p><p>Requeiro, outrossim, que seja dado conhecimento desta homenagem à família enlutada.</p><p style="text-align: right">Sala das Sessões, ___ de _______ de 2025.</p><p style="text-align: center">___________________________<br>Assinatura do Autor</p>`,
+  voto_pesar: `<h3 style="text-align: center">CÂMARA MUNICIPAL</h3><p style="text-align: center"><strong>VOTO DE PESAR Nº ___/2025</strong></p><p><strong>Autor:</strong> ___________________</p><p>A Câmara Municipal expressa seu profundo pesar pelo falecimento de:</p><p style="text-align: center"><strong>[NOME DO FALECIDO]</strong></p><p>Apresentamos nossas sinceras condolências aos familiares e amigos, rogando a Deus que traga conforto neste momento de dor.</p><p style="text-align: right">Sala das Sessões, ___ de _______ de 2025.</p><p style="text-align: center">___________________________<br>Assinatura do Autor</p>`,
 }
+
+const TEMPLATE_GENERICO = `<h3 style="text-align: center">CÂMARA MUNICIPAL</h3><p style="text-align: center"><strong>MATÉRIA Nº ___/2025</strong></p><p><strong>Autor:</strong> ___________________</p><p>...</p><p style="text-align: right">Sala das Sessões, ___ de _______ de 2025.</p><p style="text-align: center">___________________________<br>Assinatura do Autor</p>`
 
 export function ProposicaoNova() {
   const navigate = useNavigate()
   const { criar, protocolar } = useProposicoes()
+  const { tiposProposicao, loading: loadingTipos } = useConfiguracoes()
 
-  const [tipo, setTipo] = useState<ProposicaoTipo>('projeto_lei')
+  const tiposAtivos = tiposProposicao.filter(t => t.ativo)
+
+  const [tipo, setTipo] = useState<string>('')
   const [ementa, setEmenta] = useState('')
-  const [texto, setTexto] = useState(TEMPLATES['projeto_lei'])
+  const [texto, setTexto] = useState(TEMPLATE_GENERICO)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
+  // Define o tipo inicial após os tipos carregarem
+  useEffect(() => {
+    if (tiposAtivos.length > 0 && !tipo) {
+      const primeiro = tiposAtivos[0].codigo
+      setTipo(primeiro)
+      setTexto(TEMPLATES[primeiro] ?? TEMPLATE_GENERICO)
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tiposAtivos.length])
+
   async function salvar(protocolarImediatamente = false) {
     if (!ementa.trim()) { setError('A ementa é obrigatória.'); return }
+    if (!tipo) { setError('Selecione o tipo de proposição.'); return }
     setSaving(true)
     setError(null)
 
@@ -56,17 +63,29 @@ export function ProposicaoNova() {
     navigate(`/backoffice/legislativo/${resultado.id}`)
   }
 
-  function handleMudarTipo(novoTipo: ProposicaoTipo) {
-    if (texto && texto !== '<p></p>' && !texto.includes('Art. 1º') && !texto.includes('Mesa Diretora')) {
-      if (!window.confirm("Você digitou um texto personalizado. Se alterar o tipo, o modelo sobrescreverá sua edição atual. Deseja continuar?")) {
+  function handleMudarTipo(novoTipo: string) {
+    const templateAtual = TEMPLATES[tipo] ?? TEMPLATE_GENERICO
+    if (texto && texto !== '<p></p>' && texto !== templateAtual) {
+      if (!window.confirm('Você digitou um texto personalizado. Se alterar o tipo, o modelo sobrescreverá sua edição atual. Deseja continuar?')) {
         return
       }
     }
     setTipo(novoTipo)
-    setTexto(TEMPLATES[novoTipo])
+    setTexto(TEMPLATES[novoTipo] ?? TEMPLATE_GENERICO)
   }
 
-  const tipoSelecionado = TIPOS.find(t => t.value === tipo)
+  const tipoSelecionado = tiposAtivos.find(t => t.codigo === tipo)
+
+  if (loadingTipos) {
+    return (
+      <div className="flex flex-col h-full">
+        <PageHeader title="Nova Proposição" description="Carregando tipos configurados..." />
+        <div className="flex-1 flex items-center justify-center">
+          <div className="animate-spin w-6 h-6 border-2 border-primary-600 border-t-transparent rounded-full" />
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="flex flex-col h-full">
@@ -90,24 +109,29 @@ export function ProposicaoNova() {
           {/* Tipo */}
           <section className="card space-y-4">
             <h2 className="font-semibold text-gray-900">Tipo de Proposição</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              {TIPOS.map(t => (
-                <button
-                  key={t.value}
-                  type="button"
-                  onClick={() => handleMudarTipo(t.value)}
-                  className={`text-left p-3 rounded-lg border transition-all ${tipo === t.value
-                    ? 'border-primary-500 bg-primary-50 ring-1 ring-primary-400'
-                    : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+            {tiposAtivos.length === 0 ? (
+              <p className="text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-4 py-3">
+                Nenhum tipo de proposição ativo. Configure em <strong>Configurações → Tipos de Proposição</strong>.
+              </p>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {tiposAtivos.map(t => (
+                  <button
+                    key={t.codigo}
+                    type="button"
+                    onClick={() => handleMudarTipo(t.codigo)}
+                    className={`text-left p-3 rounded-lg border transition-all ${tipo === t.codigo
+                      ? 'border-primary-500 bg-primary-50 ring-1 ring-primary-400'
+                      : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
                     }`}
-                >
-                  <p className={`font-semibold text-sm ${tipo === t.value ? 'text-primary-700' : 'text-gray-800'}`}>
-                    {t.label}
-                  </p>
-                  <p className="text-xs text-gray-400 mt-0.5 leading-snug">{t.desc}</p>
-                </button>
-              ))}
-            </div>
+                  >
+                    <p className={`font-semibold text-sm ${tipo === t.codigo ? 'text-primary-700' : 'text-gray-800'}`}>
+                      {t.nome} <span className="font-mono text-xs opacity-60">({t.sigla})</span>
+                    </p>
+                  </button>
+                ))}
+              </div>
+            )}
           </section>
 
           {/* Ementa */}
@@ -119,7 +143,7 @@ export function ProposicaoNova() {
               <textarea
                 rows={3}
                 className="input resize-none"
-                placeholder={`Ex: Dispõe sobre... e dá outras providências.`}
+                placeholder="Ex: Dispõe sobre... e dá outras providências."
                 value={ementa}
                 onChange={e => setEmenta(e.target.value)}
                 maxLength={500}
@@ -136,8 +160,8 @@ export function ProposicaoNova() {
                 <button
                   type="button"
                   onClick={() => {
-                    if (window.confirm("Carregar o modelo apagará sua digitação atual. Tem certeza?")) {
-                      setTexto(TEMPLATES[tipo])
+                    if (window.confirm('Carregar o modelo apagará sua digitação atual. Tem certeza?')) {
+                      setTexto(TEMPLATES[tipo] ?? TEMPLATE_GENERICO)
                     }
                   }}
                   className="text-xs text-primary-600 hover:text-primary-700 font-medium px-2 py-0.5 rounded transition-colors hover:bg-primary-50"
@@ -149,7 +173,7 @@ export function ProposicaoNova() {
                 <RichTextEditor
                   content={texto}
                   onChange={setTexto}
-                  placeholder={`CÂMARA MUNICIPAL DE ___________\n\n${tipoSelecionado?.label?.toUpperCase() ?? 'PROJETO'} Nº ___/2025\n\nAutor: ___________\n\nDispõe sobre...\n\nA Câmara Municipal de ___________,\n\nAprova:\n\nArt. 1º ...\n\nArt. 2º Esta lei entra em vigor na data de sua publicação.\n\n_______________, ___ de _______ de 2025.\n\n___________________________`}
+                  placeholder={`CÂMARA MUNICIPAL\n\n${tipoSelecionado?.nome?.toUpperCase() ?? 'MATÉRIA'} Nº ___/2025\n\nAutor: ___________\n\nDispõe sobre...`}
                 />
               </div>
             </div>

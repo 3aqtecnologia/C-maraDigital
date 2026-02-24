@@ -76,6 +76,7 @@ npm run dev
 - Visualização pública de proposições, leis e sessões — sem necessidade de login.
 - **Ouvidoria / e-SIC:** sistema de tickets para denúncias, reclamações e pedidos de informação com SLA de 20 dias (Lei 12.527/2011).
 - **Exportação em Dados Abertos:** download de leis e proposições em **CSV** (compatível com Excel, BOM UTF-8) e **JSON** diretamente no portal.
+- **Resolução Inteligente de Tenant:** detecção via subdomínio (produção), query param (`?slug=`) ou fallback automático para o primeiro tenant ativo (ambiente de teste local sem sessão).
 
 ### 📁 Módulo Administrativo (GED & Processos)
 - **GED (Gestão Eletrônica de Documentos):** sistema de arquivos com upload via Supabase Storage, categorização por tipo (Ata, Ofício, Portaria, etc.) e isolamento total por Câmara.

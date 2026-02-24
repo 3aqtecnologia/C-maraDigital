@@ -505,7 +505,7 @@ export type Database = {
           status: Database["public"]["Enums"]["proposicao_status"]
           tenant_id: string
           texto_integral: string | null
-          tipo: Database["public"]["Enums"]["proposicao_tipo"]
+          tipo: string
           updated_at: string
         }
         Insert: {
@@ -520,7 +520,7 @@ export type Database = {
           status?: Database["public"]["Enums"]["proposicao_status"]
           tenant_id: string
           texto_integral?: string | null
-          tipo: Database["public"]["Enums"]["proposicao_tipo"]
+          tipo: string
           updated_at?: string
         }
         Update: {
@@ -535,7 +535,7 @@ export type Database = {
           status?: Database["public"]["Enums"]["proposicao_status"]
           tenant_id?: string
           texto_integral?: string | null
-          tipo?: Database["public"]["Enums"]["proposicao_tipo"]
+          tipo?: string
           updated_at?: string
         }
         Relationships: [
@@ -651,7 +651,7 @@ export type Database = {
           quorum_minimo: number
           status: Database["public"]["Enums"]["sessao_status"]
           tenant_id: string
-          tipo: Database["public"]["Enums"]["sessao_tipo"]
+          tipo: string
           transmissao_url: string | null
           updated_at: string
         }
@@ -667,7 +667,7 @@ export type Database = {
           quorum_minimo?: number
           status?: Database["public"]["Enums"]["sessao_status"]
           tenant_id: string
-          tipo?: Database["public"]["Enums"]["sessao_tipo"]
+          tipo?: string
           transmissao_url?: string | null
           updated_at?: string
         }
@@ -683,7 +683,7 @@ export type Database = {
           quorum_minimo?: number
           status?: Database["public"]["Enums"]["sessao_status"]
           tenant_id?: string
-          tipo?: Database["public"]["Enums"]["sessao_tipo"]
+          tipo?: string
           transmissao_url?: string | null
           updated_at?: string
         }
@@ -887,45 +887,192 @@ export type Database = {
           },
         ]
       }
+      tenant_fluxo_tramitacao: {
+        Row: {
+          ativo: boolean
+          cor: string
+          created_at: string
+          id: string
+          label: string
+          ordem: number
+          proximos_status: string[]
+          status_codigo: string
+          tenant_id: string
+        }
+        Insert: {
+          ativo?: boolean
+          cor?: string
+          created_at?: string
+          id?: string
+          label: string
+          ordem?: number
+          proximos_status?: string[]
+          status_codigo: string
+          tenant_id: string
+        }
+        Update: {
+          ativo?: boolean
+          cor?: string
+          created_at?: string
+          id?: string
+          label?: string
+          ordem?: number
+          proximos_status?: string[]
+          status_codigo?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tenant_fluxo_tramitacao_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      tenant_tipos_proposicao: {
+        Row: {
+          ativo: boolean
+          codigo: string
+          created_at: string
+          id: string
+          nome: string
+          ordem: number
+          sigla: string
+          tenant_id: string
+        }
+        Insert: {
+          ativo?: boolean
+          codigo: string
+          created_at?: string
+          id?: string
+          nome: string
+          ordem?: number
+          sigla: string
+          tenant_id: string
+        }
+        Update: {
+          ativo?: boolean
+          codigo?: string
+          created_at?: string
+          id?: string
+          nome?: string
+          ordem?: number
+          sigla?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tenant_tipos_proposicao_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      tenant_tipos_sessao: {
+        Row: {
+          ativo: boolean
+          created_at: string
+          descricao: string | null
+          id: string
+          nome: string
+          ordem: number
+          quorum_percentual: number
+          tenant_id: string
+        }
+        Insert: {
+          ativo?: boolean
+          created_at?: string
+          descricao?: string | null
+          id?: string
+          nome: string
+          ordem?: number
+          quorum_percentual?: number
+          tenant_id: string
+        }
+        Update: {
+          ativo?: boolean
+          created_at?: string
+          descricao?: string | null
+          id?: string
+          nome?: string
+          ordem?: number
+          quorum_percentual?: number
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tenant_tipos_sessao_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
       tenants: {
         Row: {
           ativo: boolean
           cnpj: string | null
           cor_primaria: string
+          cor_secundaria: string | null
           created_at: string
+          email_geral: string | null
+          endereco: string | null
+          horario_atendimento: string | null
           id: string
           logo_url: string | null
           municipio: string
           nome: string
+          site_url: string | null
           slug: string
+          telefone: string | null
           uf: string
           updated_at: string
+          whatsapp: string | null
         }
         Insert: {
           ativo?: boolean
           cnpj?: string | null
           cor_primaria?: string
+          cor_secundaria?: string | null
           created_at?: string
+          email_geral?: string | null
+          endereco?: string | null
+          horario_atendimento?: string | null
           id?: string
           logo_url?: string | null
           municipio: string
           nome: string
+          site_url?: string | null
           slug: string
+          telefone?: string | null
           uf: string
           updated_at?: string
+          whatsapp?: string | null
         }
         Update: {
           ativo?: boolean
           cnpj?: string | null
           cor_primaria?: string
+          cor_secundaria?: string | null
           created_at?: string
+          email_geral?: string | null
+          endereco?: string | null
+          horario_atendimento?: string | null
           id?: string
           logo_url?: string | null
           municipio?: string
           nome?: string
+          site_url?: string | null
           slug?: string
+          telefone?: string | null
           uf?: string
           updated_at?: string
+          whatsapp?: string | null
         }
         Relationships: []
       }
@@ -1130,7 +1277,7 @@ export type Database = {
         Args: {
           p_ano: number
           p_tenant_id: string
-          p_tipo: Database["public"]["Enums"]["proposicao_tipo"]
+          p_tipo: string
         }
         Returns: string
       }
@@ -1420,11 +1567,11 @@ export type OuvidoriaRespostaOrigem = Database['public']['Enums']['ouvidoria_res
 export type OuvidoriaStatus = Database['public']['Enums']['ouvidoria_status']
 export type OuvidoriaTipo = Database['public']['Enums']['ouvidoria_tipo']
 export type ProposicaoStatus = Database['public']['Enums']['proposicao_status']
-export type ProposicaoTipo = Database['public']['Enums']['proposicao_tipo']
+export type ProposicaoTipo = string
 export type ProtocoloStatus = Database['public']['Enums']['protocolo_status']
 export type ProtocoloTipo = Database['public']['Enums']['protocolo_tipo']
 export type SessaoStatus = Database['public']['Enums']['sessao_status']
-export type SessaoTipo = Database['public']['Enums']['sessao_tipo']
+export type SessaoTipo = string
 export type TeletrabalhoStatus = Database['public']['Enums']['teletrabalho_status']
 export type TenantPlano = Database['public']['Enums']['tenant_plano']
 export type TenantSituacao = Database['public']['Enums']['tenant_situacao']

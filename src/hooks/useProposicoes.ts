@@ -1,7 +1,8 @@
 import { useEffect, useState, useCallback } from 'react'
 import { supabase } from '@/lib/supabase'
-import type { Database, ProposicaoStatus, ProposicaoTipo } from '@/types/database'
+import type { Database, ProposicaoStatus } from '@/types/database'
 import { useAuth } from './useAuth'
+import { useToast } from './useToast'
 
 type Proposicao = Database['public']['Tables']['proposicoes']['Row']
 type ProposicaoInsert = Database['public']['Tables']['proposicoes']['Insert']
@@ -12,6 +13,7 @@ export interface ProposicaoComAutor extends Proposicao {
 
 export function useProposicoes(filtroStatus?: ProposicaoStatus | 'todos') {
   const { profile } = useAuth()
+  const { showToast } = useToast()
   const [proposicoes, setProposicoes] = useState<ProposicaoComAutor[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -44,7 +46,7 @@ export function useProposicoes(filtroStatus?: ProposicaoStatus | 'todos') {
   useEffect(() => { fetch() }, [fetch])
 
   async function criar(dados: {
-    tipo: ProposicaoTipo
+    tipo: string
     ementa: string
     texto_integral?: string
   }): Promise<{ id: string } | null> {
@@ -116,6 +118,25 @@ export function useProposicoes(filtroStatus?: ProposicaoStatus | 'todos') {
   ): Promise<boolean> {
     const proposicao = proposicoes.find(p => p.id === id)
     if (!proposicao || !profile) return false
+
+    // Validar transição contra o fluxo configurado pelo tenant
+    const { data: etapaAtual } = await supabase
+      .from('tenant_fluxo_tramitacao')
+      .select('proximos_status')
+      .eq('tenant_id', profile.tenant_id)
+      .eq('status_codigo', proposicao.status)
+      .single()
+
+    if (etapaAtual) {
+      const permitidos = (etapaAtual.proximos_status as unknown as string[]) ?? []
+      if (permitidos.length > 0 && !permitidos.includes(novoStatus)) {
+        showToast(
+          `Transição de "${proposicao.status}" para "${novoStatus}" não é permitida pelo regimento da câmara.`,
+          'error'
+        )
+        return false
+      }
+    }
 
     const { error: err } = await supabase
       .from('proposicoes')
