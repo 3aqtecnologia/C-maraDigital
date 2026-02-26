@@ -51,7 +51,11 @@ export function Sidebar({ open = false, onClose }: SidebarProps) {
   )
 
   return (
-    <aside className={`flex flex-col w-64 min-h-screen bg-primary-600 text-white fixed inset-y-0 left-0 z-40 transition-transform duration-300 lg:static lg:translate-x-0 ${open ? 'translate-x-0' : '-translate-x-full'}`}>
+    <aside
+      id="sidebar"
+      aria-label="Painel de navegação"
+      className={`flex flex-col w-64 min-h-screen bg-primary-600 text-white fixed inset-y-0 left-0 z-40 transition-transform duration-300 lg:static lg:translate-x-0 ${open ? 'translate-x-0' : '-translate-x-full'}`}
+    >
       {/* Logo */}
       <div className="flex items-center gap-3 px-6 py-5 border-b border-primary-500">
         <div className="w-8 h-8 bg-accent rounded-lg flex items-center justify-center flex-shrink-0">
@@ -93,7 +97,7 @@ export function Sidebar({ open = false, onClose }: SidebarProps) {
       )}
 
       {/* Navigation */}
-      <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
+      <nav role="navigation" aria-label="Navegação principal" className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
         {visibleItems.map(item => (
           <NavLink
             key={item.to}
@@ -101,7 +105,7 @@ export function Sidebar({ open = false, onClose }: SidebarProps) {
             end={item.to === '/backoffice'}
             onClick={() => onClose?.()}
             className={({ isActive }) =>
-              `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors group ${isActive
+              `flex items-center gap-3 px-3 py-3 rounded-lg text-sm font-medium transition-colors group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-primary-600 ${isActive
                 ? 'bg-white text-primary-600'
                 : 'text-primary-100 hover:bg-primary-500 hover:text-white'
               }`
@@ -109,10 +113,11 @@ export function Sidebar({ open = false, onClose }: SidebarProps) {
           >
             {({ isActive }) => (
               <>
-                <item.icon size={18} className={isActive ? 'text-primary-600' : ''} />
+                <item.icon size={18} aria-hidden="true" className={isActive ? 'text-primary-600' : ''} />
                 <span className="flex-1">{item.label}</span>
                 <ChevronRight
                   size={14}
+                  aria-hidden="true"
                   className={`opacity-0 group-hover:opacity-100 transition-opacity ${isActive ? 'opacity-100 text-primary-400' : ''}`}
                 />
               </>
@@ -136,9 +141,9 @@ export function Sidebar({ open = false, onClose }: SidebarProps) {
         )}
         <button
           onClick={signOut}
-          className="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-sm text-primary-200 hover:bg-primary-500 hover:text-white transition-colors"
+          className="flex items-center gap-3 w-full px-3 py-3 rounded-lg text-sm text-primary-200 hover:bg-primary-500 hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-primary-600"
         >
-          <LogOut size={16} />
+          <LogOut size={16} aria-hidden="true" />
           Sair
         </button>
       </div>

@@ -1,10 +1,11 @@
 import { PageHeader } from '@/components/layout/PageHeader'
+import { CardListSkeleton } from '@/components/ui/SkeletonLoader'
 import { useAuth } from '@/hooks/useAuth'
 import { supabase } from '@/lib/supabase'
 import { maskCPF } from '@/lib/utils'
 import type { Database, UserRole } from '@/types/database'
 import { CheckCircle2, Fingerprint, Mail, MoreVertical, Plus, RefreshCw, Search, Shield, Users, X, XCircle } from 'lucide-react'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 
 type Profile = Database['public']['Tables']['profiles']['Row']
 
@@ -28,6 +29,25 @@ export function Usuarios() {
   const [convidarForm, setConvidarForm] = useState({ nome: '', email: '', role: 'vereador' as UserRole, partido: '', cpf: '' })
   const [convidando, setConvidando] = useState(false)
   const [convidadoOk, setConvidadoOk] = useState(false)
+  const menuRef = useRef<HTMLDivElement>(null)
+
+  // Fechar dropdown com Escape e com clique fora
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === 'Escape') setMenuAberto(null)
+    }
+    function handleClickOutside(e: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setMenuAberto(null)
+      }
+    }
+    document.addEventListener('keydown', handleKeyDown)
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown)
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [])
 
   const fetch = useCallback(async () => {
     if (!currentProfile) return
@@ -109,11 +129,23 @@ export function Usuarios() {
 
         {/* Modal Convidar */}
         {showConvidar && (
-          <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div
+            className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="modal-convidar-titulo"
+            onKeyDown={e => { if (e.key === 'Escape') { setShowConvidar(false); setConvidadoOk(false) } }}
+          >
             <div className="bg-white rounded-2xl shadow-xl w-full max-w-md">
               <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-                <h2 className="font-semibold text-gray-900">Convidar Usuário</h2>
-                <button onClick={() => { setShowConvidar(false); setConvidadoOk(false) }} className="text-gray-400 hover:text-gray-600"><X size={18} /></button>
+                <h2 id="modal-convidar-titulo" className="font-semibold text-gray-900">Convidar Usuário</h2>
+                <button
+                  onClick={() => { setShowConvidar(false); setConvidadoOk(false) }}
+                  aria-label="Fechar modal"
+                  className="p-1.5 text-gray-400 hover:text-gray-600 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+                >
+                  <X size={18} aria-hidden="true" />
+                </button>
               </div>
               {convidadoOk ? (
                 <div className="px-6 py-10 text-center">
@@ -190,10 +222,7 @@ export function Usuarios() {
 
         {/* Lista */}
         {loading ? (
-          <div className="py-12 text-center">
-            <div className="animate-spin w-6 h-6 border-2 border-primary-600 border-t-transparent rounded-full mx-auto mb-3" />
-            <p className="text-sm text-gray-400">Carregando usuários...</p>
-          </div>
+          <CardListSkeleton rows={5} />
         ) : filtrados.length === 0 ? (
           <div className="card text-center py-12 text-gray-400">
             <Users size={36} className="mx-auto mb-3 opacity-20" />
@@ -241,28 +270,32 @@ export function Usuarios() {
 
                   {/* Menu */}
                   {u.id !== currentProfile?.id && (
-                    <div className="relative flex-shrink-0">
+                    <div ref={menuAberto === u.id ? menuRef : null} className="relative flex-shrink-0">
                       <button
                         onClick={() => setMenuAberto(menuAberto === u.id ? null : u.id)}
-                        className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-700"
+                        aria-label={`Opções para ${u.nome}`}
+                        aria-expanded={menuAberto === u.id}
+                        aria-haspopup="menu"
+                        className="p-2.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
                       >
-                        <MoreVertical size={16} />
+                        <MoreVertical size={16} aria-hidden="true" />
                       </button>
                       {menuAberto === u.id && (
-                        <div className="absolute right-0 top-8 z-10 bg-white rounded-xl shadow-lg border border-gray-200 py-1 w-44 text-sm">
+                        <div role="menu" aria-label={`Opções para ${u.nome}`} className="absolute right-0 top-10 z-10 bg-white rounded-xl shadow-lg border border-gray-200 py-1 w-44 text-sm">
                           <button
+                            role="menuitem"
                             onClick={() => toggleAtivo(u.id, u.ativo)}
-                            className="w-full text-left px-4 py-2 hover:bg-gray-50 text-gray-700"
+                            className="w-full text-left px-4 py-2.5 hover:bg-gray-50 text-gray-700 focus-visible:outline-none focus-visible:bg-gray-50"
                           >
                             {u.ativo ? 'Desativar usuário' : 'Ativar usuário'}
                           </button>
-                          <div className="border-t border-gray-100 my-1" />
+                          <div className="border-t border-gray-100 my-1" role="separator" />
                           <p className="px-4 py-1 text-xs text-gray-400 font-medium uppercase tracking-wide">Alterar perfil</p>
                           {(Object.entries(ROLE_CONFIG) as [UserRole, typeof ROLE_CONFIG[UserRole]][])
                             .filter(([v]) => v !== u.role)
                             .map(([v, c]) => (
-                              <button key={v} onClick={() => alterarRole(u.id, v)}
-                                className="w-full text-left px-4 py-2 hover:bg-gray-50 text-gray-700">
+                              <button key={v} role="menuitem" onClick={() => alterarRole(u.id, v)}
+                                className="w-full text-left px-4 py-2.5 hover:bg-gray-50 text-gray-700 focus-visible:outline-none focus-visible:bg-gray-50">
                                 → {c.label}
                               </button>
                             ))

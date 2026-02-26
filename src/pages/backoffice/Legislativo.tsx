@@ -1,6 +1,7 @@
 import { useConfiguracoes } from '@/hooks/useConfiguracoes'
 import { useProposicoes } from '@/hooks/useProposicoes'
 import { PageHeader } from '@/components/layout/PageHeader'
+import { TableSkeleton } from '@/components/ui/SkeletonLoader'
 import type { ProposicaoStatus } from '@/types/database'
 import { AlertCircle, FileText, Filter, Plus, RefreshCw, Search } from 'lucide-react'
 import { useState } from 'react'
@@ -116,61 +117,56 @@ export function Legislativo() {
 
         {/* Tabela */}
         <div className="card p-0 overflow-hidden">
-          {loading ? (
-            <div className="py-16 text-center">
-              <div className="animate-spin w-6 h-6 border-2 border-primary-600 border-t-transparent rounded-full mx-auto mb-3" />
-              <p className="text-sm text-gray-400">Carregando proposições...</p>
-            </div>
-          ) : (
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-gray-200 bg-gray-50">
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Número</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ementa</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">Autor</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden lg:table-cell">Data</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+          <table className="w-full text-sm" aria-label="Lista de proposições">
+            <thead>
+              <tr className="border-b border-gray-200 bg-gray-50">
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Número</th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ementa</th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">Autor</th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden lg:table-cell">Data</th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100">
+              {loading ? (
+                <TableSkeleton cols={5} rows={6} />
+              ) : filtered.length === 0 ? (
+                <tr>
+                  <td colSpan={5} className="px-6 py-14 text-center text-gray-400">
+                    <FileText size={32} className="mx-auto mb-2 opacity-30" aria-hidden="true" />
+                    <p className="font-medium">Nenhuma proposição encontrada</p>
+                    <p className="text-xs mt-1">Crie a primeira proposição clicando em "Nova Proposição"</p>
+                  </td>
                 </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">
-                {filtered.length === 0 ? (
-                  <tr>
-                    <td colSpan={5} className="px-6 py-14 text-center text-gray-400">
-                      <FileText size={32} className="mx-auto mb-2 opacity-30" />
-                      <p className="font-medium">Nenhuma proposição encontrada</p>
-                      <p className="text-xs mt-1">Crie a primeira proposição clicando em "Nova Proposição"</p>
-                    </td>
-                  </tr>
-                ) : filtered.map(p => (
-                  <tr
-                    key={p.id}
-                    className="hover:bg-primary-50/30 cursor-pointer transition-colors"
-                    onClick={() => navigate(`/backoffice/legislativo/${p.id}`)}
-                  >
-                    <td className="px-6 py-4">
-                      <span className="font-mono font-semibold text-primary-600 text-xs bg-primary-50 px-2 py-1 rounded">
-                        {formatNumero(p)}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4">
-                      <p className="text-gray-800 line-clamp-2 max-w-md leading-snug">{p.ementa}</p>
-                    </td>
-                    <td className="px-6 py-4 text-gray-500 hidden md:table-cell">
-                      {p.autor?.nome ?? '—'}
-                    </td>
-                    <td className="px-6 py-4 text-gray-400 text-xs hidden lg:table-cell">
-                      {new Date(p.data_protocolo).toLocaleDateString('pt-BR')}
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className={`badge ${STATUS_LABELS[p.status]?.color ?? 'bg-gray-100 text-gray-600'}`}>
-                        {STATUS_LABELS[p.status]?.label ?? p.status}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
+              ) : filtered.map(p => (
+                <tr
+                  key={p.id}
+                  className="hover:bg-primary-50/30 cursor-pointer transition-colors focus-within:bg-primary-50/30"
+                  onClick={() => navigate(`/backoffice/legislativo/${p.id}`)}
+                >
+                  <td className="px-6 py-4">
+                    <span className="font-mono font-semibold text-primary-600 text-xs bg-primary-50 px-2 py-1 rounded">
+                      {formatNumero(p)}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4">
+                    <p className="text-gray-800 line-clamp-2 max-w-md leading-snug">{p.ementa}</p>
+                  </td>
+                  <td className="px-6 py-4 text-gray-500 hidden md:table-cell">
+                    {p.autor?.nome ?? '—'}
+                  </td>
+                  <td className="px-6 py-4 text-gray-400 text-xs hidden lg:table-cell">
+                    {new Date(p.data_protocolo).toLocaleDateString('pt-BR')}
+                  </td>
+                  <td className="px-6 py-4">
+                    <span className={`badge ${STATUS_LABELS[p.status]?.color ?? 'bg-gray-100 text-gray-600'}`}>
+                      {STATUS_LABELS[p.status]?.label ?? p.status}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
 
         <p className="text-xs text-gray-400 text-right">

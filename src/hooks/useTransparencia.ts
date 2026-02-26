@@ -178,16 +178,19 @@ export function useTenantBySlug(slug: string | null) {
       return
     }
 
-    supabase
-      .from('tenants')
-      .select(TENANT_PUBLIC_FIELDS)
-      .eq('slug', slug)
-      .eq('ativo', true)
-      .single()
-      .then(({ data }) => {
+    ;(async () => {
+      try {
+        const { data } = await supabase
+          .from('tenants')
+          .select(TENANT_PUBLIC_FIELDS)
+          .eq('slug', slug)
+          .eq('ativo', true)
+          .single()
         setTenant(data)
+      } finally {
         setLoading(false)
-      })
+      }
+    })()
   }, [slug])
 
   return { tenant, loading }
@@ -204,16 +207,19 @@ export function useTenantById(id: string | null) {
       return
     }
 
-    supabase
-      .from('tenants')
-      .select(TENANT_PUBLIC_FIELDS)
-      .eq('id', id)
-      .eq('ativo', true)
-      .single()
-      .then(({ data }) => {
+    ;(async () => {
+      try {
+        const { data } = await supabase
+          .from('tenants')
+          .select(TENANT_PUBLIC_FIELDS)
+          .eq('id', id)
+          .eq('ativo', true)
+          .single()
         setTenant(data)
+      } finally {
         setLoading(false)
-      })
+      }
+    })()
   }, [id])
 
   return { tenant, loading }
@@ -230,16 +236,19 @@ export function useFirstActiveTenant(enabled: boolean) {
       return
     }
 
-    supabase
-      .from('tenants')
-      .select(TENANT_PUBLIC_FIELDS)
-      .eq('ativo', true)
-      .limit(1)
-      .single()
-      .then(({ data }) => {
+    ;(async () => {
+      try {
+        const { data } = await supabase
+          .from('tenants')
+          .select(TENANT_PUBLIC_FIELDS)
+          .eq('ativo', true)
+          .limit(1)
+          .single()
         setTenant(data)
+      } finally {
         setLoading(false)
-      })
+      }
+    })()
   }, [enabled])
 
   return { tenant, loading }
