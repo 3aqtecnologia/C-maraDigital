@@ -1,19 +1,28 @@
 import { useAuth } from '@/hooks/useAuth'
 import { supabase } from '@/lib/supabase'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { PageLoader } from '@/components/ui/PageLoader'
 
 export function ResetPasswordPage() {
   const navigate = useNavigate()
-  const { mustChangePassword } = useAuth()
+  const { mustChangePassword, session, loading: authLoading } = useAuth()
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [isReady, setIsReady] = useState(false)
 
-  // O Supabase Auth vai automaticamente pegar o token da URL e setar a sessão.
-  // Assim a gente consegue chamar o ".updateUser" logo em seguida.
+  // Aguarda o Supabase processar o token da URL e inicializar a sessão
+  useEffect(() => {
+    if (!authLoading) {
+      // Como o token da URL ou PKCE leva uns instantes para ser trocado por sessão
+      // Podemos ter um pequeno delay
+      const timer = setTimeout(() => setIsReady(true), 500)
+      return () => clearTimeout(timer)
+    }
+  }, [authLoading])
 
   async function handleSubmit(e: React.SyntheticEvent) {
     e.preventDefault()
@@ -26,6 +35,11 @@ export function ResetPasswordPage() {
 
     if (password.length < 6) {
       setError('A senha deve ter pelo menos 6 caracteres.')
+      return
+    }
+
+    if (!session) {
+      setError('Sessão expirada ou inválida. Por favor, solicite a recuperação de senha novamente.')
       return
     }
 
@@ -42,6 +56,10 @@ export function ResetPasswordPage() {
       setSuccess(true)
     }
     setLoading(false)
+  }
+
+  if (authLoading || !isReady) {
+    return <PageLoader />
   }
 
   return (
@@ -69,7 +87,22 @@ export function ResetPasswordPage() {
             </p>
           )}
 
-          {success ? (
+          {!session ? (
+            <div className="space-y-6">
+              <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-sm text-red-800">
+                <p className="font-semibold text-red-900 mb-1">Ocorreu um erro</p>
+                <p>O link de redefinição de senha é inválido ou expirou. Lembre-se que o link só pode ser usado uma vez e no mesmo navegador que foi solicitado.</p>
+              </div>
+              <Link to="/forgot-password" className="btn-primary w-full justify-center flex py-2.5">
+                Solicitar novo link
+              </Link>
+              <div className="text-center pt-2">
+                <Link to="/login" className="text-sm font-medium text-primary-600 hover:text-primary-700 transition-colors">
+                  Voltar para o Login
+                </Link>
+              </div>
+            </div>
+          ) : success ? (
             <div className="space-y-6">
               <div className="bg-green-50 border border-green-200 rounded-lg p-4 text-sm text-green-800">
                 <p className="font-semibold text-green-900 mb-1">Senha atualizada com sucesso!</p>
