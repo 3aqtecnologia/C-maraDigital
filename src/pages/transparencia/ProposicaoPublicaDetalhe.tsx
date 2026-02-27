@@ -55,6 +55,20 @@ export function ProposicaoPublicaDetalhe() {
   }
 
   const cfg = STATUS_CONFIG[proposicao.status] || STATUS_CONFIG.rascunho
+  const numero = `${TIPOS_LABELS[proposicao.tipo] ?? proposicao.tipo} № ${proposicao.numero}/${proposicao.ano}`
+
+  function imprimirPDF() {
+    const win = window.open('', '_blank')
+    if (!win || !proposicao) return
+    win.document.write(`<!DOCTYPE html><html lang="pt-BR"><head>
+      <meta charset="UTF-8"><title>${numero}</title>
+      <style>body{font-family:serif;max-width:800px;margin:2cm auto;line-height:1.6}h1{font-size:1.4rem}em{color:#555}</style>
+      </head><body><h1>${numero}</h1><p><em>${proposicao.ementa}</em></p>
+      ${proposicao.texto_integral || '<p>Texto não disponível.</p>'}
+      </body></html>`)
+    win.document.close()
+    win.print()
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -110,7 +124,7 @@ export function ProposicaoPublicaDetalhe() {
                       <p className="font-semibold text-gray-900">{proposicao.autor?.nome} <span className="text-gray-400 font-normal">({proposicao.autor?.partido || 'Sem partido'})</span></p>
                     </div>
                   </div>
-                  <button className="btn-primary flex items-center gap-2 justify-center shadow-indigo-100 shadow-md">
+                  <button onClick={imprimirPDF} className="btn-primary flex items-center gap-2 justify-center shadow-indigo-100 shadow-md">
                     <Download size={16} /> Baixar PDF Oficial
                   </button>
                 </div>
@@ -189,9 +203,12 @@ export function ProposicaoPublicaDetalhe() {
               <p className="text-indigo-200 text-sm mb-4 leading-relaxed">
                 Você pode solicitar mais informações sobre este processo através do e-SIC (Sistema de Informação ao Cidadão).
               </p>
-              <button className="w-full bg-accent text-primary-900 font-bold py-2.5 rounded-xl hover:bg-accent-light transition-colors text-sm">
+              <Link
+                to="/transparencia#lai-section"
+                className="block w-full text-center bg-accent text-primary-900 font-bold py-2.5 rounded-xl hover:bg-accent-light transition-colors text-sm"
+              >
                 Solicitar Informação
-              </button>
+              </Link>
             </div>
 
           </div>

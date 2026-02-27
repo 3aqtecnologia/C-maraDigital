@@ -64,7 +64,7 @@ export function LeiNova() {
       />
 
       <div className="flex-1 overflow-auto p-8">
-        <div className="max-w-4xl max-auto space-y-6">
+        <div className="max-w-4xl mx-auto space-y-6">
 
           <section className="card space-y-4">
             <h2 className="font-semibold text-gray-900">Dados da Norma</h2>

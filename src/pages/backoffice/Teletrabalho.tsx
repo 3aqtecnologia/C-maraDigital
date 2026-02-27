@@ -56,6 +56,11 @@ function NovoRegistroForm({ onClose, onSuccess, registrar }: NovoRegistroFormPro
     e.preventDefault()
     if (!atividades.trim()) return
     setError(null)
+    const toMin = (h: string) => { const [hh, mm] = h.split(':').map(Number); return hh * 60 + mm }
+    if (toMin(horaFim) <= toMin(horaInicio)) {
+      setError('O horário de fim deve ser posterior ao horário de início.')
+      return
+    }
     setSaving(true)
     const { error: err } = await registrar({
       data,

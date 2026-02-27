@@ -70,6 +70,19 @@ export function ProposicaoDetalhe() {
   const isAdmin = profile?.role === 'admin' || profile?.role === 'servidor'
   const proximas = proposicao ? (TRANSICOES[proposicao.status] ?? []) : []
 
+  function imprimirPDF() {
+    const win = window.open('', '_blank')
+    if (!win || !proposicao) return
+    win.document.write(`<!DOCTYPE html><html lang="pt-BR"><head>
+      <meta charset="UTF-8"><title>${numero}</title>
+      <style>body{font-family:serif;max-width:800px;margin:2cm auto;line-height:1.6}h1{font-size:1.4rem}em{color:#555}</style>
+      </head><body><h1>${numero}</h1><p><em>${proposicao.ementa}</em></p>
+      ${proposicao.texto_integral || '<p>Texto não disponível.</p>'}
+      </body></html>`)
+    win.document.close()
+    win.print()
+  }
+
   async function transicionar(novoStatus: ProposicaoStatus) {
     if (!proposicao) return
     setTransitioning(true)
@@ -145,7 +158,7 @@ export function ProposicaoDetalhe() {
                   </span>
                 </div>
                 <div className="flex gap-2">
-                  <button className="btn-secondary text-xs flex items-center gap-1.5">
+                  <button onClick={imprimirPDF} className="btn-secondary text-xs flex items-center gap-1.5">
                     <Download size={13} />
                     PDF
                   </button>

@@ -39,6 +39,19 @@ export function LeiPublicaDetalhe() {
 
   const cfg = STATUS_CONFIG[lei.status] || STATUS_CONFIG.em_vigor
 
+  function imprimirPDF() {
+    const win = window.open('', '_blank')
+    if (!win || !lei) return
+    win.document.write(`<!DOCTYPE html><html lang="pt-BR"><head>
+      <meta charset="UTF-8"><title>${lei.esfera} № ${lei.numero}/${lei.ano}</title>
+      <style>body{font-family:serif;max-width:800px;margin:2cm auto;line-height:1.6}h1{font-size:1.4rem}em{color:#555}</style>
+      </head><body><h1>${lei.esfera} № ${lei.numero}/${lei.ano}</h1><p><em>${lei.ementa}</em></p>
+      ${lei.texto_compilado || '<p>Texto não disponível.</p>'}
+      </body></html>`)
+    win.document.close()
+    win.print()
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header Fixo */}
@@ -115,7 +128,7 @@ export function LeiPublicaDetalhe() {
                   </div>
                 </div>
 
-                <button className="btn-primary px-8 py-3 rounded-2xl flex items-center gap-3 shadow-lg shadow-indigo-200">
+                <button onClick={imprimirPDF} className="btn-primary px-8 py-3 rounded-2xl flex items-center gap-3 shadow-lg shadow-indigo-200">
                   <Download size={20} />
                   Texto Oficial (PDF)
                 </button>

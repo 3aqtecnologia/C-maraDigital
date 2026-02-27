@@ -605,8 +605,8 @@ export function PortalPublico() {
           </div>
           <nav aria-label="Links do rodapé">
             <ul className="flex flex-wrap justify-center gap-6 text-xs font-semibold text-gray-400 uppercase tracking-widest list-none">
-              <li><a href="#" className="hover:text-primary-600 transition-colors">Dados Abertos</a></li>
-              <li><a href="#" className="hover:text-primary-600 transition-colors">Privacidade</a></li>
+              <li><span className="cursor-default text-gray-300" title="Em breve">Dados Abertos</span></li>
+              <li><span className="cursor-default text-gray-300" title="Em breve">Privacidade</span></li>
               <li>
                 <a href="#lai-section" className="hover:text-primary-600 transition-colors">
                   e-SIC / LAI
